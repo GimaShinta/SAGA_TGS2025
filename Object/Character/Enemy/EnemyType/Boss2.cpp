@@ -14,7 +14,7 @@ void Boss2::Initialize()
 {
 	enemy_type = ENE_BOSS2;
 	z_layer = 1;
-	box_size = 60;
+	box_size = 30;
 	hp = 100;
 
 	// 当たり判定のオブジェクト設定
@@ -78,7 +78,7 @@ void Boss2::Draw(const Vector2D& screen_offset) const
 {
 	// 雑魚１を描画する
 	DrawBox(location.x - box_size.x, location.y - box_size.y,
-		location.x + box_size.x, location.y + box_size.y, GetColor(255, 0, 0), TRUE);
+		location.x + box_size.x, location.y + box_size.y, GetColor(0, 255, 0), TRUE);
 
 	// 体力の表示
 	DrawFormatString(location.x - 8, location.y - 8, GetColor(0, 0, 0), "%.0f", hp);
@@ -98,36 +98,55 @@ void Boss2::Movement(float delta_second)
 	move_time += delta_second;
 
 	// 浮遊感：サイン波による微細な変化
-	float float_amplitude_y = 10.0f;
-	float float_speed_y = 2.0f;
-
-	float float_amplitude_x = 5.0f;
-	float float_speed_x = 1.5f;
+	const float float_amplitude_y = 10.0f;
+	const float float_speed_y = 2.0f;
+	const float float_amplitude_x = 5.0f;
+	const float float_speed_x = 1.5f;
 
 	Vector2D float_offset;
 	float_offset.y = sinf(move_time * float_speed_y) * float_amplitude_y;
 	float_offset.x = cosf(move_time * float_speed_x) * float_amplitude_x;
 
-	if (location.y < -200)
+	if (!generate)
 	{
-		location.x = base_position.x;
-		location.y = base_position.y - 200;
+		// 登場中の高速移動
+		velocity.y = -700.0f;
+		base_position.x = generate_base_position.x;
 
-		velocity.y = 100;
+		if (location.y < -400)
+		{
+			generate = true;
+		}
 	}
 	else
 	{
+		// 定位置への移動処理（ふわっと止まる）
+		float distance_y = base_position.y - location.y;
+		base_position.x = generate_base_position.x - 150;
+		generate_time += delta_second;
 
+		if (fabs(distance_y) > 1.0f)
+		{
+			const float max_speed = 200.0f;
+			velocity.y = distance_y;
+
+			// 最大速度を超えないよう制限
+			if (velocity.y > max_speed) velocity.y = max_speed;
+			if (velocity.y < -max_speed) velocity.y = -max_speed;
+
+			box_size = 60;
+		}
+		else
+		{
+			velocity = 0;
+			location = base_position; // 誤差修正
+		}
 	}
-		// 本来の移動（例：左右にゆっくり移動）
-        // ここで本体の動きを作る
-		velocity.y = -1000.0f; // 移動スピード（px/sec）
 
-		generate_base_position += velocity * delta_second; // base_position が進行方向に移動
-
-		// 最終的な座標：本体の位置＋浮遊
-		location = generate_base_position + float_offset;
-
+	// base_position を更新し、最終的な座標に浮遊オフセットを加算
+	generate_base_position += velocity * delta_second;
+	location.y = generate_base_position.y + float_offset.y;
+	location.x = base_position.x + float_offset.x;
 }
 
 void Boss2::Shot(float delta_second)
@@ -137,7 +156,8 @@ void Boss2::Shot(float delta_second)
 	// 五秒経過したら攻撃パターンを変更して弾を発射
 	if (shot_timer >= 5.0f && generate_time >= 2.0f)
 	{
-		attack_pattrn = 1 + rand() % MAX_ATTACK_PATTRN;
+		attack_pattrn = 3;
+		//attack_pattrn = 1 + rand() % MAX_ATTACK_PATTRN;
 		is_shot = true;
 		shot_timer = 0;
 		generate_time = 10.0f;
