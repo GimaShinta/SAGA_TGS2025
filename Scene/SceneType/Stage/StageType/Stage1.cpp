@@ -120,11 +120,16 @@ void Stage1::Update(float delta)
     // 警告表示
     DisplayWarning(delta);
 
+    if (boss != nullptr && boss->GetIsAlive() == false && is_over == false)
+    {
+        boss->SetDestroy();
+        is_clear = true;
+    }
+
     if (boss2 != nullptr && boss2->GetIsAlive() == false && is_over == false)
     {
         boss2->SetDestroy();
         is_clear = true;
-
     }
 
     if (player != nullptr && player->GetIsAlive() == false && is_clear == false)
@@ -305,7 +310,7 @@ void Stage1::EnemyAppearance()
         is_warning = true;
     }
     // ボス出現
-    if (distance == 1 && boss == nullptr)
+    if (distance == 1 && boss2 == nullptr)
     {
         //enemy_list.push_back(boss = objm->CreateObject<Boss>(Vector2D(D_WIN_MAX_X / 2 + 200, D_WIN_MAX_Y + 200)));
         enemy_list.push_back(boss2 = objm->CreateObject<Boss2>(Vector2D(D_WIN_MAX_X / 2, D_WIN_MAX_Y / 2)));

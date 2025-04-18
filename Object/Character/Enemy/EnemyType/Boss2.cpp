@@ -15,7 +15,7 @@ void Boss2::Initialize()
 	enemy_type = ENE_BOSS2;
 	z_layer = 1;
 	box_size = 60;
-	hp = 10;
+	hp = 100;
 
 	// 当たり判定のオブジェクト設定
 	collision.is_blocking = true;
@@ -28,9 +28,14 @@ void Boss2::Initialize()
 	// 動くかどうか（trueなら動く、falseなら止まる）
 	is_mobility = true;
 
+	// 戦闘中の中心座標
 	base_position = Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) - 200);
 
-	location = base_position;
+	// 登場時の中心座標
+	generate_base_position = Vector2D(D_WIN_MAX_X / 2 + 150, D_WIN_MAX_Y + 200);
+
+	// 初期座標は登場時のものを使用
+	location = generate_base_position;
 }
 
 /// <summary>
@@ -103,14 +108,26 @@ void Boss2::Movement(float delta_second)
 	float_offset.y = sinf(move_time * float_speed_y) * float_amplitude_y;
 	float_offset.x = cosf(move_time * float_speed_x) * float_amplitude_x;
 
-	// 本来の移動（例：左右にゆっくり移動）
-	// ここで本体の動きを作る
-	velocity.x = 30.0f; // 移動スピード（px/sec）
+	if (location.y < -200)
+	{
+		location.x = base_position.x;
+		location.y = base_position.y - 200;
 
-	base_position += velocity * delta_second; // base_position が進行方向に移動
+		velocity.y = 100;
+	}
+	else
+	{
 
-	// 最終的な座標：本体の位置＋浮遊
-	location = base_position + float_offset;
+	}
+		// 本来の移動（例：左右にゆっくり移動）
+        // ここで本体の動きを作る
+		velocity.y = -1000.0f; // 移動スピード（px/sec）
+
+		generate_base_position += velocity * delta_second; // base_position が進行方向に移動
+
+		// 最終的な座標：本体の位置＋浮遊
+		location = generate_base_position + float_offset;
+
 }
 
 void Boss2::Shot(float delta_second)
