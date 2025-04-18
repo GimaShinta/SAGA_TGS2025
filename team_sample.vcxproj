@@ -150,6 +150,8 @@
     <ClCompile Include="Object\Character\Shot\Shot.cpp" />
     <ClCompile Include="Scene\SceneType\Stage\StageType\Stage1.cpp" />
     <ClCompile Include="Scene\SceneType\Stage\StageType\Stage2.cpp" />
+    <ClCompile Include="Scene\SceneType\Stage\StageType\Stage3.cpp" />
+    <ClCompile Include="Scene\SceneType\StartScene.cpp" />
     <ClCompile Include="Utility\BoxCollision.cpp" />
     <ClCompile Include="Object\GameObjectBase.cpp" />
     <ClCompile Include="Object\GameObjectManager.cpp" />
@@ -181,6 +183,8 @@
     <ClInclude Include="Scene\SceneType\Stage\StageBase.h" />
     <ClInclude Include="Scene\SceneType\Stage\StageType\Stage1.h" />
     <ClInclude Include="Scene\SceneType\Stage\StageType\Stage2.h" />
+    <ClInclude Include="Scene\SceneType\Stage\StageType\Stage3.h" />
+    <ClInclude Include="Scene\SceneType\StartScene.h" />
     <ClInclude Include="Utility\BoxCollision.h" />
     <ClInclude Include="Object\GameObjectBase.h" />
     <ClInclude Include="Object\GameObjectManager.h" />

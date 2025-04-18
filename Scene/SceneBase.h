@@ -8,6 +8,7 @@
 // ƒV[ƒ“‚Ìí—Ş
 enum class eSceneType
 {
+	eStart,
 	eTitle,
 	eHelp,
 	eGameMain,
