@@ -2,6 +2,10 @@
 #include "../SceneBase.h"
 class TitleScene : public SceneBase
 {
+private:
+	int m_selectedIndex; // 選択中のインデックス
+
+
 public:
 	TitleScene();
 	virtual ~TitleScene();

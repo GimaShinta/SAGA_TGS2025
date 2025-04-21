@@ -60,7 +60,7 @@ void Application::WakeUp()
 	SetDrawScreen(DX_SCREEN_BACK);
 
 	// 最初のシーンをタイトル画面にする
-	scene->ChangeScene(eSceneType::eTitle);
+	scene->ChangeScene(eSceneType::eStart);
 
 	// 非アクティブ状態でも動作させる
 	SetAlwaysRunFlag(TRUE);
