@@ -117,8 +117,8 @@ void Stage1::Update(float delta)
     // 敵の攻撃
     EnemyShot(delta);
 
-    // 警告表示
-    DisplayWarning(delta);
+    //// 警告表示
+    //DisplayWarning(delta);
 
     if (boss != nullptr && boss->GetIsAlive() == false && is_over == false)
     {
@@ -213,107 +213,31 @@ StageBase* Stage1::GetNextStage(Player* player)
     return new Stage2(player); // 次のステージへ
 }
 
-void Stage1::DisplayWarning(float delta_second)
-{
-    // 警告表示（赤く光る）
-    if (is_warning == true)
-    {
-        // カウント加算
-        warning_timer += delta_second;
-        if (warning_timer >= 0.0005f)
-        {
-            // 透明度を０から２５５まで加算減算を繰り返す
-            if (is_brend == false)
-            {
-                if (brend < 255)
-                {
-                    brend++;
-                }
-                else
-                {
-                    is_brend = true;
-                }
-            }
-            else
-            {
-                if (brend > 0)
-                {
-                    brend--;
-                }
-                else
-                {
-                    // 到達カウントを加算
-                    reach_count++;
-                    is_brend = false;
-                }
-            }
-            // カウントリセット
-            warning_timer = 0;
-        }
-        // ３回警告が終わったら全てリセット
-        if (reach_count >= 3)
-        {
-            is_warning = false;
-            brend = 255;
-            warning_timer = 0;
-            reach_count = 0;
-        }
-    }
-}
 
 void Stage1::EnemyAppearance()
 {
     // オブジェクト管理クラスのインスタンスを取得
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
 
-    // 雑魚１と雑魚２の出現
-    if (300 < distance && distance % 1000 == 0)
+    switch (distance)
     {
-        // 出現範囲を画面中央の幅200に設定
-        int center_x = D_WIN_MAX_X / 2;
-        int half_width = 250; // 出現範囲の半分の幅
-        int x = center_x - half_width + rand() % (half_width * 2);
-        int y = -50;
-        int e = 1 + rand() % 2;
-        if (e == ENE_ZAKO1)
+        case 500:
         {
-            enemy_list.push_back(objm->CreateObject<Zako1>(Vector2D(x, y)));
+            // 左から右へ進む敵
+            auto enemy = objm->CreateObject<Zako2>(Vector2D(200, 100));
+            enemy->SetVelocity(Vector2D(60, 0));
+            enemy_list.push_back(enemy);
+            break;
         }
-        if (e == ENE_ZAKO2)
+
+        case 400:
         {
-            int vx = 0;
-            if (player->GetLocation().x < x)
-            {
-                vx = -60;
-            }
-            if (player->GetLocation().x > x)
-            {
-                vx = 60;
-            }
-            enemy_list.push_back(zako2 = objm->CreateObject<Zako2>(Vector2D(x, -100)));
-            zako2->SetVelocity(Vector2D(vx, 50));
+            // 右から左へ進む敵
+            auto enemy = objm->CreateObject<Zako2>(Vector2D(900, 200));
+            enemy->SetVelocity(Vector2D(-60, 0));
+            enemy_list.push_back(enemy);
+            break;
         }
-    }
-    // ザコ3の出現
-    if (300 < distance && distance < 900 && distance % 400 == 0)
-    {
-        // 出現範囲を画面中央の幅200に設定
-        int center_x = D_WIN_MAX_X / 2;
-        int half_width = 250; // 出現範囲の半分の幅
-        int x = center_x - half_width + rand() % (half_width * 2);
-        int y = -50;
-        enemy_list.push_back(objm->CreateObject<Zako3>(Vector2D(x, -100)));
-    }
-    // 警告表示
-    if (distance == 150)
-    {
-        is_warning = true;
-    }
-    // ボス出現
-    if (distance == 1 && boss2 == nullptr)
-    {
-        //enemy_list.push_back(boss = objm->CreateObject<Boss>(Vector2D(D_WIN_MAX_X / 2 + 200, D_WIN_MAX_Y + 200)));
-        enemy_list.push_back(boss2 = objm->CreateObject<Boss2>(Vector2D(D_WIN_MAX_X / 2, D_WIN_MAX_Y / 2)));
     }
 }
 

@@ -1,9 +1,9 @@
-#pragma once
+ï»¿#pragma once
 #include "../CharacterBase.h"
 #include "../../../Object/GameObjectManager.h"
 #include <unordered_set>
 
-const int ENEMY_MAX = 100; // “G‹@‚Ì”‚ÌÅ‘å’l
+const int ENEMY_MAX = 100; // æ•µæ©Ÿã®æ•°ã®æœ€å¤§å€¤
 
 enum
 {
@@ -21,6 +21,9 @@ protected:
 	float hp;
 	bool on_hit;
 	int enemy_type;
+private:
+	int move_pattern = 0; // 0ã€œ3ï¼šç§»å‹•ãƒ‘ã‚¿ãƒ¼ãƒ³
+
 
 protected:
 	bool is_shot;
@@ -33,36 +36,36 @@ public:
 	~EnemyBase();
 
 public:
-	// ‰Šú‰»ˆ—
+	// åˆæœŸåŒ–å‡¦ç†
 	virtual void Initialize() override;
 
 	/// <summary>
-	/// XVˆ—
+	/// æ›´æ–°å‡¦ç†
 	/// </summary>
-	/// <param name="delata_second">‚PƒtƒŒ[ƒ€“–‚½‚è‚ÌŠÔ</param>
+	/// <param name="delata_second">ï¼‘ãƒ•ãƒ¬ãƒ¼ãƒ å½“ãŸã‚Šã®æ™‚é–“</param>
 	virtual void Update(float delta_second) override;
 
 	/// <summary>
-	/// •`‰æˆ—
+	/// æç”»å‡¦ç†
 	/// </summary>
 	/// <param name="screen_offset"></param>
 	virtual void Draw(const Vector2D& screen_offset)const override;
 
-	// I—¹ˆ—
+	// çµ‚äº†æ™‚å‡¦ç†
 	virtual void Finalize() override;
 
 public:
 	/// <summary>
-	/// ƒqƒbƒgˆ—
+	/// ãƒ’ãƒƒãƒˆæ™‚å‡¦ç†
 	/// </summary>
-	/// <param name="hit_object">“–‚½‚Á‚½‘Šè</param>
+	/// <param name="hit_object">å½“ãŸã£ãŸç›¸æ‰‹</param>
 	virtual void OnHitCollision(GameObjectBase* hit_object) override;
 
 protected:
 	/// <summary>
-	/// ˆÚ“®ˆ—
+	/// ç§»å‹•å‡¦ç†
 	/// </summary>
-	/// <param name="delta_second">‚PƒtƒŒ[ƒ€“–‚½‚è‚ÌŠÔ</param>
+	/// <param name="delta_second">ï¼‘ãƒ•ãƒ¬ãƒ¼ãƒ å½“ãŸã‚Šã®æ™‚é–“</param>
 	virtual void Movement(float delta_second) override;
 
 	virtual void Shot(float delta_second);
