@@ -110,7 +110,7 @@ void Boss2::Movement(float delta_second)
 	if (!generate)
 	{
 		// 登場前の高速移動
-		velocity.y = -700.0f;
+		velocity.y = -900.0f;
 		base_position.x = generate_base_position.x;
 
 		// 定位置に到着したら登場するように設定
@@ -142,6 +142,7 @@ void Boss2::Movement(float delta_second)
 			velocity = 0;
 			location = base_position; // 誤差修正
 		}
+
 	}
 
 	// base_position を更新し、最終的な座標に浮遊オフセットを加算
