@@ -71,12 +71,21 @@ void EnemyShot3::Update(float delta_second)
 		}
 	}
 
-	// ストップしていれば一秒後プレイヤーに向かって弾を打つ
+	// ストップしていれば一秒ずつ段階を踏んで弾を打つ
 	if (velocity.x == 0 && velocity.y == 0)
 	{
 		shot_timer += delta_second;
 
 		if (shot_timer >= 1.0f * step_shot)
+		{
+			player_target = true;
+		}
+	}
+
+	// 一段階目の攻撃
+	if (player_target == true && step_shot == 1)
+	{
+		if (!has_fired_step1)
 		{
 			//テキの位置からプレイヤーへのベクトルを求める
 			Vector2D b = player->GetLocation() - location;
@@ -84,11 +93,28 @@ void EnemyShot3::Update(float delta_second)
 			//プレイヤーに向かって弾を打つ
 			velocity = (Vector2D(b.x / c, b.y / c));
 			velocity *= 500;
-			player_target = true;
+			has_fired_step1 = true; // 1回だけ方向を決める
 		}
 	}
+	// 二段階目の攻撃
+	else if (player_target == true && step_shot == 2)
+	{
+		if (!has_fired_step2)
+		{
+			if (location.y <= player->GetLocation().y)
+			{
+				velocity = Vector2D(0.0f, 600.0f);
+			}
+			else
+			{
+				velocity = Vector2D(0.0f, -600.0f);
+			}
 
-	if (player_target == true && step_shot == 3)
+			has_fired_step2 = true; // 1回だけ方向を決める
+		}
+	}
+	// 三段階目の攻撃
+	else if (player_target == true && step_shot == 3)
 	{
 		// プレイヤーとのベクトル
 		Vector2D to_player = player->GetLocation() - location;
@@ -110,22 +136,6 @@ void EnemyShot3::Update(float delta_second)
 				Vector2D direction = to_player / distance;
 				velocity = direction * 500.0f;
 			}
-		}
-	}
-	else if (player_target == true && step_shot == 2)
-	{
-		if (!has_fired_step2)
-		{
-			if (location.y <= player->GetLocation().y)
-			{
-				velocity = Vector2D(0.0f, 600.0f);
-			}
-			else
-			{
-				velocity = Vector2D(0.0f, -600.0f);
-			}
-
-			has_fired_step2 = true; // 1回だけ方向を決める
 		}
 	}
 
