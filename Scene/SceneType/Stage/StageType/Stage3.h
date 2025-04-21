@@ -55,8 +55,10 @@ public:
 
 private:
 	void DisplayWarning(float delta_second);
+	void PlayerShot();
 	void EnemyAppearance();
 	void EnemyShot(float delta_second);
+	void UpdateGameStatus(float delta);
 
 private:
 	bool finished = false;

@@ -56,15 +56,15 @@ void Boss2::Update(float delta_second)
 		is_alive = false;
 	}
 
-	// 攻撃パターン変更時に時間リセット
-	if (attack_pattrn != prev_attack_pattrn)
-	{
-		if (prev_attack_pattrn == 3)
-		{
-			move_time = 0.0f; // 軌道の先頭に戻す！
-		}
-		prev_attack_pattrn = attack_pattrn;
-	}
+	//// 攻撃パターン変更時に時間リセット
+	//if (attack_pattrn != prev_attack_pattrn)
+	//{
+	//	if (prev_attack_pattrn == 3)
+	//	{
+	//		move_time = 0.0f; // 軌道の先頭に戻す！
+	//	}
+	//	prev_attack_pattrn = attack_pattrn;
+	//}
 
 	// 親クラスの更新処理を呼び出す
 	__super::Update(delta_second);
@@ -109,10 +109,11 @@ void Boss2::Movement(float delta_second)
 
 	if (!generate)
 	{
-		// 登場中の高速移動
+		// 登場前の高速移動
 		velocity.y = -700.0f;
 		base_position.x = generate_base_position.x;
 
+		// 定位置に到着したら登場するように設定
 		if (location.y < -400)
 		{
 			generate = true;
@@ -154,7 +155,7 @@ void Boss2::Shot(float delta_second)
 	shot_timer += delta_second;
 
 	// 五秒経過したら攻撃パターンを変更して弾を発射
-	if (shot_timer >= 5.0f && generate_time >= 2.0f)
+	if (shot_timer >= 5.0f && generate_time >= 5.0f)
 	{
 		attack_pattrn = 3;
 		//attack_pattrn = 1 + rand() % MAX_ATTACK_PATTRN;

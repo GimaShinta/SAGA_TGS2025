@@ -50,50 +50,6 @@ void Stage3::Update(float delta)
 
     timer++; // タイマーをカウント
 
-    // オブジェクト管理クラスのインスタンスを取得
-    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
-    objm->Update(delta);
-
-    // プレイヤーが弾を打つ準備ができていたら弾を生成        
-    if (player->GetIsShot() == true)
-    {
-        Vector2D p_location = player->GetLocation();
-        player->SetIsShot();
-        // 上下反転していなかったら下方向に生成
-        if (player->GetShotFlip() == false)
-        {
-            shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 10, p_location.y - D_OBJECT_SIZE));
-            shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 10, p_location.y - D_OBJECT_SIZE));
-            shot->SetShotFlip(false);
-        }
-        // 反転していたら上方向に生成
-        else
-        {
-            Vector2D p_location = player->GetLocation();
-            shot = objm->CreateObject<Shot>(Vector2D(p_location.x, p_location.y + D_OBJECT_SIZE));
-            shot->SetShotFlip(true);
-        }
-    }
-    // プレイヤーがビームをうつ準備ができていたらビームを生成
-    else if (player->GetBeamOn() == true)
-    {
-        Vector2D p_location = player->GetLocation();
-        // 上下反転していなかったら下方向に生成
-        if (player->GetShotFlip() == false)
-        {
-            beam = objm->CreateObject<Beam>(Vector2D(p_location.x, (p_location.y - D_OBJECT_SIZE) - 848));
-            beam->SetBeamFlip(false);
-        }
-        // 反転していたら上方向に生成
-        else
-        {
-            beam = objm->CreateObject<Beam>(Vector2D(p_location.x, (p_location.y + D_OBJECT_SIZE) + 848));
-            beam->SetBeamFlip(true);
-        }
-        beam->SetPlayer(player);
-        player->SetBeamOn();
-    }
-
     // delta_second 分加算
     stage_timer += delta;
 
@@ -111,6 +67,13 @@ void Stage3::Update(float delta)
         stage_timer = 0;
     }
 
+    // オブジェクト管理クラスのインスタンスを取得
+    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+    objm->Update(delta);
+
+    // プレイヤーの攻撃
+    PlayerShot();
+
     // 敵の出現
     EnemyAppearance();
 
@@ -120,42 +83,8 @@ void Stage3::Update(float delta)
     // 警告表示
     DisplayWarning(delta);
 
-    if (boss != nullptr && boss->GetIsAlive() == false && is_over == false)
-    {
-        boss->SetDestroy();
-        is_clear = true;
-    }
-
-    if (boss2 != nullptr && boss2->GetIsAlive() == false && is_over == false)
-    {
-        boss2->SetDestroy();
-        is_clear = true;
-    }
-
-    if (player != nullptr && player->GetIsAlive() == false && is_clear == false)
-    {
-        // オブジェクト管理クラスのインスタンスを取得
-        GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
-        objm->Finalize();
-
-        player->SetDestroy();
-        is_over = true;
-    }
-
-    if (is_clear == true || is_over == true)
-    {
-        scene_timer += delta;
-        if (scene_timer >= 5.0f)
-        {
-            finished = true;
-        }
-    }
-
-    // 仮の条件：スペースキーを押したらステージ終了
-    if (CheckHitKey(KEY_INPUT_N))
-    {
-        finished = true;
-    }
+    // クリア判定
+    UpdateGameStatus(delta);
 }
 
 void Stage3::Draw()
@@ -262,6 +191,52 @@ void Stage3::DisplayWarning(float delta_second)
             warning_timer = 0;
             reach_count = 0;
         }
+    }
+}
+
+void Stage3::PlayerShot()
+{
+    // オブジェクト管理クラスのインスタンスを取得
+    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+
+    // プレイヤーが弾を打つ準備ができていたら弾を生成        
+    if (player->GetIsShot() == true)
+    {
+        Vector2D p_location = player->GetLocation();
+        player->SetIsShot();
+        // 上下反転していなかったら下方向に生成
+        if (player->GetShotFlip() == false)
+        {
+            shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 10, p_location.y - D_OBJECT_SIZE));
+            shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 10, p_location.y - D_OBJECT_SIZE));
+            shot->SetShotFlip(false);
+        }
+        // 反転していたら上方向に生成
+        else
+        {
+            Vector2D p_location = player->GetLocation();
+            shot = objm->CreateObject<Shot>(Vector2D(p_location.x, p_location.y + D_OBJECT_SIZE));
+            shot->SetShotFlip(true);
+        }
+    }
+    // プレイヤーがビームをうつ準備ができていたらビームを生成
+    else if (player->GetBeamOn() == true)
+    {
+        Vector2D p_location = player->GetLocation();
+        // 上下反転していなかったら下方向に生成
+        if (player->GetShotFlip() == false)
+        {
+            beam = objm->CreateObject<Beam>(Vector2D(p_location.x, (p_location.y - D_OBJECT_SIZE) - 848));
+            beam->SetBeamFlip(false);
+        }
+        // 反転していたら上方向に生成
+        else
+        {
+            beam = objm->CreateObject<Beam>(Vector2D(p_location.x, (p_location.y + D_OBJECT_SIZE) + 848));
+            beam->SetBeamFlip(true);
+        }
+        beam->SetPlayer(player);
+        player->SetBeamOn();
     }
 }
 
@@ -437,33 +412,76 @@ void Stage3::EnemyShot(float delta_second)
                 bs_attack_pattrn = boss2->GetAttackPattrn();
                 Vector2D e_location = enemy_list[i]->GetLocation();
 
-            if (bs_attack_pattrn == 3)
-            {
-                // 縦に３よこに５つ生成（片方）
-                for (int j = 1; j < 4; j++)
+                // 攻撃パターンが３だったら
+                if (bs_attack_pattrn == 3)
                 {
-                    for (int i = 0; i < 10; i++)
+                    // 縦に３よこに５つ生成（片方）
+                    for (int j = 1; j < 4; j++)
                     {
-                        e_shot3 = objm->CreateObject<EnemyShot3>(Vector2D(boss2->GetLocation()));
-                        e_shot3->SetPlayer(player);
-                        e_shot3->SetPlayerLocation(player->GetLocation());
-                        // +１しなかったら０秒で発射される
-                        e_shot3->SetStepShot(j);
-                        if (i < 5)
+                        for (int i = 0; i < 10; i++)
                         {
-                            e_shot3->SetVelocity(Vector2D(240, 0));
-                            e_shot3->SetPurposeLocation(Vector2D((e_location.x + 150) + (30 * i), (e_location.y + 40) - (50 * j)));
-                        }
-                        else
-                        {
-                            e_shot3->SetVelocity(Vector2D(-240, 0));
-                            e_shot3->SetPurposeLocation(Vector2D(e_location.x - (30 * i), (e_location.y + 40) - (50 * j)));
+                            e_shot3 = objm->CreateObject<EnemyShot3>(Vector2D(boss2->GetLocation()));
+                            e_shot3->SetPlayer(player);
+                            e_shot3->SetPlayerLocation(player->GetLocation());
+                            // +１しなかったら０秒で発射される
+                            e_shot3->SetStepShot(j);
+                            if (i < 5)
+                            {
+                                e_shot3->SetVelocity(Vector2D(240, 0));
+                                e_shot3->SetPurposeLocation(Vector2D((e_location.x + 150) + (30 * i), (e_location.y + 40) - (50 * j)));
+                            }
+                            else
+                            {
+                                e_shot3->SetVelocity(Vector2D(-240, 0));
+                                e_shot3->SetPurposeLocation(Vector2D(e_location.x - (30 * i), (e_location.y + 40) - (50 * j)));
+                            }
                         }
                     }
-                }
-                enemy_list[i]->SetIsShot();
+                    enemy_list[i]->SetIsShot();
                 }
             }
         }
+    }
+}
+
+// クリア判定
+void Stage3::UpdateGameStatus(float delta)
+{
+    // ボスが倒れたらクリア
+    if (boss != nullptr && boss->GetIsAlive() == false && is_over == false)
+    {
+        boss->SetDestroy();
+        is_clear = true;
+    }
+
+    // ボス２が倒れたらクリア
+    if (boss2 != nullptr && boss2->GetIsAlive() == false && is_over == false)
+    {
+        boss2->SetDestroy();
+        is_clear = true;
+    }
+
+    // プレイヤーが倒れたらゲームオーバー
+    if (player != nullptr && player->GetIsAlive() == false && is_clear == false)
+    {
+        // オブジェクト管理クラスのインスタンスを取得
+        GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+        objm->Finalize();
+        is_over = true;
+    }
+
+    if (is_clear == true || is_over == true)
+    {
+        scene_timer += delta;
+        if (scene_timer >= 5.0f)
+        {
+            finished = true;
+        }
+    }
+
+    // 仮の条件：スペースキーを押したらステージ終了
+    if (CheckHitKey(KEY_INPUT_N))
+    {
+        finished = true;
     }
 }
