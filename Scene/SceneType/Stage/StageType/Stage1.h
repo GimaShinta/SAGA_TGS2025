@@ -19,7 +19,7 @@ private:
 	class EnemyShot1* e_shot1;
 	std::vector<EnemyBase*> enemy_list;
 	StageBase* current_stage;
-
+	float enemy_spawn_timer = 0.0f;
 private:
 	int distance = 0;   // ステージ終端までの距離
 	int boss_idx = 0;    // ボスを代入した配列のインデックス
