@@ -16,80 +16,90 @@
 #include "../../../../Object/Character/Enemy/EnemyType/Boss2.h"
 #include "../../../../Scene/SceneType/Stage/StageType/Stage1.h"
 #include <math.h>
+#include <stdlib.h> // rand(), srand()
+#include <time.h>   // time()
 
-Stage1::Stage1(Player* player) : StageBase(player), zako2(nullptr), boss(nullptr), e_shot1(nullptr), e_shot2(nullptr) {}
-Stage1::~Stage1() {}
+Stage1::Stage1(Player* player)
+    : StageBase(player),
+    zako2(nullptr),
+    boss(nullptr),
+    e_shot1(nullptr),
+    e_shot2(nullptr),
+    enemy_spawn_timer(0.0f)
+{}
 
-void Stage1::Initialize() 
+Stage1::~Stage1()
+{}
+
+void Stage1::Initialize()
 {
     // 初期化処理
-        // 【記述位置は仮】ステージの長さを代入
     distance = STAGE_DISTANCE;
 }
 
-void Stage1::Finalize() 
+void Stage1::Finalize()
 {
     // 終了処理
-} 
+}
 
-void Stage1::Update(float delta) 
+void Stage1::Update(float delta)
 {
-    //// ゲームの骨組みとなる処理を、ここに記述する
-    //int spd = 1; // スクロールの速さ
-    //if (distance == 0)
-    //{
-    //    spd = 0; // ボス戦はスクロール停止
-    //}
-    //scrollBG(spd); // 背景のスクロール
-    //moveEnemy(); // 敵機の制御
-    //moveBullet(); // 弾の制御
-    //moveItem(); // アイテムの制御
-    //drawEffect(); // エフェクト
-    //stageMap(); // ステージマップ
-    //drawParameter(); // 自機のシールドなどのパラメーターを表示
+    // 敵が画面外に出た場合に削除
+    for (auto it = enemy_list.begin(); it != enemy_list.end(); )
+    {
+        Vector2D enemy_pos = (*it)->GetLocation();
 
-    timer++; // タイマーをカウント
+        if (enemy_pos.x < 100 || enemy_pos.x > 1100)
+        {
+            (*it)->SetDestroy();
+            it = enemy_list.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
 
-    // オブジェクト管理クラスのインスタンスを取得
+    // タイマーをカウント
+    timer++;
+
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
     objm->Update(delta);
 
-    // プレイヤーが弾を打つ準備ができていたら弾を生成        
-    if (player->GetIsShot() == true)
+    // プレイヤーが弾を打つ準備ができていたら弾を生成
+    if (player->GetIsShot())
     {
         Vector2D p_location = player->GetLocation();
         player->SetIsShot();
-        // 上下反転していなかったら下方向に生成
+
         if (player->GetShotFlip() == false)
         {
             shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 10, p_location.y - D_OBJECT_SIZE));
             shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 10, p_location.y - D_OBJECT_SIZE));
             shot->SetShotFlip(false);
         }
-        // 反転していたら上方向に生成
         else
         {
-            Vector2D p_location = player->GetLocation();
             shot = objm->CreateObject<Shot>(Vector2D(p_location.x, p_location.y + D_OBJECT_SIZE));
             shot->SetShotFlip(true);
         }
     }
     // プレイヤーがビームをうつ準備ができていたらビームを生成
-    else if (player->GetBeamOn() == true)
+    else if (player->GetBeamOn())
     {
         Vector2D p_location = player->GetLocation();
-        // 上下反転していなかったら下方向に生成
+
         if (player->GetShotFlip() == false)
         {
             beam = objm->CreateObject<Beam>(Vector2D(p_location.x, (p_location.y - D_OBJECT_SIZE) - 848));
             beam->SetBeamFlip(false);
         }
-        // 反転していたら上方向に生成
         else
         {
             beam = objm->CreateObject<Beam>(Vector2D(p_location.x, (p_location.y + D_OBJECT_SIZE) + 848));
             beam->SetBeamFlip(true);
         }
+
         beam->SetPlayer(player);
         player->SetBeamOn();
     }
@@ -97,7 +107,6 @@ void Stage1::Update(float delta)
     // delta_second 分加算
     stage_timer += delta;
 
-    // 一定時間ごとに distance を減らす（例：0.1秒ごとに1減らす）
     if (stage_timer >= 0.01f)
     {
         if (distance > 0)
@@ -117,28 +126,26 @@ void Stage1::Update(float delta)
     // 敵の攻撃
     EnemyShot(delta);
 
-    //// 警告表示
-    //DisplayWarning(delta);
-
-    if (boss != nullptr && boss->GetIsAlive() == false && is_over == false)
+    // ゲームクリア・オーバー判定
+    if (boss && !boss->GetIsAlive() && !is_over)
     {
         boss->SetDestroy();
         is_clear = true;
     }
 
-    if (boss2 != nullptr && boss2->GetIsAlive() == false && is_over == false)
+    if (boss2 && !boss2->GetIsAlive() && !is_over)
     {
         boss2->SetDestroy();
         is_clear = true;
     }
 
-    if (player != nullptr && player->GetIsAlive() == false && is_clear == false)
+    if (player && !player->GetIsAlive() && !is_clear)
     {
         player->SetDestroy();
         is_over = true;
     }
 
-    if (is_clear == true || is_over == true)
+    if (is_clear || is_over)
     {
         scene_timer += delta;
         if (scene_timer >= 5.0f)
@@ -148,26 +155,34 @@ void Stage1::Update(float delta)
     }
 
     // 仮の条件：スペースキーを押したらステージ終了
-    if (CheckHitKey(KEY_INPUT_N)) 
+    if (CheckHitKey(KEY_INPUT_N))
     {
         finished = true;
     }
 }
 
-void Stage1::Draw() 
+void Stage1::Draw()
 {
+    // 背景を白で塗る（最初に描画）
+    DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(255, 255, 255), TRUE);
+
+    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+    objm->Draw();
+
+    // 左の黒帯
+    DrawBox(0, 0, (D_WIN_MAX_X / 2) - 350, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
+
+    // 右の黒帯
+    DrawBox((D_WIN_MAX_X / 2) + 350, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
+
     DrawString(0, 0, "ゲームメイン", GetColor(255, 255, 255));
-
     DrawString(0, 300, "操作方法\n\n左スティック\n十字ボタン\nWASDキー : 移動\n\nAボタン\nスペースキー : 発射\n\nBボタン\nBキー : レーザー\n\nRBボタン\nLキー : 射出反転", GetColor(255, 255, 255));
-
     DrawFormatString(0, 20, GetColor(255, 255, 0), "敵数: %d", enemy_list.size());
 
     // ステージ描画
     if (stage <= 1)
     {
-        DrawBox((D_WIN_MAX_X / 2) - 350, 0, (D_WIN_MAX_X / 2) + 350, D_WIN_MAX_Y, GetColor(255, 255, 255), TRUE);
-
-        if (is_warning == true)
+        if (is_warning)
         {
             SetDrawBlendMode(DX_BLENDMODE_ALPHA, brend);
             DrawBox((D_WIN_MAX_X / 2) - 350, 0, (D_WIN_MAX_X / 2) + 350, D_WIN_MAX_Y, GetColor(255, 0, 0), TRUE);
@@ -179,21 +194,17 @@ void Stage1::Draw()
         DrawBox((D_WIN_MAX_X / 2) - 250, 0, (D_WIN_MAX_X / 2) + 250, D_WIN_MAX_Y, GetColor(100, 100, 100), TRUE);
     }
 
-    // オブジェクト管理クラスのインスタンスを取得
-    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
-    objm->Draw();
-
-    if (is_clear == true)
+    if (is_clear)
     {
         DrawString((D_WIN_MAX_X / 2) - 40, (D_WIN_MAX_Y / 2) - 100, "ゲームクリア", GetColor(0, 0, 0));
     }
-    else if (is_over == true)
+    else if (is_over)
     {
         DrawString((D_WIN_MAX_X / 2) - 60, (D_WIN_MAX_Y / 2) - 100, "ゲームオーバー", GetColor(0, 0, 0));
     }
 }
 
-bool Stage1::IsFinished() 
+bool Stage1::IsFinished()
 {
     return finished;
 }
@@ -208,36 +219,54 @@ bool Stage1::IsOver()
     return is_over;
 }
 
-StageBase* Stage1::GetNextStage(Player* player) 
+StageBase* Stage1::GetNextStage(Player* player)
 {
     return new Stage2(player); // 次のステージへ
 }
 
-
 void Stage1::EnemyAppearance()
 {
-    // オブジェクト管理クラスのインスタンスを取得
-    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+    enemy_spawn_timer += 1.0f / 60.0f; // 1フレームごとに加算（60FPS想定）
 
-    switch (distance)
-    {
-        case 500:
+    if (enemy_spawn_timer >= 30.0f)
+    { // 1秒ごとに4体の敵を出現
+        GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+
+        // 出現位置の範囲を黒帯内に指定（左黒帯と右黒帯）
+        float spawn_x_min_left = 0;                       // 左黒帯の開始位置
+        float spawn_x_max_left = (D_WIN_MAX_X / 2) - 400; // 黒帯の終わり（左側）
+
+        float spawn_x_min_right = (D_WIN_MAX_X / 2) + 400;  // 右黒帯の開始位置
+        float spawn_x_max_right = D_WIN_MAX_X;               // 画面右端
+
+        float spawn_y_min = 0;                               // 画面内のY座標
+        float spawn_y_max = D_WIN_MAX_Y / 2;
+
+        int number_of_enemies = 4;
+        float spawn_y = rand() % int(spawn_y_max - spawn_y_min) + spawn_y_min;
+
+        int random_direction = rand() % 2; // 左または右から出現
+
+        // 左または右から出現するX座標をランダムに決定
+        float spawn_x = random_direction == 0
+            ? rand() % int(spawn_x_max_left - spawn_x_min_left) + spawn_x_min_left
+            : rand() % int(spawn_x_max_right - spawn_x_min_right) + spawn_x_min_right;
+
+        // 進行方向のベクトル（左→右または右→左）
+        Vector2D velocity(random_direction == 0 ? 60 : -60, 0);
+
+        for (int i = 0; i < number_of_enemies; i++)
         {
-            // 左から右へ進む敵
-            auto enemy = objm->CreateObject<Zako2>(Vector2D(200, 100));
-            enemy->SetVelocity(Vector2D(60, 0));
+            Vector2D spawn_pos(spawn_x, spawn_y);  // 出現位置（X座標がランダム）
+            auto enemy = objm->CreateObject<Zako1>(spawn_pos);
+            enemy->SetVelocity(velocity); // 左または右に進む
             enemy_list.push_back(enemy);
-            break;
+
+            // 敵を少しずつ右または左に出現させる
+            spawn_x += (random_direction == 0 ? 50 : -50);  // 敵を横方向に少しずつ配置
         }
 
-        case 400:
-        {
-            // 右から左へ進む敵
-            auto enemy = objm->CreateObject<Zako2>(Vector2D(900, 200));
-            enemy->SetVelocity(Vector2D(-60, 0));
-            enemy_list.push_back(enemy);
-            break;
-        }
+        enemy_spawn_timer = 0.0f; // タイマーをリセット
     }
 }
 
@@ -249,7 +278,7 @@ void Stage1::EnemyShot(float delta_second)
     // 敵が弾を打つ準備ができていたら弾を発射する
     for (int i = 0; i < enemy_list.size(); i++)
     {
-        if (enemy_list[i]->GetIsShot() == true)
+        if (enemy_list[i]->GetIsShot())
         {
             int enemy_type = enemy_list[i]->GetEnemyType();
 
@@ -264,96 +293,22 @@ void Stage1::EnemyShot(float delta_second)
             // 敵が雑魚２だったらプレイヤーを狙った弾を発射する
             else if (enemy_type == ENE_ZAKO2)
             {
-                //テキの位置からプレイヤーへのベクトルを求める
+                // テキの位置からプレイヤーへのベクトルを求める
                 Vector2D b = player->GetLocation() - enemy_list[i]->GetLocation();
                 float c = sqrt(pow(b.x, 2) + pow(b.y, 2));
-                //プレイヤーに向かって弾を打つ
+
+                // プレイヤーに向かって弾を打つ
                 e_shot2 = objm->CreateObject<EnemyShot2>(enemy_list[i]->GetLocation());
                 e_shot2->SetVelocity(Vector2D(b.x / c, b.y / c));
                 enemy_list[i]->SetIsShot();
             }
+            // ボスの攻撃パターン
             else if (enemy_type == ENE_BOSS)
             {
-                // ボスの攻撃パターンを取得
-                bs_attack_pattrn = boss->GetAttackPattrn();
                 Vector2D e_location = enemy_list[i]->GetLocation();
-
-                // パターン１（下方向に３発）
-                if (bs_attack_pattrn == 1)
-                {
-                    for (int i = 0; i < 3; i++)
-                    {
-                        objm->CreateObject<EnemyShot1>(Vector2D((e_location.x - 30) + (30 * i), e_location.y + D_OBJECT_SIZE));
-                    }
-                    enemy_list[i]->SetIsShot();
-                }
-                // パターン２（４方向に３発）
-                else if (bs_attack_pattrn == 2)
-                {
-                    // 縦２方向
-                    for (int i = 0; i < 2; i++)
-                    {
-                        for (int j = 0; j < 5; j++)
-                        {
-                            e_shot1 = objm->CreateObject<EnemyShot1>(Vector2D((e_location.x - 60) + (30 * j), e_location.y));
-                            if (i == 0)
-                            {
-                                e_shot1->SetVelocity(Vector2D(0, 120));
-                            }
-                            else if (i == 1)
-                            {
-                                e_shot1->SetVelocity(Vector2D(0, -120));
-                            }
-                        }
-                    }
-                    // 横２方向
-                    for (int i = 0; i < 2; i++)
-                    {
-                        for (int j = 0; j < 5; j++)
-                        {
-                            e_shot1 = objm->CreateObject<EnemyShot1>(Vector2D(e_location.x, (e_location.y - 60) + (30 * j)));
-                            if (i == 0)
-                            {
-                                e_shot1->SetVelocity(Vector2D(-120, 0));
-                            }
-                            else if (i == 1)
-                            {
-                                e_shot1->SetVelocity(Vector2D(120, 0));
-                            }
-                        }
-                    }
-                    enemy_list[i]->SetIsShot();
-                }
-                else if (bs_attack_pattrn == 3)
-                {
-                    // 縦に３よこに５つ生成（片方）
-                    for (int j = 1; j < 4; j++)
-                    {
-                        for (int i = 0; i < 10; i++)
-                        {
-                            e_shot3 = objm->CreateObject<EnemyShot3>(Vector2D(boss->GetLocation()));
-                            e_shot3->SetPlayer(player);
-                            e_shot3->SetPlayerLocation(player->GetLocation());
-                            // +１しなかったら０秒で発射される
-                            e_shot3->SetStepShot(j);
-                            if (i < 5)
-                            {
-                                e_shot3->SetVelocity(Vector2D(240, 0));
-                                e_shot3->SetPurposeLocation(Vector2D((e_location.x + 150) + (30 * i), (e_location.y + 40) - (50 * j)));
-                            }
-                            else
-                            {
-                                e_shot3->SetVelocity(Vector2D(-240, 0));
-                                e_shot3->SetPurposeLocation(Vector2D(e_location.x - (30 * i), (e_location.y + 40) - (50 * j)));
-                            }
-                        }
-                    }
-                    enemy_list[i]->SetIsShot();
-                }
-            }
-            else if (enemy_type == ENE_BOSS2)
-            {
-
+                objm->CreateObject<EnemyShot3>(Vector2D(e_location.x, e_location.y + D_OBJECT_SIZE));
+                objm->CreateObject<EnemyShot3>(Vector2D(e_location.x, e_location.y + D_OBJECT_SIZE));
+                enemy_list[i]->SetIsShot();
             }
         }
     }
