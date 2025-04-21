@@ -11,6 +11,8 @@ EnemyBase::~EnemyBase()
 // 初期化処理
 void EnemyBase::Initialize()
 {
+	EnemyBase::Initialize();
+	move_pattern = rand() % 4;  // ランダムで0?3のパターン
 }
 
 /// <summary>
