@@ -1,8 +1,24 @@
 #pragma once
 #include "../SceneBase.h"
-class StartScene :
-    public SceneBase
+#include<stdio.h>
+
+
+
+class StartScene :  public SceneBase
 {
+private:
+	enum class Step {
+		WaitForInput,
+		IntroText,
+		GoToTitle
+	};
+
+	Step m_step;
+	float m_elapsedTime;
+	int m_displayCharCount;
+	static const int LINE_COUNT = 2;
+	const char* m_introText[LINE_COUNT]; // 2s•ª‚Ì•¶š—ñ
+
 public:
 	StartScene();
 	virtual ~StartScene();
