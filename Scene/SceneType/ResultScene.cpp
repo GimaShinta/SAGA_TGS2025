@@ -29,6 +29,7 @@ eSceneType ResultScene::Update(float delta_second)
 /// <returns></returns>
 void ResultScene::Draw()
 {
+	DrawString(0, 0, "Result", GetColor(255, 255, 255));
 }
 
 // 終了時処理（使ったインスタンスの削除とか）
