@@ -14,6 +14,7 @@ private:
 	class Zako2* zako2;
 	class Boss* boss;
 	class Boss2* boss2;
+	class EnemyShot5* e_shot5;
 	class EnemyShot4* e_shot4;
 	class EnemyShot3* e_shot3;
 	class EnemyShot2* e_shot2;

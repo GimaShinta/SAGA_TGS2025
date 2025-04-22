@@ -9,6 +9,7 @@
 #include "../../../../Object/Character/Shot/EnemyShot/EnemyShot2.h"
 #include "../../../../Object/Character/Shot/EnemyShot/EnemyShot3.h"
 #include "../../../../Object/Character/Shot/EnemyShot/EnemyShot4.h"
+#include "../../../../Object/Character/Shot/EnemyShot/EnemyShot5.h"
 #include "../../../../Object/Character/Enemy/EnemyBase.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako1.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako2.h"
@@ -687,6 +688,67 @@ void Stage3::EnemyShot(float delta_second)
                             e_shot4->SetVelocity(velocity);
                         }
                     }
+                }
+                else if (bs_attack_pattrn == 8)
+                {
+#if 1
+                    const float wave_interval = 0.1f;  // 発射間隔（秒）
+                    const int wave_max_count = 10;     // 発射する弾の数
+
+                    static float wave_timer = 0.0f;
+                    static int wave_count = 0;
+                    static int prev_pattern = -1;
+
+                    // パターンが切り替わったら初期化
+                    if (prev_pattern != 8)
+                    {
+                        wave_timer = 0.0f;
+                        wave_count = 0;
+                        prev_pattern = 8;
+                    }
+
+                    // 最大数撃ったら終了
+                    if (wave_count >= wave_max_count)
+                    {
+                        return;
+                    }
+
+                    wave_timer += delta_second;
+
+                    if (wave_timer >= wave_interval)
+                    {
+                        wave_timer = 0.0f;
+
+                        Vector2D e_lo = boss2->GetLocation();
+                        e_shot5 = objm->CreateObject<EnemyShot5>(Vector2D(e_lo.x + 50, e_lo.y));
+                        e_shot5->SetWaveReflected(false);
+                        e_shot5->SetVelocity(Vector2D(0, 200));               // 下方向
+                        e_shot5->SetWaveParameters(400.0f, 0.7f);             // 振れ幅と周波数
+                        e_shot5 = objm->CreateObject<EnemyShot5>(Vector2D(e_lo.x - 50, e_lo.y));
+                        e_shot5->SetWaveReflected(true);
+                        e_shot5->SetVelocity(Vector2D(0, 200));               // 下方向
+                        e_shot5->SetWaveParameters(400.0f, 0.7f);             // 振れ幅と周波数
+                        wave_count++;
+
+                        // 必要であればここで enemy_list[i]->SetIsShot(); なども呼ぶ
+                    }
+#else
+
+                    int num_shots = 20;
+                    float spread_speed = 150.0f;
+                    Vector2D origin = e_location; // 弾の初期発射位置（ボスの位置）
+                    Vector2D boss_center = boss2->GetLocation(); // 吸い込み中心！
+
+                    for (int i = 0; i < num_shots; ++i)
+                    {
+                        float angle = 360.0f / num_shots * i;
+                        float rad = angle * DX_PI / 180.0f;
+
+                        e_shot5 = objm->CreateObject<EnemyShot5>(origin);
+                        e_shot5->SetVelocity(Vector2D(cosf(rad), sinf(rad)) * spread_speed);
+                        e_shot5->SetSuckCenter(boss_center); // 吸い込み先をセット！
+                    }
+#endif
                 }
             }
         }

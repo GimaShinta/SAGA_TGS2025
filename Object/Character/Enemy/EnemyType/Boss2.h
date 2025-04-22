@@ -1,7 +1,7 @@
 #pragma once
 #include "../EnemyBase.h"
 
-const int MAX_ATTACK_PATTRN = 7;
+const int MAX_ATTACK_PATTRN = 8;
 
 class Boss2 : public EnemyBase
 {
