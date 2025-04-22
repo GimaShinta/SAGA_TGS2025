@@ -8,6 +8,7 @@
 #include "../../../../Object/Character/Shot/EnemyShot/EnemyShot1.h"
 #include "../../../../Object/Character/Shot/EnemyShot/EnemyShot2.h"
 #include "../../../../Object/Character/Shot/EnemyShot/EnemyShot3.h"
+#include "../../../../Object/Character/Shot/EnemyShot/EnemyShot4.h"
 #include "../../../../Object/Character/Enemy/EnemyBase.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako1.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako2.h"
@@ -23,7 +24,7 @@ Stage3::~Stage3() {}
 void Stage3::Initialize()
 {
     // 初期化処理
-        // 【記述位置は仮】ステージの長さを代入
+    // 【記述位置は仮】ステージの長さを代入
     distance = STAGE3_DISTANCE;
 }
 
@@ -240,6 +241,7 @@ void Stage3::PlayerShot()
     }
 }
 
+// 敵の出現
 void Stage3::EnemyAppearance()
 {
     // オブジェクト管理クラスのインスタンスを取得
@@ -296,6 +298,7 @@ void Stage3::EnemyAppearance()
     }
 }
 
+// 敵の攻撃
 void Stage3::EnemyShot(float delta_second)
 {
     // オブジェクト管理クラスのインスタンスを取得
@@ -333,7 +336,7 @@ void Stage3::EnemyShot(float delta_second)
                 bs_attack_pattrn = boss->GetAttackPattrn();
                 Vector2D e_location = enemy_list[i]->GetLocation();
 
-                // パターン１（下方向に３発）
+                // 攻撃パターン１（下方向に３発）
                 if (bs_attack_pattrn == 1)
                 {
                     for (int i = 0; i < 3; i++)
@@ -342,7 +345,7 @@ void Stage3::EnemyShot(float delta_second)
                     }
                     enemy_list[i]->SetIsShot();
                 }
-                // パターン２（４方向に３発）
+                // 攻撃パターン２（４方向に３発）
                 else if (bs_attack_pattrn == 2)
                 {
                     // 縦２方向
@@ -379,6 +382,7 @@ void Stage3::EnemyShot(float delta_second)
                     }
                     enemy_list[i]->SetIsShot();
                 }
+                // 攻撃パターン３（三段階のやつ）
                 else if (bs_attack_pattrn == 3)
                 {
                     // 縦に３よこに５つ生成（片方）
@@ -406,14 +410,62 @@ void Stage3::EnemyShot(float delta_second)
                     enemy_list[i]->SetIsShot();
                 }
             }
+            // ボス２の攻撃パターン
             else if (enemy_type == ENE_BOSS2)
             {
                 // ボスの攻撃パターンを取得
                 bs_attack_pattrn = boss2->GetAttackPattrn();
                 Vector2D e_location = enemy_list[i]->GetLocation();
 
-                // 攻撃パターンが３だったら
-                if (bs_attack_pattrn == 3)
+                // パターン１（下方向に３発）
+                if (bs_attack_pattrn == 1)
+                {
+                    for (int i = 0; i < 3; i++)
+                    {
+                        e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D((e_location.x - 30) + (30 * i), e_location.y + D_OBJECT_SIZE));
+                        e_shot4->SetVelocity(Vector2D(0, 120));
+                    }
+                    enemy_list[i]->SetIsShot();
+                }
+                // パターン２（４方向に３発）
+                else if (bs_attack_pattrn == 2)
+                {
+                    // 縦２方向
+                    for (int i = 0; i < 2; i++)
+                    {
+                        for (int j = 0; j < 5; j++)
+                        {
+                            e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D((e_location.x - 60) + (30 * j), e_location.y));
+                            if (i == 0)
+                            {
+                                e_shot4->SetVelocity(Vector2D(0, 120));
+                            }
+                            else if (i == 1)
+                            {
+                                e_shot4->SetVelocity(Vector2D(0, -120));
+                            }
+                        }
+                    }
+                    // 横２方向
+                    for (int i = 0; i < 2; i++)
+                    {
+                        for (int j = 0; j < 5; j++)
+                        {
+                            e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(e_location.x, (e_location.y - 60) + (30 * j)));
+                            if (i == 0)
+                            {
+                                e_shot4->SetVelocity(Vector2D(-120, 0));
+                            }
+                            else if (i == 1)
+                            {
+                                e_shot4->SetVelocity(Vector2D(120, 0));
+                            }
+                        }
+                    }
+                    enemy_list[i]->SetIsShot();
+                }
+                // 攻撃パターンが３（段階の攻撃）
+                else if (bs_attack_pattrn == 3)
                 {
                     // 縦に３よこに５つ生成（片方）
                     for (int j = 1; j < 4; j++)
@@ -438,6 +490,62 @@ void Stage3::EnemyShot(float delta_second)
                         }
                     }
                     enemy_list[i]->SetIsShot();
+                }
+                // 攻撃パターン４（花火）
+                else if (bs_attack_pattrn == 4)
+                {
+
+                    int bullet_num = 24; // 発射する弾の数（花火の「輪郭」）
+                    float speed = 150.0f; // 弾の速度
+
+
+
+                    for (int i = 0; i < bullet_num; i++)
+                    {
+                        float angle = (360.0f / bullet_num) * i; // 角度を均等に
+                        float rad = angle * DX_PI / 180.0f;      // DXライブラリ用にラジアンへ変換
+
+                        Vector2D velocity(cos(rad) * speed, sin(rad) * speed);
+
+                        e_shot4 = objm->CreateObject<EnemyShot4>(e_location);
+                        e_shot4->SetVelocity(velocity);
+                    }
+
+                    enemy_list[i]->SetIsShot();
+                }
+                // 攻撃パターン５（渦巻き）
+                else if (bs_attack_pattrn == 5)
+                {
+
+                    const float spiral_duration_limit = 3.0f;    // 最大発射時間
+
+
+                    static float spiral_timer = 0.0f;            // 弾発射のインターバル管理
+                    static float spiral_angle = 0.0f;            // 回転角度
+                    static float spiral_total_time = 0.0f;       // パターン5に入ってからの累計時間
+                    const float spiral_interval = 0.1f;
+
+                    // 3秒経過したら何もしない
+                    if (spiral_total_time >= spiral_duration_limit) return;
+
+                    spiral_timer += delta_second;
+                    spiral_total_time += delta_second;
+
+                    if (spiral_timer >= spiral_interval)
+                    {
+                        spiral_timer = 0.0f;
+
+                        float rad = spiral_angle * DX_PI / 180.0f;
+                        float speed = 160.0f;
+                        Vector2D velocity(cos(rad) * speed, sin(rad) * speed);
+
+                        GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+                        EnemyShot4* shot = objm->CreateObject<EnemyShot4>(boss2->GetLocation());
+                        shot->SetVelocity(velocity);
+
+                        spiral_angle += 15.0f;
+                        if (spiral_angle >= 360.0f) spiral_angle -= 360.0f;
+                    }
                 }
             }
         }

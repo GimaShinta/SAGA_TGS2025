@@ -14,6 +14,7 @@ private:
 	class Zako2* zako2;
 	class Boss* boss;
 	class Boss2* boss2;
+	class EnemyShot4* e_shot4;
 	class EnemyShot3* e_shot3;
 	class EnemyShot2* e_shot2;
 	class EnemyShot1* e_shot1;
@@ -37,8 +38,15 @@ private:
 	int bs_attack_pattrn = 0;
 	float shot_timer;
 
+	float spiral_angle = 0.0f; // スパイラル角度（毎フレーム増加）
+	float spiral_interval = 0.1f; // 発射間隔（秒）
+	float spiral_timer = 0.0f; // 経過時間
+
 	float stage_timer = 0.0f; // 経過時間（秒）
 	float scene_timer = 0.0f;
+
+	float spiral_duration_timer = 0.0f;
+	bool is_spiral_active = false;
 
 public:
 	Stage3(Player* player);

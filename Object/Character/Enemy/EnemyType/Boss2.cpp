@@ -142,7 +142,6 @@ void Boss2::Movement(float delta_second)
 			velocity = 0;
 			location = base_position; // 誤差修正
 		}
-
 	}
 
 	// base_position を更新し、最終的な座標に浮遊オフセットを加算
@@ -158,8 +157,8 @@ void Boss2::Shot(float delta_second)
 	// 五秒経過したら攻撃パターンを変更して弾を発射
 	if (shot_timer >= 5.0f && generate_time >= 5.0f)
 	{
-		attack_pattrn = 3;
-		//attack_pattrn = 1 + rand() % MAX_ATTACK_PATTRN;
+		//attack_pattrn = 4;
+		attack_pattrn = 1 + rand() % MAX_ATTACK_PATTRN;
 		is_shot = true;
 		shot_timer = 0;
 		generate_time = 10.0f;
