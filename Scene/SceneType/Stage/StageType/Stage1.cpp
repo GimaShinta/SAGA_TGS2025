@@ -145,14 +145,15 @@ void Stage1::Update(float delta)
         is_over = true;
     }
 
-    if (is_clear || is_over)
+
+    //stage遷移
+    stage_timer += delta;
+
+    if (stage_timer >= 10.0f)
     {
-        scene_timer += delta;
-        if (scene_timer >= 5.0f)
-        {
-            finished = true;
-        }
+        finished = true;
     }
+
 
     // 仮の条件：スペースキーを押したらステージ終了
     if (CheckHitKey(KEY_INPUT_N))
@@ -229,46 +230,71 @@ void Stage1::EnemyAppearance()
     enemy_spawn_timer += 1.0f / 60.0f; // 1フレームごとに加算（60FPS想定）
 
     if (enemy_spawn_timer >= 30.0f)
-    { // 1秒ごとに4体の敵を出現
+    {
         GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
 
-        // 出現位置の範囲を黒帯内に指定（左黒帯と右黒帯）
-        float spawn_x_min_left = 0;                       // 左黒帯の開始位置
-        float spawn_x_max_left = (D_WIN_MAX_X / 2) - 400; // 黒帯の終わり（左側）
+        const int NUM_LANES = 3;
+        float lane_y[NUM_LANES] = {
+            D_WIN_MAX_Y / 8.0f,         // 上レーン
+            D_WIN_MAX_Y / 4.0f,         // 中央レーン
+            (D_WIN_MAX_Y / 8.0f) * 3.0f // 下レーン（上半分まで）
+        };
 
-        float spawn_x_min_right = (D_WIN_MAX_X / 2) + 400;  // 右黒帯の開始位置
-        float spawn_x_max_right = D_WIN_MAX_X;               // 画面右端
+        bool lane_occupied[NUM_LANES] = { false, false, false };
 
-        float spawn_y_min = 0;                               // 画面内のY座標
-        float spawn_y_max = D_WIN_MAX_Y / 2;
-
-        int number_of_enemies = 4;
-        float spawn_y = rand() % int(spawn_y_max - spawn_y_min) + spawn_y_min;
-
-        int random_direction = rand() % 2; // 左または右から出現
-
-        // 左または右から出現するX座標をランダムに決定
-        float spawn_x = random_direction == 0
-            ? rand() % int(spawn_x_max_left - spawn_x_min_left) + spawn_x_min_left
-            : rand() % int(spawn_x_max_right - spawn_x_min_right) + spawn_x_min_right;
-
-        // 進行方向のベクトル（左→右または右→左）
-        Vector2D velocity(random_direction == 0 ? 60 : -60, 0);
-
-        for (int i = 0; i < number_of_enemies; i++)
+        // 現在の敵の位置からレーン占有状態をチェック
+        for (const auto& enemy : enemy_list)
         {
-            Vector2D spawn_pos(spawn_x, spawn_y);  // 出現位置（X座標がランダム）
-            auto enemy = objm->CreateObject<Zako1>(spawn_pos);
-            enemy->SetVelocity(velocity); // 左または右に進む
-            enemy_list.push_back(enemy);
-
-            // 敵を少しずつ右または左に出現させる
-            spawn_x += (random_direction == 0 ? 50 : -50);  // 敵を横方向に少しずつ配置
+            float e_y = enemy->GetLocation().y;
+            for (int i = 0; i < NUM_LANES; i++)
+            {
+                if (fabs(e_y - lane_y[i]) < 30.0f) // 30px以内にいるなら同一レーン
+                {
+                    lane_occupied[i] = true;
+                }
+            }
         }
 
-        enemy_spawn_timer = 0.0f; // タイマーをリセット
+        // 使用可能なレーンを収集
+        std::vector<int> available_lanes;
+        for (int i = 0; i < NUM_LANES; i++)
+        {
+            if (!lane_occupied[i])
+                available_lanes.push_back(i);
+        }
+
+        // 出現可能なレーンがあるか確認
+        if (!available_lanes.empty())
+        {
+            int chosen_index = rand() % available_lanes.size(); // 使用可能なレーンの中からランダム
+            int lane_id = available_lanes[chosen_index];
+            float spawn_y = lane_y[lane_id];
+
+            int random_direction = rand() % 2; // 左からか右からか
+            float base_x = (random_direction == 0)
+                ? (rand() % ((D_WIN_MAX_X / 2) - 400))         // 左
+                : ((D_WIN_MAX_X / 2) + 400 + rand() % (D_WIN_MAX_X - ((D_WIN_MAX_X / 2) + 400))); // 右
+
+            Vector2D velocity(random_direction == 0 ? 60 : -60, 0);
+
+            for (int i = 0; i < 4; i++)
+            {
+                float offset = i * 50.0f; // 横に50pxずつずらして配置
+                float spawn_x = (random_direction == 0)
+                    ? base_x + offset
+                    : base_x - offset;
+
+                auto enemy = objm->CreateObject<Zako1>(Vector2D(spawn_x, spawn_y));
+                enemy->SetVelocity(velocity);
+                enemy_list.push_back(enemy);
+            }
+        }
+
+        enemy_spawn_timer = 0.0f;
     }
 }
+
+
 
 void Stage1::EnemyShot(float delta_second)
 {
