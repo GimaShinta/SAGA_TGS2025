@@ -157,8 +157,8 @@ void Boss2::Shot(float delta_second)
 	// ŒÜ•bŒo‰ß‚µ‚½‚çUŒ‚ƒpƒ^[ƒ“‚ð•ÏX‚µ‚Ä’e‚ð”­ŽË
 	if (shot_timer >= 5.0f && generate_time >= 5.0f)
 	{
-		//attack_pattrn = 4;
-		attack_pattrn = 1 + rand() % MAX_ATTACK_PATTRN;
+		attack_pattrn = 7;
+		//attack_pattrn = 1 + rand() % MAX_ATTACK_PATTRN;
 		is_shot = true;
 		shot_timer = 0;
 		generate_time = 10.0f;
