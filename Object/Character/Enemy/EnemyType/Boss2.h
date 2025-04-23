@@ -8,6 +8,10 @@ class Boss2 : public EnemyBase
 private:
 	int attack_pattrn = 0;
 	int prev_attack_pattrn = -1; // 前フレームのパターン記録用
+
+	std::vector<int> attack_pattrn_num = { 4,5,6 };
+	int attack_count = 0;
+
 	bool generate = false;
 	bool generate2 = false;
 	bool is_alive = true;
