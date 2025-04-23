@@ -9,7 +9,7 @@ private:
 	int attack_pattrn = 0;
 	int prev_attack_pattrn = -1; // 前フレームのパターン記録用
 	bool generate = false;
-	float generate_time = 0.0f;
+	bool generate2 = false;
 	bool is_alive = true;
 	bool is_collision;
 

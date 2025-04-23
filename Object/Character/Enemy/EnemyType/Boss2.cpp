@@ -124,7 +124,6 @@ void Boss2::Movement(float delta_second)
 		// ’èˆÊ’u‚Ö‚ÌˆÚ“®ˆ—i‚Ó‚í‚Á‚ÆŽ~‚Ü‚éj
 		float distance_y = base_position.y - location.y;
 		base_position.x = generate_base_position.x - 150;
-		generate_time += delta_second;
 
 		if (fabs(distance_y) > 1.0f)
 		{
@@ -139,6 +138,7 @@ void Boss2::Movement(float delta_second)
 		}
 		else
 		{
+			generate2 = true;
 			velocity = 0;
 			location = base_position; // Œë·C³
 		}
@@ -152,16 +152,20 @@ void Boss2::Movement(float delta_second)
 
 void Boss2::Shot(float delta_second)
 {
-	shot_timer += delta_second;
-
 	// ŒÜ•bŒo‰ß‚µ‚½‚çUŒ‚ƒpƒ^[ƒ“‚ð•ÏX‚µ‚Ä’e‚ð”­ŽË
-	if (shot_timer >= 5.0f && generate_time >= 5.0f)
+	if (generate2 == true && is_shot == false)
 	{
-		attack_pattrn = 8;
-		//attack_pattrn = 1 + rand() % MAX_ATTACK_PATTRN;
-		is_shot = true;
-		shot_timer = 0;
-		generate_time = 10.0f;
+		shot_timer += delta_second;
+		if (shot_timer >= 0.1f)
+		{
+#if 0
+			attack_pattrn = 5;
+#else
+			attack_pattrn = 4 + rand() % MAX_ATTACK_PATTRN;
+#endif
+			is_shot = true;
+			shot_timer = 0;
+		}
 	}
 }
 

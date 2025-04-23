@@ -495,11 +495,8 @@ void Stage3::EnemyShot(float delta_second)
                 // 攻撃パターン４（花火）
                 else if (bs_attack_pattrn == 4)
                 {
-
                     int bullet_num = 24; // 発射する弾の数（花火の「輪郭」）
                     float speed = 150.0f; // 弾の速度
-
-
 
                     for (int i = 0; i < bullet_num; i++)
                     {
@@ -549,25 +546,10 @@ void Stage3::EnemyShot(float delta_second)
                     static float spiral_timer = 0.0f;
                     static float spiral_angle = 0.0f;
                     static float spiral_total_time = 0.0f;
-                    static int prev_pattern = -1;
 
                     const float spiral_interval = 0.3f;
-                    const float spiral_duration_limit = 5.0f;
+                    const float spiral_duration_limit = 3.0f;
                     const float spiral_speed = 160.0f;
-
-                    // パターンが変わった瞬間だけ初期化
-                    if (prev_pattern != 5)
-                    {
-                        spiral_timer = 0.0f;
-                        spiral_total_time = 0.0f;
-                        spiral_angle = 0.0f;
-                        prev_pattern = 5;
-                    }
-
-                    if (spiral_total_time >= spiral_duration_limit)
-                    {
-                        return;
-                    }
 
                     spiral_timer += delta_second;
                     spiral_total_time += delta_second;
@@ -593,39 +575,31 @@ void Stage3::EnemyShot(float delta_second)
                         spiral_angle += 10.0f;
                         if (spiral_angle >= 360.0f) spiral_angle -= 360.0f;
                     }
+
+                    // 時間制限を超えたら終了（発射しない）
+                    if (spiral_total_time >= spiral_duration_limit)
+                    {
+                        spiral_total_time = 0.0f;
+                        enemy_list[i]->SetIsShot();
+                    }
 #endif
                 }
-                // 攻撃パターン６（扇型）
+                // 攻撃パターン６（バラバラ扇型）
                 else if (bs_attack_pattrn == 6)
                 {
                     const float fan_angle_range = 60.0f;     // 扇形の角度（中心±60度）
                     const float bullet_speed = 180.0f;        // 弾のスピード
                     const float fan_interval = 0.2f;          // 一定間隔で発射
-                    const float fan_duration_limit = 5.0f;    // この攻撃を続ける最大時間
+                    const float fan_duration_limit = 3.0f;    // この攻撃を続ける最大時間
 
                     // 攻撃持続用 static 変数
                     static float fan_timer = 0.0f;
                     static float fan_total_time = 0.0f;
-                    static int prev_pattern = -1;
 
                     // 攻撃パターンが変更されたらリセットしたい → boss2側で状態持たせるのもあり
 
                     fan_timer += delta_second;
                     fan_total_time += delta_second;
-
-                    // 時間制限を超えたら終了（発射しない）
-                    if (fan_total_time >= fan_duration_limit)
-                    {
-                        return;
-                    }
-
-                    // パターンが変わった瞬間だけ初期化
-                    if (prev_pattern != 6)
-                    {
-                        fan_timer = 0.0f;
-                        fan_total_time = 0.0f;
-                        prev_pattern = 6;
-                    }
 
                     // 一定間隔ごとに発射
                     if (fan_timer >= fan_interval)
@@ -642,38 +616,33 @@ void Stage3::EnemyShot(float delta_second)
                         e_shot4 = objm->CreateObject<EnemyShot4>(boss2->GetLocation());
                         e_shot4->SetVelocity(velocity);
                     }
+
+                    // 時間制限を超えたら終了（発射しない）
+                    if (fan_total_time >= fan_duration_limit)
+                    {
+                        fan_total_time = 0.0f;
+                        enemy_list[i]->SetIsShot();
+                    }
                 }
+                // 攻撃パターン７（段階扇形）
                 else if (bs_attack_pattrn == 7)
                 {
                     const float fan_angle_range = 60.0f;
                     const float bullet_speed = 180.0f;
                     const float fan_interval = 0.4f;
-                    const float fan_duration_limit = 5.0f;
+                    const float fan_duration_limit = 3.0f;
 
                     static float fan_timer = 0.0f;
                     static float fan_total_time = 0.0f;
-                    static int prev_pattern = -1;
-
-                    if (prev_pattern != 7)
-                    {
-                        fan_timer = 0.0f;
-                        fan_total_time = 0.0f;
-                        prev_pattern = 7;
-                    }
 
                     fan_timer += delta_second;
                     fan_total_time += delta_second;
-
-                    if (fan_total_time >= fan_duration_limit)
-                    {
-                        return;
-                    }
 
                     if (fan_timer >= fan_interval)
                     {
                         fan_timer = 0.0f;
 
-                        int bullet_count = 5;
+                        int bullet_count = 3;
                         float base_angle = 90.0f; // 中心下方向
 
                         for (int i = 0; i < bullet_count; ++i)
@@ -688,49 +657,50 @@ void Stage3::EnemyShot(float delta_second)
                             e_shot4->SetVelocity(velocity);
                         }
                     }
+
+                    // 一定時間経過したら終了
+                    if (fan_total_time >= fan_duration_limit)
+                    {
+                        fan_total_time = 0.0f;
+                        enemy_list[i]->SetIsShot();
+                    }
                 }
+                // 攻撃パターン８（ひもQ）
                 else if (bs_attack_pattrn == 8)
                 {
 #if 1
-                    const float wave_interval = 0.1f;  // 発射間隔（秒）
-                    const int wave_max_count = 10;     // 発射する弾の数
+                    const float wave_interval = 0.1f;       // 発射間隔（秒）
+                    const float wave_duration_limit = 1.0f; // 発射時間の上限（秒）
 
                     static float wave_timer = 0.0f;
-                    static int wave_count = 0;
-                    static int prev_pattern = -1;
-
-                    // パターンが切り替わったら初期化
-                    if (prev_pattern != 8)
-                    {
-                        wave_timer = 0.0f;
-                        wave_count = 0;
-                        prev_pattern = 8;
-                    }
-
-                    // 最大数撃ったら終了
-                    if (wave_count >= wave_max_count)
-                    {
-                        return;
-                    }
+                    static float wave_total_time = 0.0f;
 
                     wave_timer += delta_second;
+                    wave_total_time += delta_second;
 
                     if (wave_timer >= wave_interval)
                     {
                         wave_timer = 0.0f;
-
                         Vector2D e_lo = boss2->GetLocation();
+
+                        // 右側
                         e_shot5 = objm->CreateObject<EnemyShot5>(Vector2D(e_lo.x + 50, e_lo.y));
                         e_shot5->SetWaveReflected(false);
-                        e_shot5->SetVelocity(Vector2D(0, 200));               // 下方向
-                        e_shot5->SetWaveParameters(400.0f, 0.7f);             // 振れ幅と周波数
+                        e_shot5->SetVelocity(Vector2D(0, 200));
+                        e_shot5->SetWaveParameters(400.0f, 0.7f);
+
+                        // 左側
                         e_shot5 = objm->CreateObject<EnemyShot5>(Vector2D(e_lo.x - 50, e_lo.y));
                         e_shot5->SetWaveReflected(true);
-                        e_shot5->SetVelocity(Vector2D(0, 200));               // 下方向
-                        e_shot5->SetWaveParameters(400.0f, 0.7f);             // 振れ幅と周波数
-                        wave_count++;
+                        e_shot5->SetVelocity(Vector2D(0, 200));
+                        e_shot5->SetWaveParameters(400.0f, 0.7f);
+                    }
 
-                        // 必要であればここで enemy_list[i]->SetIsShot(); なども呼ぶ
+                    // 一定時間経過したら終了
+                    if (wave_total_time >= wave_duration_limit)
+                    {
+                        wave_total_time = 0.0f;
+                        enemy_list[i]->SetIsShot();
                     }
 #else
 
