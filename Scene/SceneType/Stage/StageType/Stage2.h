@@ -24,5 +24,8 @@ public:
 
 private:
     bool finished = false;
+
+    void DrawScrollBackground() const override;
+
 };
 

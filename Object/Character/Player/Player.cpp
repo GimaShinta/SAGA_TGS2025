@@ -60,7 +60,7 @@ void Player::Draw(const Vector2D& screen_offset) const
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, brend);
 	// プレイヤーを描画する
 	DrawBox(location.x - box_size.x, location.y - box_size.y, 
-		location.x + box_size.x, location.y + box_size.y, GetColor(0, 0, 0), TRUE);
+		location.x + box_size.x, location.y + box_size.y, GetColor(0, 255, 255), TRUE);
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 
 	// ライフの表示
