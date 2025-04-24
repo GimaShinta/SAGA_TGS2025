@@ -12,6 +12,7 @@ private:
 	class Shot* shot;
 	class Beam* beam;
 	class Zako2* zako2;
+	class Zako4* zako4;
 	class Boss* boss;
 	class Boss2* boss2;
 	class EnemyShot3* e_shot3;
@@ -20,6 +21,10 @@ private:
 	std::vector<EnemyBase*> enemy_list;
 	StageBase* current_stage;
 	float enemy_spawn_timer = 0.0f;
+	float distance_timer = 0.0f; 
+	bool zako4_spawned = false;
+
+
 private:
 	int distance = 0;   // ステージ終端までの距離
 	int boss_idx = 0;    // ボスを代入した配列のインデックス

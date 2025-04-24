@@ -124,7 +124,6 @@ void Boss2::Movement(float delta_second)
 		// 定位置への移動処理（ふわっと止まる）
 		float distance_y = base_position.y - location.y;
 		base_position.x = generate_base_position.x - 150;
-		generate_time += delta_second;
 
 		if (fabs(distance_y) > 1.0f)
 		{
@@ -139,6 +138,7 @@ void Boss2::Movement(float delta_second)
 		}
 		else
 		{
+			generate2 = true;
 			velocity = 0;
 			location = base_position; // 誤差修正
 		}
@@ -150,18 +150,56 @@ void Boss2::Movement(float delta_second)
 	location.x = base_position.x + float_offset.x;
 }
 
+// 攻撃
 void Boss2::Shot(float delta_second)
 {
-	shot_timer += delta_second;
+	// 次の攻撃パターン変更までの時間
+	const int shot_interval = 0.1f;
 
-	// 五秒経過したら攻撃パターンを変更して弾を発射
-	if (shot_timer >= 5.0f && generate_time >= 5.0f)
+	// 時間経過したら攻撃パターンを変更して弾を発射
+	if (generate2 == true && is_shot == false)
 	{
-		//attack_pattrn = 4;
-		attack_pattrn = 1 + rand() % MAX_ATTACK_PATTRN;
-		is_shot = true;
-		shot_timer = 0;
-		generate_time = 10.0f;
+		shot_timer += delta_second;
+		if (shot_timer >= shot_interval)
+		{
+#if 1
+
+	#if 0
+			// 特定の攻撃のみ繰り返す
+			attack_pattrn = 5;
+	#else
+			// HPが減ったら攻撃パターンを変更（オーバーフロー防止に合わせてリセット）
+			if (hp <= 50 && attack_pattrn_num != std::vector<int>{7, 8})
+			{
+				attack_pattrn_num = { 7, 8 };
+				attack_count = 0; // 安全にリセット
+			}
+
+			// 決められた攻撃パターンのみ繰り返す
+			if (!attack_pattrn_num.empty())
+			{
+				// 念のため配列サイズチェックを挟む（念押し）
+				if (attack_count >= attack_pattrn_num.size())
+				{
+					attack_count = 0;
+				}
+				attack_pattrn = attack_pattrn_num[attack_count];
+				attack_count++;
+		}
+			else
+			{
+				// 予備処理：攻撃パターンリストが空の時は安全なデフォルトに
+				attack_pattrn = 0;
+			}
+#endif
+
+#else
+			// 完全ランダム
+			attack_pattrn = 4 + rand() % MAX_ATTACK_PATTRN;
+#endif
+			is_shot = true;
+			shot_timer = 0;
+		}
 	}
 }
 
