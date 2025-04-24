@@ -9,6 +9,7 @@
 #include "../../../../Object/Character/Shot/EnemyShot/EnemyShot2.h"
 #include "../../../../Object/Character/Shot/EnemyShot/EnemyShot3.h"
 #include "../../../../Object/Character/Shot/EnemyShot/EnemyShot4.h"
+#include "../../../../Object/Character/Shot/EnemyShot/EnemyShot5.h"
 #include "../../../../Object/Character/Enemy/EnemyBase.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako1.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako2.h"
@@ -494,11 +495,8 @@ void Stage3::EnemyShot(float delta_second)
                 // 攻撃パターン４（花火）
                 else if (bs_attack_pattrn == 4)
                 {
-
                     int bullet_num = 24; // 発射する弾の数（花火の「輪郭」）
                     float speed = 150.0f; // 弾の速度
-
-
 
                     for (int i = 0; i < bullet_num; i++)
                     {
@@ -516,14 +514,12 @@ void Stage3::EnemyShot(float delta_second)
                 // 攻撃パターン５（渦巻き）
                 else if (bs_attack_pattrn == 5)
                 {
-
-                    const float spiral_duration_limit = 3.0f;    // 最大発射時間
-
-
+#if 0
                     static float spiral_timer = 0.0f;            // 弾発射のインターバル管理
                     static float spiral_angle = 0.0f;            // 回転角度
                     static float spiral_total_time = 0.0f;       // パターン5に入ってからの累計時間
                     const float spiral_interval = 0.1f;
+                    const float spiral_duration_limit = 3.0f;    // 最大発射時間
 
                     // 3秒経過したら何もしない
                     if (spiral_total_time >= spiral_duration_limit) return;
@@ -546,6 +542,183 @@ void Stage3::EnemyShot(float delta_second)
                         spiral_angle += 15.0f;
                         if (spiral_angle >= 360.0f) spiral_angle -= 360.0f;
                     }
+#else
+                    static float spiral_timer = 0.0f;
+                    static float spiral_angle = 0.0f;
+                    static float spiral_total_time = 0.0f;
+
+                    const float spiral_interval = 0.3f;
+                    const float spiral_duration_limit = 3.0f;
+                    const float spiral_speed = 160.0f;
+
+                    spiral_timer += delta_second;
+                    spiral_total_time += delta_second;
+
+                    if (spiral_timer >= spiral_interval)
+                    {
+                        spiral_timer = 0.0f;
+
+                        Vector2D boss_pos = boss2->GetLocation();
+
+                        for (int dir = 0; dir < 2; dir++)
+                        {
+                            float base_angle = (dir == 0) ? 90.0f : 270.0f;
+                            float current_angle = base_angle + spiral_angle;
+
+                            float rad = current_angle * DX_PI / 180.0f;
+                            Vector2D velocity(cos(rad) * spiral_speed, sin(rad) * spiral_speed);
+
+                            EnemyShot4* shot = objm->CreateObject<EnemyShot4>(boss_pos);
+                            shot->SetVelocity(velocity);
+                        }
+
+                        spiral_angle += 10.0f;
+                        if (spiral_angle >= 360.0f) spiral_angle -= 360.0f;
+                    }
+
+                    // 時間制限を超えたら終了（発射しない）
+                    if (spiral_total_time >= spiral_duration_limit)
+                    {
+                        spiral_total_time = 0.0f;
+                        enemy_list[i]->SetIsShot();
+                    }
+#endif
+                }
+                // 攻撃パターン６（バラバラ扇型）
+                else if (bs_attack_pattrn == 6)
+                {
+                    const float fan_angle_range = 60.0f;     // 扇形の角度（中心±60度）
+                    const float bullet_speed = 180.0f;        // 弾のスピード
+                    const float fan_interval = 0.2f;          // 一定間隔で発射
+                    const float fan_duration_limit = 3.0f;    // この攻撃を続ける最大時間
+
+                    // 攻撃持続用 static 変数
+                    static float fan_timer = 0.0f;
+                    static float fan_total_time = 0.0f;
+
+                    // 攻撃パターンが変更されたらリセットしたい → boss2側で状態持たせるのもあり
+
+                    fan_timer += delta_second;
+                    fan_total_time += delta_second;
+
+                    // 一定間隔ごとに発射
+                    if (fan_timer >= fan_interval)
+                    {
+                        fan_timer = 0.0f;
+
+                        // ランダムな角度（中心±60°）
+                        float base_angle = 90.0f; // 下方向中心
+                        float random_angle = base_angle - fan_angle_range / 2.0f + (rand() % (int)fan_angle_range);
+
+                        float rad = random_angle * DX_PI / 180.0f;
+                        Vector2D velocity(cos(rad) * bullet_speed, sin(rad) * bullet_speed);
+
+                        e_shot4 = objm->CreateObject<EnemyShot4>(boss2->GetLocation());
+                        e_shot4->SetVelocity(velocity);
+                    }
+
+                    // 時間制限を超えたら終了（発射しない）
+                    if (fan_total_time >= fan_duration_limit)
+                    {
+                        fan_total_time = 0.0f;
+                        enemy_list[i]->SetIsShot();
+                    }
+                }
+                // 攻撃パターン７（段階扇形）
+                else if (bs_attack_pattrn == 7)
+                {
+                    const float fan_angle_range = 60.0f;
+                    const float bullet_speed = 180.0f;
+                    const float fan_interval = 0.4f;
+                    const float fan_duration_limit = 3.0f;
+
+                    static float fan_timer = 0.0f;
+                    static float fan_total_time = 0.0f;
+
+                    fan_timer += delta_second;
+                    fan_total_time += delta_second;
+
+                    if (fan_timer >= fan_interval)
+                    {
+                        fan_timer = 0.0f;
+
+                        int bullet_count = 3;
+                        float base_angle = 90.0f; // 中心下方向
+
+                        for (int i = 0; i < bullet_count; ++i)
+                        {
+                            float angle = base_angle - fan_angle_range / 2.0f +
+                                (fan_angle_range / (bullet_count - 1)) * i;
+
+                            float rad = angle * DX_PI / 180.0f;
+                            Vector2D velocity(cos(rad) * bullet_speed, sin(rad) * bullet_speed);
+
+                            e_shot4 = objm->CreateObject<EnemyShot4>(boss2->GetLocation());
+                            e_shot4->SetVelocity(velocity);
+                        }
+                    }
+
+                    // 一定時間経過したら終了
+                    if (fan_total_time >= fan_duration_limit)
+                    {
+                        fan_total_time = 0.0f;
+                        enemy_list[i]->SetIsShot();
+                    }
+                }
+                // 攻撃パターン８（ひもQ）
+                else if (bs_attack_pattrn == 8)
+                {
+#if 1
+                    const float wave_interval = 0.1f;       // 発射間隔（秒）
+                    const float wave_duration_limit = 1.0f; // 発射時間の上限（秒）
+
+                    static float wave_timer = 0.0f;
+                    static float wave_total_time = 0.0f;
+
+                    wave_timer += delta_second;
+                    wave_total_time += delta_second;
+
+                    if (wave_timer >= wave_interval)
+                    {
+                        wave_timer = 0.0f;
+                        Vector2D e_lo = boss2->GetLocation();
+
+                        // 右側
+                        e_shot5 = objm->CreateObject<EnemyShot5>(Vector2D(e_lo.x + 50, e_lo.y));
+                        e_shot5->SetWaveReflected(false);
+                        e_shot5->SetVelocity(Vector2D(0, 200));
+                        e_shot5->SetWaveParameters(400.0f, 0.7f);
+
+                        // 左側
+                        e_shot5 = objm->CreateObject<EnemyShot5>(Vector2D(e_lo.x - 50, e_lo.y));
+                        e_shot5->SetWaveReflected(true);
+                        e_shot5->SetVelocity(Vector2D(0, 200));
+                        e_shot5->SetWaveParameters(400.0f, 0.7f);
+                    }
+
+                    // 一定時間経過したら終了
+                    if (wave_total_time >= wave_duration_limit)
+                    {
+                        wave_total_time = 0.0f;
+                        enemy_list[i]->SetIsShot();
+                    }
+#else
+
+                    int num_shots = 20;
+                    float spread_speed = 150.0f;
+                    Vector2D origin = e_location; // 弾の初期発射位置（ボスの位置）
+                    Vector2D boss_center = boss2->GetLocation(); // 吸い込み中心！
+
+                    for (int i = 0; i < num_shots; ++i)
+                    {
+                        float angle = 360.0f / num_shots * i;
+                        float rad = angle * DX_PI / 180.0f;
+
+                        e_shot5 = objm->CreateObject<EnemyShot5>(origin);
+                        e_shot5->SetVelocity(Vector2D(cosf(rad), sinf(rad)) * spread_speed);
+                        e_shot5->SetSuckCenter(boss_center); // 吸い込み先をセット！
+                    }
+#endif
                 }
             }
         }

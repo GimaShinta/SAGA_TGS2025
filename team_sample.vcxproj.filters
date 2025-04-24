@@ -111,7 +111,7 @@
     <ClCompile Include="Object\Character\Shot\EnemyShot\EnemyShot4.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Object\Character\Enemy\EnemyType\Zako4.cpp">
+    <ClCompile Include="Object\Character\Shot\EnemyShot\EnemyShot5.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -221,7 +221,7 @@
     <ClInclude Include="Object\Character\Shot\EnemyShot\EnemyShot4.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Object\Character\Enemy\EnemyType\Zako4.h">
+    <ClInclude Include="Object\Character\Shot\EnemyShot\EnemyShot5.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,6 +1,9 @@
 #include "Stage1.h"
 #include "Stage2.h" // 次のステージがある場合
 
+#include <algorithm>
+
+
 #include "../../../../Object/GameObjectManager.h"
 #include "../../../../Object/Character/Player/Player.h"
 #include "../../../../Object/Character/Shot/Shot.h"
@@ -57,6 +60,8 @@ void Stage1::Finalize()
 
 void Stage1::Update(float delta)
 {
+    UpdateBackgroundScroll(delta);
+
     // 敵が画面外に出た場合に削除
     for (auto it = enemy_list.begin(); it != enemy_list.end(); )
     {
@@ -190,6 +195,8 @@ void Stage1::Draw()
 {
     // 背景を白で塗る（最初に描画）
     DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(255, 255, 255), TRUE);
+
+     DrawScrollBackground();  // ここで scroll_offset を使って描画！
 
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
     objm->Draw();
@@ -376,5 +383,47 @@ void Stage1::EnemyShot(float delta_second)
             }
         }
     }
+}
+
+
+//スクロール描画
+void Stage1::DrawScrollBackground() const
+{
+    // 背景色（明るめの紺）
+    DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(20, 20, 40), TRUE);
+
+    // 背面グリッド（遠く・細かく・線細く）
+    const int grid_size_back = 40;
+    const int alpha_back = 100;
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha_back);
+
+    for (int x = 0; x < D_WIN_MAX_X; x += grid_size_back)
+        DrawLine(x, 0, x, D_WIN_MAX_Y, GetColor(0, 100, 255)); // ネオンブルー（薄）
+
+    //画像だとここを変更
+    for (int y = -grid_size_back; y < D_WIN_MAX_Y + grid_size_back; y += grid_size_back)
+    {
+        int sy = y - static_cast<int>(bg_scroll_offset_layer1) % grid_size_back;
+        DrawLine(0, sy, D_WIN_MAX_X, sy, GetColor(0, 100, 255));
+    }
+
+    /**     二枚目     **/
+
+    // 手前グリッド（近く・広め・線太め）
+    const int grid_size_front = 80;
+    const int alpha_front = 120;
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha_front);
+
+    // 太いライン用の四角（縦ライン）
+    for (int x = 0; x < D_WIN_MAX_X; x += grid_size_front)
+        DrawBox(x - 1, 0, x + 1, D_WIN_MAX_Y, GetColor(180, 0, 255), TRUE); // 手前は太めパープル
+
+    //画像だとここを変更
+    for (int y = -grid_size_front; y < D_WIN_MAX_Y + grid_size_front; y += grid_size_front) {
+        int sy = y - static_cast<int>(bg_scroll_offset_layer2) % grid_size_front;
+        DrawBox(0, sy - 1, D_WIN_MAX_X, sy + 1, GetColor(180, 0, 255), TRUE); // 太線で遠近感
+    }
+
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 }
 

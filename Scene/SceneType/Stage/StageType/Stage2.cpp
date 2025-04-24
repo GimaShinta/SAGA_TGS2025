@@ -13,6 +13,7 @@ Stage2::~Stage2() {}
 void Stage2::Initialize() 
 {
     // 初期化処理
+
 }
 
 void Stage2::Finalize() 
@@ -129,4 +130,33 @@ bool Stage2::IsOver()
 StageBase* Stage2::GetNextStage(Player* player) 
 {
     return nullptr; // 次のステージへ
+}
+void Stage2::DrawScrollBackground() const 
+{
+    const int grid_size1 = 80;  // 背面グリッド
+    const int grid_size2 = 40;  // 前面グリッド
+    const int alpha1 = 60;
+    const int alpha2 = 100;
+
+    DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(10, 30, 30), TRUE); // グリーン味のある背景
+
+    // 背面グリッド（レイヤー1）
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha1);
+    for (int x = 0; x < D_WIN_MAX_X; x += grid_size1)
+        DrawLine(x, 0, x, D_WIN_MAX_Y, GetColor(0, 100, 255));
+    for (int y = -grid_size1; y < D_WIN_MAX_Y + grid_size1; y += grid_size1) {
+        int sy = y - (int)bg_scroll_offset_layer1 % grid_size1;
+        DrawLine(0, sy, D_WIN_MAX_X, sy, GetColor(0, 100, 255));
+    }
+
+    // 前面グリッド（レイヤー2）
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha2);
+    for (int x = 0; x < D_WIN_MAX_X; x += grid_size2)
+        DrawLine(x, 0, x, D_WIN_MAX_Y, GetColor(180, 0, 255));
+    for (int y = -grid_size2; y < D_WIN_MAX_Y + grid_size2; y += grid_size2) {
+        int sy = y - (int)bg_scroll_offset_layer2 % grid_size2;
+        DrawLine(0, sy, D_WIN_MAX_X, sy, GetColor(180, 0, 255));
+    }
+
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 }

@@ -4,7 +4,7 @@
 #include "../../../../Object/Character/Enemy/EnemyBase.h"
 
 const int FPS3 = 60; // フレームレート
-const int STAGE3_DISTANCE = FPS3 * 10; // ステージの長さ
+const int STAGE3_DISTANCE = FPS3 * 5; // ステージの長さ
 
 class Stage3 : public StageBase
 {
@@ -14,6 +14,7 @@ private:
 	class Zako2* zako2;
 	class Boss* boss;
 	class Boss2* boss2;
+	class EnemyShot5* e_shot5;
 	class EnemyShot4* e_shot4;
 	class EnemyShot3* e_shot3;
 	class EnemyShot2* e_shot2;
