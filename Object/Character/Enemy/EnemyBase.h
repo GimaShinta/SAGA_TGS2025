@@ -2,6 +2,7 @@
 #include "../CharacterBase.h"
 #include "../../../Object/GameObjectManager.h"
 #include <unordered_set>
+#include"../../../Utility/ScoreData.h"
 
 const int ENEMY_MAX = 100; // 敵機の数の最大値
 

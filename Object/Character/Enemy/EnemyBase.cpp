@@ -1,4 +1,5 @@
 #include "EnemyBase.h"
+#include"../../../Utility/ScoreData.h"
 
 EnemyBase::EnemyBase() : hp(0.0f), on_hit(false), is_shot(false), shot_timer(0.0f), enemy_type(ENE_NONE)
 {

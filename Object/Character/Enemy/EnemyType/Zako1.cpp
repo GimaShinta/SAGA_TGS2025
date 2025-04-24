@@ -45,6 +45,9 @@ void Zako1::Update(float delta_second)
 	if (hp <= 0)
 	{
 		is_destroy = true;
+
+		ScoreData* score = Singleton<ScoreData>::GetInstance();
+		score->SetScoreData(100);
 	}
 
 	// 親クラスの更新処理を呼び出す

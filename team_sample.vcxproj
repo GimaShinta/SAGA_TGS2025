@@ -164,6 +164,7 @@
     <ClCompile Include="Scene\SceneType\TitleScene.cpp" />
     <ClCompile Include="Utility\ResourceManager.cpp" />
     <ClCompile Include="Utility\InputManager.cpp" />
+    <ClCompile Include="Utility\ScoreData.cpp" />
     <ClCompile Include="Utility\Vector2D.cpp" />
     <ClCompile Include="Object\Character\Enemy\EnemyType\Zako1.cpp" />
     <ClCompile Include="Object\Character\Enemy\EnemyType\Zako2.cpp" />
@@ -203,6 +204,7 @@
     <ClInclude Include="Utility\InputManager.h" />
     <ClInclude Include="Singleton.h" />
     <ClInclude Include="Utility\ProjectConfig.h" />
+    <ClInclude Include="Utility\ScoreData.h" />
     <ClInclude Include="Utility\Vector2D.h" />
     <ClInclude Include="Object\Character\Enemy\EnemyType\Zako1.h" />
     <ClInclude Include="Object\Character\Enemy\EnemyType\Zako2.h" />
