@@ -13,7 +13,7 @@ void Zako4::Initialize()
 	z_layer = 2;
 	velocity.y = 60;
 	box_size = Vector2D(32, 32); // サイズを32x32に拡大
-	hp = 30;
+	hp = 500;
 
 	// 当たり判定のオブジェクト設定
 	collision.is_blocking = true;
@@ -58,7 +58,7 @@ void Zako4::Draw(const Vector2D& screen_offset) const
 			GetColor(0, 255, 0), TRUE);
 
 	// 体力の表示（少し上にずらす）
-	DrawFormatString(location.x - 16, location.y - 40, GetColor(0, 0, 0), "%.0f", hp);
+	DrawFormatString(location.x - 16, location.y, GetColor(0, 0, 0), "%.0f", hp);
 }
 
 // 終了時処理
