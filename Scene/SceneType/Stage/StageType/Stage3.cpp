@@ -19,7 +19,11 @@
 #include "../../../../Scene/SceneType/Stage/StageType/Stage3.h"
 #include <math.h>
 
-Stage3::Stage3(Player* player) : StageBase(player), zako2(nullptr), boss(nullptr), e_shot1(nullptr), e_shot2(nullptr) {}
+Stage3::Stage3(Player* player) : StageBase(player), zako2(nullptr), boss(nullptr), e_shot1(nullptr), e_shot2(nullptr)
+{
+    bg_scroll_speed_layer1 = 300.0f; // 奥
+    bg_scroll_speed_layer2 = 600.0f; // 手前
+}
 Stage3::~Stage3() {}
 
 void Stage3::Initialize()
@@ -38,7 +42,6 @@ void Stage3::Finalize()
 
 void Stage3::Update(float delta)
 {
-
     UpdateBackgroundScroll(delta);
 
     //// ゲームの骨組みとなる処理を、ここに記述する
@@ -99,10 +102,8 @@ void Stage3::Draw()
     // 背景を白で塗る（最初に描画）
     DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(255, 255, 255), TRUE);
 
-    DrawScrollBackground();  // ここで scroll_offset を使って描画！
-
- /*   GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
-    objm->Draw();*/
+    //スクロール背景
+    DrawScrollBackground();  
 
     // 左の黒帯
     DrawBox(0, 0, (D_WIN_MAX_X / 2) - 350, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
@@ -117,18 +118,12 @@ void Stage3::Draw()
     // ステージ描画
     if (stage <= 1)
     {
-        DrawBox((D_WIN_MAX_X / 2) - 350, 0, (D_WIN_MAX_X / 2) + 350, D_WIN_MAX_Y, GetColor(255, 255, 255), TRUE);
-
         if (is_warning == true)
         {
             SetDrawBlendMode(DX_BLENDMODE_ALPHA, brend);
             DrawBox((D_WIN_MAX_X / 2) - 350, 0, (D_WIN_MAX_X / 2) + 350, D_WIN_MAX_Y, GetColor(255, 0, 0), TRUE);
             SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
         }
-    }
-    else if (stage >= 2)
-    {
-        DrawBox((D_WIN_MAX_X / 2) - 250, 0, (D_WIN_MAX_X / 2) + 250, D_WIN_MAX_Y, GetColor(100, 100, 100), TRUE);
     }
 
     // オブジェクト管理クラスのインスタンスを取得
@@ -786,31 +781,46 @@ void Stage3::UpdateGameStatus(float delta)
 
 void Stage3::DrawScrollBackground() const
 {
-    const int grid_size1 = 80;  // 背面グリッド
-    const int grid_size2 = 40;  // 前面グリッド
-    const int alpha1 = 60;
-    const int alpha2 = 100;
+    static float time = 0.0f;
+    time += 0.05f;
 
-    DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(10, 30, 30), TRUE); // グリーン味のある背景
+    // 背景色：やや赤みがかったグレー
+    DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(30, 10, 10), TRUE);
 
-    // 背面グリッド（レイヤー1）
-    SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha1);
-    for (int x = 0; x < D_WIN_MAX_X; x += grid_size1)
-        DrawLine(x, 0, x, D_WIN_MAX_Y, GetColor(0, 100, 255));
-    for (int y = -grid_size1; y < D_WIN_MAX_Y + grid_size1; y += grid_size1) {
-        int sy = y - (int)bg_scroll_offset_layer1 % grid_size1;
-        DrawLine(0, sy, D_WIN_MAX_X, sy, GetColor(0, 100, 255));
+    // === 背面レイヤー（奥・細かく・暗め） ===
+    const int grid_size_back = 40;
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
+
+    for (int x = 0; x < D_WIN_MAX_X; x += grid_size_back)
+        DrawLine(x, 0, x, D_WIN_MAX_Y, GetColor(100, 0, 0));
+
+    for (int y = -grid_size_back; y < D_WIN_MAX_Y + grid_size_back; y += grid_size_back) {
+        int sy = y - static_cast<int>(bg_scroll_offset_layer1) % grid_size_back;
+        DrawLine(0, sy, D_WIN_MAX_X, sy, GetColor(100, 0, 0));
     }
 
-    // 前面グリッド（レイヤー2）
-    SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha2);
-    for (int x = 0; x < D_WIN_MAX_X; x += grid_size2)
-        DrawLine(x, 0, x, D_WIN_MAX_Y, GetColor(180, 0, 255));
-    for (int y = -grid_size2; y < D_WIN_MAX_Y + grid_size2; y += grid_size2) {
-        int sy = y - (int)bg_scroll_offset_layer2 % grid_size2;
-        DrawLine(0, sy, D_WIN_MAX_X, sy, GetColor(180, 0, 255));
+    // === 前面レイヤー（太く・明るく・警告感） ===
+    const int grid_size_front = 80;
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
+
+    for (int x = 0; x < D_WIN_MAX_X; x += grid_size_front)
+        DrawBox(x - 1, 0, x + 1, D_WIN_MAX_Y, GetColor(255, 40, 40), TRUE);
+
+    for (int y = -grid_size_front; y < D_WIN_MAX_Y + grid_size_front; y += grid_size_front) {
+        int sy = y - static_cast<int>(bg_scroll_offset_layer2) % grid_size_front;
+        DrawBox(0, sy - 1, D_WIN_MAX_X, sy + 1, GetColor(255, 40, 40), TRUE);
+    }
+
+    // === ノイズ演出（崩壊感） ===
+    for (int i = 0; i < 5; ++i) {
+        if (rand() % 70 == 0) {
+            int nx = rand() % D_WIN_MAX_X;
+            int ny = rand() % D_WIN_MAX_Y;
+            DrawBox(nx, ny, nx + 3, ny + 3, GetColor(255, 100, 50), TRUE); // オレンジ警告ドット
+        }
     }
 
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 }
+
 

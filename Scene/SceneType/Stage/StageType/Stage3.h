@@ -72,5 +72,7 @@ private:
 private:
 	bool finished = false;
 
+	/*ƒXƒNƒ[ƒ‹*/
 	void DrawScrollBackground() const override;
+	
 };
