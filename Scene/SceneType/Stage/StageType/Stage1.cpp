@@ -263,21 +263,23 @@ void Stage1::EnemyAppearance()
 {
     enemy_spawn_timer += 1.0f / 60.0f; // 1フレームごとに加算（60FPS想定）
 
-    if (enemy_spawn_timer >= 30.0f)
+    // ステージ経過時間に応じた出現間隔
+    float spawn_interval = 3.0f;
+    if (stage_timer >= 10.0f) spawn_interval = 2.0f;
+    if (stage_timer >= 20.0f) spawn_interval = 1.5f;
+    if (stage_timer >= 30.0f) spawn_interval = 1.0f;
+    if (stage_timer >= 45.0f) spawn_interval = 0.5f;
+
+    if (enemy_spawn_timer >= spawn_interval)
     {
         GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
 
         const int NUM_LANES = 3;
         float lane_y[NUM_LANES] = {
-  
             D_WIN_MAX_Y / 4.0f,         // 上レーン
-   
             D_WIN_MAX_Y / 2.5f,         // 中央レーン
-  
             D_WIN_MAX_Y / 2.0f          // 下レーン
         };
-
-
 
         bool lane_occupied[NUM_LANES] = { false, false, false };
 
@@ -329,8 +331,7 @@ void Stage1::EnemyAppearance()
             }
         }
 
-        // Zako2を出現させる処理
-        // Stage1::EnemyAppearance() 内の Zako2 生成部を修正
+        // Zako2を出現させる処理（Stage1の進行に合わせて）
         if (stage_timer >= 5.0f && !zako4_spawned)
         {
             printf("Zako2 is about to appear!\n");
@@ -345,10 +346,11 @@ void Stage1::EnemyAppearance()
             }
         }
 
-
+        // タイマーリセット
         enemy_spawn_timer = 0.0f;
     }
 }
+
 
 
 
