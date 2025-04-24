@@ -12,6 +12,7 @@
 #include "../../../../Object/Character/Enemy/EnemyType/Zako1.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako2.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako3.h"
+#include "../../../../Object/Character/Enemy/EnemyType/Zako4.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Boss.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Boss2.h"
 #include "../../../../Scene/SceneType/Stage/StageType/Stage1.h"
@@ -22,6 +23,7 @@
 Stage1::Stage1(Player* player)
     : StageBase(player),
     zako2(nullptr),
+    zako4(nullptr),
     boss(nullptr),
     e_shot1(nullptr),
     e_shot2(nullptr),
@@ -35,11 +37,22 @@ void Stage1::Initialize()
 {
     // 初期化処理
     distance = STAGE_DISTANCE;
+
+    // 乱数初期化（1回だけ行う）
+    srand(static_cast<unsigned int>(time(NULL)));
+
 }
 
 void Stage1::Finalize()
 {
     // 終了処理
+        // 敵リストをすべて削除
+        for (auto& enemy : enemy_list)
+        {
+            enemy->SetDestroy();
+        }
+        enemy_list.clear();
+
 }
 
 void Stage1::Update(float delta)
@@ -105,9 +118,11 @@ void Stage1::Update(float delta)
     }
 
     // delta_second 分加算
-    stage_timer += delta;
+   // タイマー2つに分ける
+    stage_timer += delta;          // 10秒判定用
+    distance_timer += delta;       // スクロール用
 
-    if (stage_timer >= 0.01f)
+    if (distance_timer >= 0.01f)
     {
         if (distance > 0)
         {
@@ -117,8 +132,14 @@ void Stage1::Update(float delta)
         {
             distance = 0;
         }
-        stage_timer = 0;
+        distance_timer = 0;
     }
+
+    if (stage_timer >= 50.0f)
+    {
+        is_clear = true;
+    }
+
 
     // 敵の出現
     EnemyAppearance();
@@ -146,12 +167,15 @@ void Stage1::Update(float delta)
     }
 
 
-    //stage遷移
-    stage_timer += delta;
 
-    if (stage_timer >= 10.0f)
+
+    if (is_clear == true || is_over == true)
     {
-        finished = true;
+        scene_timer += delta;
+        if (scene_timer >= 5.0f)
+        {
+            finished = true;
+        }
     }
 
 
@@ -179,6 +203,9 @@ void Stage1::Draw()
     DrawString(0, 0, "ゲームメイン", GetColor(255, 255, 255));
     DrawString(0, 300, "操作方法\n\n左スティック\n十字ボタン\nWASDキー : 移動\n\nAボタン\nスペースキー : 発射\n\nBボタン\nBキー : レーザー\n\nRBボタン\nLキー : 射出反転", GetColor(255, 255, 255));
     DrawFormatString(0, 20, GetColor(255, 255, 0), "敵数: %d", enemy_list.size());
+    // ステージタイマーの表示（右上）
+    DrawFormatString(D_WIN_MAX_X - 200, 20, GetColor(255, 255, 255), "Time: %.1f", stage_timer);
+
 
     // ステージ描画
     if (stage <= 1)
@@ -235,10 +262,15 @@ void Stage1::EnemyAppearance()
 
         const int NUM_LANES = 3;
         float lane_y[NUM_LANES] = {
-            D_WIN_MAX_Y / 8.0f,         // 上レーン
-            D_WIN_MAX_Y / 4.0f,         // 中央レーン
-            (D_WIN_MAX_Y / 8.0f) * 3.0f // 下レーン（上半分まで）
+  
+            D_WIN_MAX_Y / 4.0f,         // 上レーン
+   
+            D_WIN_MAX_Y / 2.5f,         // 中央レーン
+  
+            D_WIN_MAX_Y / 2.0f          // 下レーン
         };
+
+
 
         bool lane_occupied[NUM_LANES] = { false, false, false };
 
@@ -290,6 +322,23 @@ void Stage1::EnemyAppearance()
             }
         }
 
+        // Zako2を出現させる処理
+        // Stage1::EnemyAppearance() 内の Zako2 生成部を修正
+        if (stage_timer >= 5.0f && !zako4_spawned)
+        {
+            printf("Zako2 is about to appear!\n");
+
+            Vector2D spawn_pos(150.0f, 100.0f);
+            zako4 = objm->CreateObject<Zako4>(spawn_pos);
+            if (zako4)
+            {
+                zako4->SetVelocity(Vector2D(40.0f, 0.0f));
+                enemy_list.push_back(zako4);
+                zako4_spawned = true;
+            }
+        }
+
+
         enemy_spawn_timer = 0.0f;
     }
 }
@@ -298,17 +347,17 @@ void Stage1::EnemyAppearance()
 
 void Stage1::EnemyShot(float delta_second)
 {
-    // オブジェクト管理クラスのインスタンスを取得
+    // ステージタイマーが半分（15秒）を過ぎていない場合は攻撃させない
+    if (stage_timer < 15.0f) return;
+
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
 
-    // 敵が弾を打つ準備ができていたら弾を発射する
     for (int i = 0; i < enemy_list.size(); i++)
     {
         if (enemy_list[i]->GetIsShot())
         {
             int enemy_type = enemy_list[i]->GetEnemyType();
 
-            // 敵が雑魚１だったら通常弾を発射する
             if (enemy_type == ENE_ZAKO1)
             {
                 Vector2D e_location = enemy_list[i]->GetLocation();
@@ -316,26 +365,16 @@ void Stage1::EnemyShot(float delta_second)
                 objm->CreateObject<EnemyShot1>(Vector2D(e_location.x, e_location.y + D_OBJECT_SIZE));
                 enemy_list[i]->SetIsShot();
             }
-            // 敵が雑魚２だったらプレイヤーを狙った弾を発射する
             else if (enemy_type == ENE_ZAKO2)
             {
-                // テキの位置からプレイヤーへのベクトルを求める
                 Vector2D b = player->GetLocation() - enemy_list[i]->GetLocation();
                 float c = sqrt(pow(b.x, 2) + pow(b.y, 2));
 
-                // プレイヤーに向かって弾を打つ
                 e_shot2 = objm->CreateObject<EnemyShot2>(enemy_list[i]->GetLocation());
                 e_shot2->SetVelocity(Vector2D(b.x / c, b.y / c));
-                enemy_list[i]->SetIsShot();
-            }
-            // ボスの攻撃パターン
-            else if (enemy_type == ENE_BOSS)
-            {
-                Vector2D e_location = enemy_list[i]->GetLocation();
-                objm->CreateObject<EnemyShot3>(Vector2D(e_location.x, e_location.y + D_OBJECT_SIZE));
-                objm->CreateObject<EnemyShot3>(Vector2D(e_location.x, e_location.y + D_OBJECT_SIZE));
                 enemy_list[i]->SetIsShot();
             }
         }
     }
 }
+
