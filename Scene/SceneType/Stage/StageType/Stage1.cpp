@@ -385,7 +385,7 @@ void Stage1::EnemyShot(float delta_second)
     }
 }
 
-<<<<<<< HEAD
+
 //ƒXƒNƒ[ƒ‹•`‰æ
 void Stage1::DrawScrollBackground() const
 {
@@ -427,5 +427,3 @@ void Stage1::DrawScrollBackground() const
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 }
 
-=======
->>>>>>> master
