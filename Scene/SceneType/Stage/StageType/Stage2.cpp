@@ -1,3 +1,4 @@
+#include "Stage3.h"
 #include "Stage2.h"
 #include "Stage1.h" // 次のステージがある場合
 
@@ -129,7 +130,7 @@ bool Stage2::IsOver()
 
 StageBase* Stage2::GetNextStage(Player* player) 
 {
-    return nullptr; // 次のステージへ
+    return new Stage3(player); // 次のステージへ
 }
 void Stage2::DrawScrollBackground() const 
 {
