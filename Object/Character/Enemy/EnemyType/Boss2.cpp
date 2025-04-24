@@ -139,13 +139,23 @@ void Boss2::Movement(float delta_second)
 		else
 		{
 			generate2 = true;
-			velocity = 0;
-			location = base_position; // 誤差修正
+
+			// 横反復運動（サイン波でvelocity.xを決める）
+			const float swing_speed = 2.0f;     // 左右の振れスピード
+			const float swing_range = 100.0f;   // 振れ幅
+
+			velocity.x = cosf(move_time * swing_speed) * swing_range;
+			velocity.y = 0.0f;
+
+			// 誤差修正：縦方向のみ
+			location.y = base_position.y;
 		}
 	}
 
 	// base_position を更新し、最終的な座標に浮遊オフセットを加算
 	generate_base_position += velocity * delta_second;
+	base_position.x += velocity.x * delta_second; // 横方向に反復させる
+
 	location.y = generate_base_position.y + float_offset.y;
 	location.x = base_position.x + float_offset.x;
 }

@@ -21,6 +21,10 @@ private:
 	Vector2D base_position; // 軌道の中心位置
 	Vector2D generate_base_position; // 軌道の中心位置
 
+	bool swinging_right = true;      // 現在右に向かってるかどうか
+	float swing_timer = 0.0f;        // 静止中のタイマー
+	bool is_pausing = false;         // 静止中かどうか
+
 public:
 	Boss2();
 	~Boss2();
