@@ -1,5 +1,6 @@
 #include "Stage1.h"
 #include "Stage2.h" // 次のステージがある場合
+#include "Stage3.h"  
 
 #include <algorithm>
 
@@ -140,7 +141,8 @@ void Stage1::Update(float delta)
         distance_timer = 0;
     }
 
-    if (stage_timer >= 50.0f)
+    /*遷移時間*/
+    if (stage_timer >= 5.0f)
     {
         is_clear = true;
     }
@@ -196,7 +198,7 @@ void Stage1::Draw()
     // 背景を白で塗る（最初に描画）
     DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(255, 255, 255), TRUE);
 
-     DrawScrollBackground();  // ここで scroll_offset を使って描画！
+    DrawScrollBackground();  // ここで scroll_offset を使って描画！
 
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
     objm->Draw();
@@ -256,7 +258,7 @@ bool Stage1::IsOver()
 
 StageBase* Stage1::GetNextStage(Player* player)
 {
-    return new Stage2(player); // 次のステージへ
+    return new Stage3(player); // 次のステージへ
 }
 
 void Stage1::EnemyAppearance()

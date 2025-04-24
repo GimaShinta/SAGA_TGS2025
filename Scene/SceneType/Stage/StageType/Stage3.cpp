@@ -32,10 +32,15 @@ void Stage3::Initialize()
 void Stage3::Finalize()
 {
     // 終了処理
+    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+    objm->Finalize();
 }
 
 void Stage3::Update(float delta)
 {
+
+    UpdateBackgroundScroll(delta);
+
     //// ゲームの骨組みとなる処理を、ここに記述する
     //int spd = 1; // スクロールの速さ
     //if (distance == 0)
@@ -91,10 +96,22 @@ void Stage3::Update(float delta)
 
 void Stage3::Draw()
 {
+    // 背景を白で塗る（最初に描画）
+    DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(255, 255, 255), TRUE);
+
+    DrawScrollBackground();  // ここで scroll_offset を使って描画！
+
+ /*   GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+    objm->Draw();*/
+
+    // 左の黒帯
+    DrawBox(0, 0, (D_WIN_MAX_X / 2) - 350, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
+
+    // 右の黒帯
+    DrawBox((D_WIN_MAX_X / 2) + 350, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
+
     DrawString(0, 0, "ゲームメイン", GetColor(255, 255, 255));
-
     DrawString(0, 300, "操作方法\n\n左スティック\n十字ボタン\nWASDキー : 移動\n\nAボタン\nスペースキー : 発射\n\nBボタン\nBキー : レーザー\n\nRBボタン\nLキー : 射出反転", GetColor(255, 255, 255));
-
     DrawFormatString(0, 20, GetColor(255, 255, 0), "敵数: %d", enemy_list.size());
 
     // ステージ描画
@@ -145,7 +162,7 @@ bool Stage3::IsOver()
 
 StageBase* Stage3::GetNextStage(Player* player)
 {
-    return new Stage2(player); // 次のステージへ
+    return nullptr; // 次のステージへ
 }
 
 void Stage3::DisplayWarning(float delta_second)
@@ -766,3 +783,34 @@ void Stage3::UpdateGameStatus(float delta)
         finished = true;
     }
 }
+
+void Stage3::DrawScrollBackground() const
+{
+    const int grid_size1 = 80;  // 背面グリッド
+    const int grid_size2 = 40;  // 前面グリッド
+    const int alpha1 = 60;
+    const int alpha2 = 100;
+
+    DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(10, 30, 30), TRUE); // グリーン味のある背景
+
+    // 背面グリッド（レイヤー1）
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha1);
+    for (int x = 0; x < D_WIN_MAX_X; x += grid_size1)
+        DrawLine(x, 0, x, D_WIN_MAX_Y, GetColor(0, 100, 255));
+    for (int y = -grid_size1; y < D_WIN_MAX_Y + grid_size1; y += grid_size1) {
+        int sy = y - (int)bg_scroll_offset_layer1 % grid_size1;
+        DrawLine(0, sy, D_WIN_MAX_X, sy, GetColor(0, 100, 255));
+    }
+
+    // 前面グリッド（レイヤー2）
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha2);
+    for (int x = 0; x < D_WIN_MAX_X; x += grid_size2)
+        DrawLine(x, 0, x, D_WIN_MAX_Y, GetColor(180, 0, 255));
+    for (int y = -grid_size2; y < D_WIN_MAX_Y + grid_size2; y += grid_size2) {
+        int sy = y - (int)bg_scroll_offset_layer2 % grid_size2;
+        DrawLine(0, sy, D_WIN_MAX_X, sy, GetColor(180, 0, 255));
+    }
+
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+}
+
