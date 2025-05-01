@@ -97,12 +97,11 @@ void Boss2::Movement(float delta_second)
 {
 	move_time += delta_second;
 
-	// 浮遊感：サイン波による微細な変化
+	// 浮遊感
 	const float float_amplitude_y = 10.0f;
 	const float float_speed_y = 2.0f;
 	const float float_amplitude_x = 5.0f;
 	const float float_speed_x = 1.5f;
-
 	Vector2D float_offset;
 	float_offset.y = sinf(move_time * float_speed_y) * float_amplitude_y;
 	float_offset.x = cosf(move_time * float_speed_x) * float_amplitude_x;
@@ -113,7 +112,6 @@ void Boss2::Movement(float delta_second)
 		velocity.y = -900.0f;
 		base_position.x = generate_base_position.x;
 
-		// 定位置に到着したら登場するように設定
 		if (location.y < -400)
 		{
 			generate = true;
@@ -121,16 +119,14 @@ void Boss2::Movement(float delta_second)
 	}
 	else
 	{
-		// 定位置への移動処理（ふわっと止まる）
 		float distance_y = base_position.y - location.y;
-		base_position.x = generate_base_position.x - 150;
+		base_position.x = generate_base_position.x - 150.0f;
 
 		if (fabs(distance_y) > 1.0f)
 		{
 			const float max_speed = 200.0f;
 			velocity.y = distance_y;
 
-			// 最大速度を超えないよう制限
 			if (velocity.y > max_speed) velocity.y = max_speed;
 			if (velocity.y < -max_speed) velocity.y = -max_speed;
 
@@ -140,21 +136,58 @@ void Boss2::Movement(float delta_second)
 		{
 			generate2 = true;
 
-			// 横反復運動（サイン波でvelocity.xを決める）
-			const float swing_speed = 2.0f;     // 左右の振れスピード
-			const float swing_range = 100.0f;   // 振れ幅
+			// 反復移動の設定
+			const float swing_range = 200.0f;
+			const float move_speed = 150.0f;
+			const float wait_time_max = 0.6f;
 
-			velocity.x = cosf(move_time * swing_speed) * swing_range;
+			if (!has_initialized_swing_x)
+			{
+				swing_center_x = base_position.x - 150;
+				has_initialized_swing_x = true;
+				swing_direction = 1; // 右から開始
+				swing_wait_timer = 0.0f;
+			}
+
+			float left_x = (swing_center_x - swing_range);
+			float right_x = (swing_center_x + swing_range);
+
+			// 待機中かどうか
+			if (swing_wait_timer > 0.0f)
+			{
+				swing_wait_timer -= delta_second;
+				velocity.x = 0.0f;
+			}
+			else
+			{
+				// 端に達しているか判定
+				if (swing_direction == 1 && base_position.x >= right_x)
+				{
+					swing_direction = -1;
+					swing_wait_timer = wait_time_max;
+					velocity.x = 0.0f;
+				}
+				else if (swing_direction == -1 && base_position.x <= left_x)
+				{
+					swing_direction = 1;
+					swing_wait_timer = wait_time_max;
+					velocity.x = 0.0f;
+				}
+				else
+				{
+					// 通常移動
+					velocity.x = move_speed * swing_direction;
+				}
+			}
+
 			velocity.y = 0.0f;
-
-			// 誤差修正：縦方向のみ
 			location.y = base_position.y;
 		}
 	}
 
-	// base_position を更新し、最終的な座標に浮遊オフセットを加算
+	// 位置更新
 	generate_base_position += velocity * delta_second;
-	base_position.x += velocity.x * delta_second; // 横方向に反復させる
+	base_position.x += velocity.x * delta_second;
 
 	location.y = generate_base_position.y + float_offset.y;
 	location.x = base_position.x + float_offset.x;

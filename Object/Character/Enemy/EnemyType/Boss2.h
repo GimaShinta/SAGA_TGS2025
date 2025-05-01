@@ -25,6 +25,12 @@ private:
 	float swing_timer = 0.0f;        // 静止中のタイマー
 	bool is_pausing = false;         // 静止中かどうか
 
+	// クラス Boss2 に以下の変数を追加
+
+	bool has_initialized_swing_x = false;
+	float swing_center_x = 0.0f;
+	int swing_direction = 1;           // 1 = 右, -1 = 左
+	float swing_wait_timer = 0.0f;     // 停止中のタイマー
 public:
 	Boss2();
 	~Boss2();
