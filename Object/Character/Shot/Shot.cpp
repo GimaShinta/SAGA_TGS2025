@@ -44,11 +44,11 @@ void Shot::Update(float delta_second)
 	
 	if (shot_flip == false)
 	{
-		velocity.y = -1000.0f;
+		velocity.y = -2000.0f;
 	}
 	else
 	{
-		velocity.y = 1000.0f;
+		velocity.y = 2000.0f;
 	}
 
 	location += velocity * delta_second;
