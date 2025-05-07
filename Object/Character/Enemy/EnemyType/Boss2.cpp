@@ -98,9 +98,9 @@ void Boss2::Movement(float delta_second)
 	move_time += delta_second;
 
 	// •‚—VŠ´
-	const float float_amplitude_y = 10.0f;
-	const float float_speed_y = 2.0f;
-	const float float_amplitude_x = 5.0f;
+	const float float_amplitude_y = 30.0f;
+	const float float_speed_y = 1.5f;
+	const float float_amplitude_x = 20.0f;
 	const float float_speed_x = 1.5f;
 	Vector2D float_offset;
 	float_offset.y = sinf(move_time * float_speed_y) * float_amplitude_y;
@@ -148,9 +148,9 @@ void Boss2::Movement(float delta_second)
 			generate2 = true;
 
 			// ”½•œˆÚ“®‚Ìİ’è
-			const float swing_range = 150.0f;
-			const float move_speed = 150.0f;
-			const float wait_time_max = 0.6f;
+			const float swing_range = 100.0f;
+			const float move_speed = 100.0f;
+			const float wait_time_max = 0.1f;
 
 			// ¶‰E‚Ç‚±‚©‚çˆÚ“®‚·‚é‚©‰Šú“®ì‚Ìİ’è
 			if (!has_initialized_swing_x)
