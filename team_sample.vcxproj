@@ -137,6 +137,7 @@
   <ItemGroup>
     <ClCompile Include="Application\Application.cpp" />
     <ClCompile Include="AppMain.cpp" />
+    <ClCompile Include="Object\Item\ItemBase.cpp" />
     <ClCompile Include="Object\Character\Shot\EnemyShot\EnemyShot5.cpp" />
     <ClCompile Include="Object\Character\Shot\EnemyShot\EnemyShot4.cpp" />
     <ClCompile Include="Object\Character\Enemy\EnemyType\Boss2.cpp" />
@@ -173,6 +174,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Application.h" />
+    <ClInclude Include="Object\Item\ItemBase.h" />
     <ClInclude Include="Object\Character\Shot\EnemyShot\EnemyShot5.h" />
     <ClInclude Include="Object\Character\Shot\EnemyShot\EnemyShot4.h" />
     <ClInclude Include="Object\Character\Enemy\EnemyType\Boss2.h" />
