@@ -1,4 +1,6 @@
 #include "Zako1.h"
+#include "../../../Item/Exp/Exp.h"
+#include "../../../Character/Player/Player.h"
 
 Zako1::Zako1()
 {
@@ -48,6 +50,9 @@ void Zako1::Update(float delta_second)
 
 		ScoreData* score = Singleton<ScoreData>::GetInstance();
 		score->SetScoreData(100);
+
+		// 経験値アイテムを生成して登録
+		ItemExp* exp = Singleton<GameObjectManager>::GetInstance()->CreateObject<ItemExp>(this->location);
 	}
 
 	// 親クラスの更新処理を呼び出す
