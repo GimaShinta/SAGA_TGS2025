@@ -12,8 +12,9 @@ const float beam_duration = 5.0f; // 5ïbä‘
 
 enum
 {
-	NONE,
-	DAMAGE
+	LEVEL1 = 1,
+	LEVEL2,
+	LEVEL3
 };
 
 class Player : public CharacterBase
@@ -32,6 +33,9 @@ private:
 	int brend = 255;
 	float beam_timer = 0;
 	float damage_timer = 0;
+	int powerd = 1;
+	bool powerd_on = false;
+	float powerd_time = 0.0f;
 
 
 	bool is_alive = true;

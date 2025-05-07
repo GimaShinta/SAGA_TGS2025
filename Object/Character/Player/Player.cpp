@@ -23,6 +23,9 @@ void Player::Initialize()
 	collision.object_type = eObjectType::ePlayer;
 	// 当たる相手のオブジェクトタイプ
 	collision.hit_object_type.push_back(eObjectType::eEnemy);
+	collision.hit_object_type.push_back(eObjectType::eBoss2);
+	collision.hit_object_type.push_back(eObjectType::eExp);
+	collision.hit_object_type.push_back(eObjectType::ePowerUp);
 
 	// 動くかどうか（trueなら動く、falseなら止まる）
 	is_mobility = true;
@@ -47,6 +50,20 @@ void Player::Update(float delta_second)
 		is_alive = false;
 	}
 
+	if (powerd_time > 0.0f)
+	{
+		powerd_time -= delta_second;
+	}
+	else
+	{
+		powerd_on = false;
+	}
+
+	if (powerd >= 3)
+	{
+		powerd = 3;
+	}
+
 	// 親クラスの更新処理を呼び出す
 	__super::Update(delta_second);
 }
@@ -58,9 +75,23 @@ void Player::Update(float delta_second)
 void Player::Draw(const Vector2D& screen_offset) const
 {
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, brend);
+
+	int color;
 	// プレイヤーを描画する
-	DrawBox(location.x - box_size.x, location.y - box_size.y, 
-		location.x + box_size.x, location.y + box_size.y, GetColor(0, 255, 255), TRUE);
+	if (powerd <= 1)
+	{
+		color = GetColor(255, 0, 0);
+	}
+	else if (powerd == 2)
+	{
+		color = GetColor(0, 255, 0);
+	}
+	else
+	{
+		color = GetColor(0, 0, 255);
+	}
+	DrawBox(location.x - box_size.x, location.y - box_size.y,
+		location.x + box_size.x, location.y + box_size.y, color, TRUE);
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 
 	// ライフの表示
@@ -86,6 +117,15 @@ void Player::OnHitCollision(GameObjectBase* hit_object)
 			life--;
 			is_damage = true;
 			on_hit = true;
+		}
+	}
+	if (hit_object->GetCollision().object_type == eObjectType::ePowerUp)
+	{
+		if (powerd_on == false)
+		{
+			powerd++;
+			powerd_on = true;
+			powerd_time = 4.0f;
 		}
 	}
 }

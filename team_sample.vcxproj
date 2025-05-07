@@ -152,6 +152,7 @@
     <ClCompile Include="Object\Character\CharacterBase.cpp" />
     <ClCompile Include="Object\Character\Player\Player.cpp" />
     <ClCompile Include="Object\Character\Shot\Shot.cpp" />
+    <ClCompile Include="Object\Item\PowerUp\PowerUp.cpp" />
     <ClCompile Include="Scene\SceneType\Stage\StageType\Stage1.cpp" />
     <ClCompile Include="Scene\SceneType\Stage\StageType\Stage2.cpp" />
     <ClCompile Include="Scene\SceneType\Stage\StageType\Stage3.cpp" />
@@ -190,6 +191,7 @@
     <ClInclude Include="Object\Character\CharacterBase.h" />
     <ClInclude Include="Object\Character\Player\Player.h" />
     <ClInclude Include="Object\Character\Shot\Shot.h" />
+    <ClInclude Include="Object\Item\PowerUp\PowerUp.h" />
     <ClInclude Include="Scene\SceneType\Stage\StageBase.h" />
     <ClInclude Include="Scene\SceneType\Stage\StageType\Stage1.h" />
     <ClInclude Include="Scene\SceneType\Stage\StageType\Stage2.h" />

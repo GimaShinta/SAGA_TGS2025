@@ -16,6 +16,7 @@
 #include "../../../../Object/Character/Enemy/EnemyType/Zako3.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Boss.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Boss2.h"
+#include "../../../../Object/Item/PowerUp/PowerUp.h"
 #include "../../../../Scene/SceneType/Stage/StageType/Stage3.h"
 #include <math.h>
 
@@ -31,6 +32,12 @@ void Stage3::Initialize()
     // 初期化処理
     // 【記述位置は仮】ステージの長さを代入
     distance = STAGE3_DISTANCE;
+
+    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+    objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) - 100.0f));
+    objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2 + 100, (D_WIN_MAX_Y / 2) - 100.0f));
+    objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2 + 150, (D_WIN_MAX_Y / 2) - 100.0f));
+
 }
 
 void Stage3::Finalize()
