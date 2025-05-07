@@ -174,8 +174,6 @@ void Stage1::Update(float delta)
     }
 
 
-
-
     if (is_clear == true || is_over == true)
     {
         // 敵全削除（既に削除されているものは何も起きない）
@@ -183,6 +181,7 @@ void Stage1::Update(float delta)
         {
             enemy->SetDestroy();
         }
+
         enemy_list.clear(); // 管理リストもクリア
 
         scene_timer += delta;
