@@ -1,6 +1,7 @@
 #pragma once
 #include "../StageBase.h"
 #include "../../../../Object/Character/Player/Player.h"
+#include "../../../../Object/Character/Enemy/EnemyType/Zako1.h"  // Zako1クラスをインクルード
 
 class Stage2 :
     public StageBase
@@ -8,6 +9,14 @@ class Stage2 :
 private:
     class Shot* shot;
     class Beam* beam;
+    class Zako4* zako4;
+    class Zako2* zako2;
+    std::vector<EnemyBase*> enemy_list;
+    float stage_timer = 0.0f; // 経過時間（秒）
+    bool zako4_spawned = false;
+
+    // 敵の出現タイマー
+    float enemy_spawn_timer = 0.0f;
 
 public:
     Stage2(Player* player);
@@ -25,7 +34,9 @@ public:
 private:
     bool finished = false;
 
+    // 敵出現処理
+    void EnemyAppearance(float delta);
+
+    // 背景スクロール
     void DrawScrollBackground() const override;
-
 };
-

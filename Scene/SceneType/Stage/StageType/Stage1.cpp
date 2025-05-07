@@ -142,7 +142,7 @@ void Stage1::Update(float delta)
     }
 
     /*遷移時間*/
-    if (stage_timer >= 5.0f)
+    if (stage_timer >= 20.0f)
     {
         is_clear = true;
     }
@@ -178,6 +178,13 @@ void Stage1::Update(float delta)
 
     if (is_clear == true || is_over == true)
     {
+        // 敵全削除（既に削除されているものは何も起きない）
+        for (auto& enemy : enemy_list)
+        {
+            enemy->SetDestroy();
+        }
+        enemy_list.clear(); // 管理リストもクリア
+
         scene_timer += delta;
         if (scene_timer >= 5.0f)
         {
@@ -258,28 +265,30 @@ bool Stage1::IsOver()
 
 StageBase* Stage1::GetNextStage(Player* player)
 {
-    return new Stage3(player); // 次のステージへ
+    return new Stage2(player); // 次のステージへ
 }
 
 void Stage1::EnemyAppearance()
 {
     enemy_spawn_timer += 1.0f / 60.0f; // 1フレームごとに加算（60FPS想定）
 
-    if (enemy_spawn_timer >= 30.0f)
+    // ステージ経過時間に応じた出現間隔
+    float spawn_interval = 3.0f;
+    if (stage_timer >= 10.0f) spawn_interval = 2.0f;
+    if (stage_timer >= 20.0f) spawn_interval = 1.5f;
+    if (stage_timer >= 30.0f) spawn_interval = 1.0f;
+    if (stage_timer >= 45.0f) spawn_interval = 0.5f;
+
+    if (enemy_spawn_timer >= spawn_interval)
     {
         GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
 
         const int NUM_LANES = 3;
         float lane_y[NUM_LANES] = {
-  
             D_WIN_MAX_Y / 4.0f,         // 上レーン
-   
             D_WIN_MAX_Y / 2.5f,         // 中央レーン
-  
             D_WIN_MAX_Y / 2.0f          // 下レーン
         };
-
-
 
         bool lane_occupied[NUM_LANES] = { false, false, false };
 
@@ -316,7 +325,7 @@ void Stage1::EnemyAppearance()
                 ? (rand() % ((D_WIN_MAX_X / 2) - 400))         // 左
                 : ((D_WIN_MAX_X / 2) + 400 + rand() % (D_WIN_MAX_X - ((D_WIN_MAX_X / 2) + 400))); // 右
 
-            Vector2D velocity(random_direction == 0 ? 60 : -60, 0);
+            Vector2D velocity(random_direction == 0 ? 100 : -100, 0);
 
             for (int i = 0; i < 4; i++)
             {
@@ -329,10 +338,23 @@ void Stage1::EnemyAppearance()
                 enemy->SetVelocity(velocity);
                 enemy_list.push_back(enemy);
             }
+
+            // 追加した左斜め上から出現
+            float diagonal_spawn_x_left = 200;
+            float diagonal_spawn_y_left = 600; // 画面の下外から出現
+            auto enemy_left = objm->CreateObject<Zako1>(Vector2D(diagonal_spawn_x_left, diagonal_spawn_y_left));
+            enemy_left->SetVelocity(Vector2D(100.0f, -100.0f)); // 右上方向
+            enemy_list.push_back(enemy_left);
+
+
+            // 追加した右斜め上から出現
+            float diagonal_spawn_x_right = 1000; // 右斜め
+            auto enemy_right = objm->CreateObject<Zako1>(Vector2D(diagonal_spawn_x_right, 120));
+            enemy_right->SetVelocity(Vector2D(-100.0f, 100.0f)); // 斜め上方向に
+            enemy_list.push_back(enemy_right);
         }
 
-        // Zako2を出現させる処理
-        // Stage1::EnemyAppearance() 内の Zako2 生成部を修正
+        // Zako2を出現させる処理（Stage1の進行に合わせて）もそのまま残す
         if (stage_timer >= 5.0f && !zako4_spawned)
         {
             printf("Zako2 is about to appear!\n");
@@ -347,11 +369,10 @@ void Stage1::EnemyAppearance()
             }
         }
 
-
+        // タイマーリセット
         enemy_spawn_timer = 0.0f;
     }
 }
-
 
 
 void Stage1::EnemyShot(float delta_second)
@@ -383,9 +404,54 @@ void Stage1::EnemyShot(float delta_second)
                 e_shot2->SetVelocity(Vector2D(b.x / c, b.y / c));
                 enemy_list[i]->SetIsShot();
             }
+            else if (enemy_type == ENE_ZAKO4)
+            {
+                // Zako4の弾発射タイミング管理
+                static float shot_timer = 0.0f;  // 発射タイマーを保持
+                static int shot_count = 0;       // 発射回数を保持
+
+                if (shot_count < 3) // 3発発射するまで
+                {
+                    shot_timer += delta_second;
+
+                    if (shot_timer >= 1.0f)  // 1秒ごとに発射
+                    {
+                        // 発射処理
+                        Vector2D e_location = enemy_list[i]->GetLocation();
+                        float shot_speed = 100.0f;
+
+                        std::vector<Vector2D> directions = {
+                            Vector2D(-0.5f, 1.0f), // 左斜め
+                            Vector2D(0.0f, 1.0f), // 真下
+                            Vector2D(0.5f, 1.0f), // 右斜め
+                        };
+
+                        for (const auto& dir : directions)
+                        {
+                            float length = std::sqrt(dir.x * dir.x + dir.y * dir.y);
+                            Vector2D normalized = (length != 0) ? Vector2D(dir.x / length, dir.y / length) : Vector2D(0.0f, 0.0f);
+                            Vector2D velocity = Vector2D(normalized.x * shot_speed, normalized.y * shot_speed);
+
+                            auto shot = objm->CreateObject<EnemyShot1>(e_location);
+                            shot->SetVelocity(velocity);
+                        }
+
+                        shot_timer = 0.0f;  // 発射後にタイマーをリセット
+                        shot_count++;       // 発射回数を増やす
+                    }
+                }
+                else
+                {
+                    // 3発撃ち終わった後の処理
+                    enemy_list[i]->SetIsShot();  // 発射が終わったことを通知
+                    shot_count = 0;  // 発射回数をリセット
+                }
+            }
         }
     }
 }
+
+
 
 
 //スクロール描画
