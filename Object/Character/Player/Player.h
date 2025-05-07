@@ -33,6 +33,7 @@ private:
 	float beam_timer = 0;
 	float damage_timer = 0;
 
+
 	bool is_alive = true;
 
 public:

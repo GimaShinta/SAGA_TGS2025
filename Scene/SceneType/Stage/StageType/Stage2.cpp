@@ -7,6 +7,11 @@
 
 #include "../../../../Object/GameObjectManager.h"
 
+#include "../../../../Object/Character/Enemy/EnemyType/Zako1.h"
+#include "../../../../Object/Character/Enemy/EnemyType/Zako2.h"
+#include "../../../../Object/Character/Enemy/EnemyType/Zako4.h"
+
+
 
 Stage2::Stage2(Player* player) : StageBase(player) {}
 Stage2::~Stage2() {}
@@ -23,6 +28,7 @@ void Stage2::Finalize()
         // オブジェクト管理クラスのインスタンスを取得
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
     objm->Finalize();
+
 }
 
 void Stage2::Update(float delta) 
@@ -30,6 +36,9 @@ void Stage2::Update(float delta)
     // オブジェクト管理クラスのインスタンスを取得
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
     objm->Update(delta);
+    EnemyAppearance(delta);
+
+    stage_timer += delta; 
 
     // プレイヤーが弾を打つ準備ができていたら弾を生成        
     if (player->GetIsShot() == true)
@@ -99,6 +108,10 @@ void Stage2::Draw()
 
     DrawBox((D_WIN_MAX_X / 2) - 350, 0, (D_WIN_MAX_X / 2) + 350, D_WIN_MAX_Y, GetColor(255, 255, 255), TRUE);
 
+
+    
+
+
     // オブジェクト管理クラスのインスタンスを取得
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
     objm->Draw();
@@ -111,6 +124,12 @@ void Stage2::Draw()
     {
         DrawString((D_WIN_MAX_X / 2) - 60, (D_WIN_MAX_Y / 2) - 100, "ゲームオーバー", GetColor(0, 0, 0));
     }
+
+    // 左の黒帯
+    DrawBox(0, 0, (D_WIN_MAX_X / 2) - 350, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
+
+    // 右の黒帯
+    DrawBox((D_WIN_MAX_X / 2) + 350, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
 }
 
 bool Stage2::IsFinished() 
@@ -132,7 +151,33 @@ StageBase* Stage2::GetNextStage(Player* player)
 {
     return new Stage3(player); // 次のステージへ
 }
-void Stage2::DrawScrollBackground() const 
+void Stage2::EnemyAppearance(float delta)
+{
+    enemy_spawn_timer += 1.0f / 60.0f; // 1フレームごとに加算（60FPS想定）
+
+    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+
+        // Zako2を出現させる処理（Stage1の進行に合わせて）もそのまま残す
+        if (stage_timer >= 5.0f && !zako4_spawned)
+        {
+            printf("Zako2 is about to appear!\n");
+
+            Vector2D spawn_pos(400.0f, 100.0f);
+            zako2 = objm->CreateObject<Zako2>(spawn_pos);
+            if (zako2 != nullptr)
+            {
+                zako2->Initialize(); 
+                enemy_list.push_back(zako2);
+                zako4_spawned = true;
+            }
+
+        }
+
+        // タイマーリセット
+        enemy_spawn_timer = 0.0f;
+    
+}
+void Stage2::DrawScrollBackground() const
 {
     const int grid_size1 = 80;  // 背面グリッド
     const int grid_size2 = 40;  // 前面グリッド

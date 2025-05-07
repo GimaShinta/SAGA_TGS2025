@@ -178,6 +178,13 @@ void Stage1::Update(float delta)
 
     if (is_clear == true || is_over == true)
     {
+        // 敵全削除（既に削除されているものは何も起きない）
+        for (auto& enemy : enemy_list)
+        {
+            enemy->SetDestroy();
+        }
+        enemy_list.clear(); // 管理リストもクリア
+
         scene_timer += delta;
         if (scene_timer >= 5.0f)
         {
@@ -258,7 +265,7 @@ bool Stage1::IsOver()
 
 StageBase* Stage1::GetNextStage(Player* player)
 {
-    return new Stage3(player); // 次のステージへ
+    return new Stage2(player); // 次のステージへ
 }
 
 void Stage1::EnemyAppearance()

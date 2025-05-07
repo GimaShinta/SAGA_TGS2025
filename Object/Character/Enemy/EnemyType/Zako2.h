@@ -1,10 +1,24 @@
 #pragma once
 #include "../EnemyBase.h"
+#include"../../Player/Player.h"
+
+// ヘッダー（Zako2.h）に追加
+enum class Zako2Pattern
+{
+	Idle,       // 何もしない
+	MoveStraight, // 真っすぐ移動
+	MoveZigzag, // ジグザグ移動
+	FollowPlayer, // プレイヤーに向かってくる
+};
+
+
 class Zako2 :public EnemyBase
 {
 public:
 	Zako2();
 	~Zako2();
+	class Player* player;
+
 
 public:
 	// 初期化処理
@@ -28,6 +42,8 @@ public:
 protected:
 
 	void Shot(float delta_second) override;
+	Zako2Pattern pattern = Zako2Pattern::MoveStraight;
+	float pattern_timer = 0.0f; // 行動切り替え用のタイマー
 
 };
 

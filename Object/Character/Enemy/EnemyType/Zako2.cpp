@@ -1,4 +1,5 @@
 #include "Zako2.h"
+#include"../../Player/Player.h"
 
 Zako2::Zako2()
 {
@@ -34,20 +35,48 @@ void Zako2::Initialize()
 /// <param name="delata_second">1フレーム当たりの時間</param>
 void Zako2::Update(float delta_second)
 {
+
+
+	pattern_timer += delta_second;
+
+	// 行動パターンに応じて挙動を変える
+	switch (pattern)
+	{
+		case Zako2Pattern::Idle:
+			velocity = { 0, 0 };
+			break;
+
+		case Zako2Pattern::MoveStraight:
+			velocity = { 0, 50 }; // 下方向に直進
+			break;
+
+		case Zako2Pattern::MoveZigzag:
+			velocity.x = sinf(pattern_timer * 3.0f) * 30; // 横に揺れる
+			velocity.y = 50;
+			break;
+
+		case Zako2Pattern::FollowPlayer:
+			// 例: プレイヤーの位置へ向かう（プレイヤー位置は仮定）
+			Vector2D dir = player->GetLocation() - location;
+			dir.Normalize();
+			velocity = dir * 60;
+			break;
+	}
+
 	location += velocity * delta_second;
 
 	// 弾を打つ
 	Shot(delta_second);
 
-	// 体力がなくなったら削除
+	// HPチェック
 	if (hp <= 0)
 	{
 		is_destroy = true;
 	}
 
-	// 親クラスの更新処理を呼び出す
 	__super::Update(delta_second);
 }
+
 
 /// <summary>
 /// 描画処理
