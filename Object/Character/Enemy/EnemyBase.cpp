@@ -99,3 +99,8 @@ void EnemyBase::SetIsShot()
 {
 	this->is_shot = false;
 }
+
+void EnemyBase::SetPlayer(Player* p)
+{
+	player = p;
+}
