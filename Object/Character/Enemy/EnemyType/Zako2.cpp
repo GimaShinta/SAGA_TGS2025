@@ -1,110 +1,203 @@
-#include "Zako2.h"
-#include"../../Player/Player.h"
+ï»¿#include "Zako2.h"
+#include "../../Player/Player.h"
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+#include<vector>
 
 Zako2::Zako2()
 {
+    srand(static_cast<unsigned int>(time(nullptr)));
 }
 
 Zako2::~Zako2()
-{
-}
+{}
 
-// ‰Šú‰»ˆ—
 void Zako2::Initialize()
 {
-	enemy_type = ENE_ZAKO2;
-	z_layer = 2;
-	box_size = 12;
-	hp = 30;
+    enemy_type = ENE_ZAKO2;
+    z_layer = 2;
+    box_size = 12;
+    hp = 30;
 
-	// “–‚½‚è”»’è‚ÌƒIƒuƒWƒFƒNƒgİ’è
-	collision.is_blocking = true;
-	// ©•ª‚ÌƒIƒuƒWƒFƒNƒgƒ^ƒCƒv
-	collision.object_type = eObjectType::eEnemy;
-	// “–‚½‚é‘Šè‚ÌƒIƒuƒWƒFƒNƒgƒ^ƒCƒv
-	collision.hit_object_type.push_back(eObjectType::eShot);
-	collision.hit_object_type.push_back(eObjectType::eBeam);
+    collision.is_blocking = true;
+    collision.object_type = eObjectType::eEnemy;
+    collision.hit_object_type.push_back(eObjectType::eShot);
+    collision.hit_object_type.push_back(eObjectType::eBeam);
 
-	// “®‚­‚©‚Ç‚¤‚©itrue‚È‚ç“®‚­Afalse‚È‚ç~‚Ü‚éj
-	is_mobility = true;
+    is_mobility = true;
+
+    start_location = location;
+    is_returning = false;
+    spawn_delay_timer = 1.0f; // 1ç§’å¾Œã«å‹•ãå‡ºã™ï¼ˆä¾‹ï¼‰
+
+
+
+    ChangePatternRandomly();
 }
 
-/// <summary>
-/// XVˆ—
-/// </summary>
-/// <param name="delata_second">1ƒtƒŒ[ƒ€“–‚½‚è‚ÌŠÔ</param>
 void Zako2::Update(float delta_second)
 {
+    spawn_delay_timer -= delta_second;
+    pattern_timer += delta_second;
+
+    switch (pattern)
+    {
+        case Zako2Pattern::Idle:
+            velocity = { 0, 0 };
+            break;
+
+        case Zako2Pattern::MoveStraight:
+            velocity = { 0, 120 };
+            break;
+
+        case Zako2Pattern::MoveZigzag:
+            velocity.x = sinf(pattern_timer * 4.0f) * 80;
+            velocity.y = 100;
+            break;
+
+        case Zako2Pattern::FollowPlayer:
+            if (player)
+            {
+                Vector2D dir = player->GetLocation() - location;
+                float distance = dir.Length();
+
+                if (distance > 10.0f)
+                {
+                    dir.Normalize();
+                    velocity = dir * 1.0f;
+                }
+                else
+                {
+                    velocity = { 0, 0 };
+                }
+                if (on_hit == true)
+                {
+                    SetDestroy();
+                }
+            }
+            break;
+
+        case Zako2Pattern::BackAndForth:
+        {
+            float offset = location.y - start_location.y;
+            if (!is_returning && offset > 150.0f)
+                is_returning = true;
+            else if (is_returning && offset < 0.0f)
+                is_returning = false;
+
+            velocity.y = is_returning ? -80 : 80;
+            velocity.x = 0;
+            break;
+        }
+
+        case Zako2Pattern::LateralSweep:
+            velocity.x = sinf(pattern_timer * 2.0f) * 100;
+            velocity.y = 0;
+            break;
+
+        case Zako2Pattern::DiagonalMove:
+        {
+            if (velocity.Length() == 0)
+            {
+                // åˆæœŸæ–¹å‘è¨­å®šï¼ˆå³ä¸‹ã¸ç§»å‹•ï¼‰
+                velocity = { 100, 100 };
+            }
+
+            location += velocity * delta_second;
+
+            // ä¸€å®šã®Yåº§æ¨™ã‚’ä¸‹å›ã£ãŸã‚‰è·³ã­è¿”ã‚‹ï¼ˆä¸Šã«æˆ»ã‚‹ï¼‰
+            if (location.y > 400)  // â†ã—ãã„å€¤ï¼ˆä»»æ„ï¼‰
+            {
+                velocity.y *= -1;
+            }
+
+            // ä¸Šã«è¡Œãã™ããŸã‚‰ã¾ãŸæˆ»ã‚‹ï¼ˆã‚ªãƒ—ã‚·ãƒ§ãƒ³ï¼‰
+            else if (location.y < 100)
+            {
+                velocity.y *= -1;
+            }
+
+            break;
+        }
 
 
-	pattern_timer += delta_second;
+        case Zako2Pattern::Hovering:
+            velocity.x = 0;
+            velocity.y = sinf(pattern_timer * 4.0f) * 20;
+            break;
 
-	// s“®ƒpƒ^[ƒ“‚É‰‚¶‚Ä‹““®‚ğ•Ï‚¦‚é
-	switch (pattern)
-	{
-		case Zako2Pattern::Idle:
-			velocity = { 0, 0 };
-			break;
+        case Zako2Pattern::Kamikaze:
+            if (player)
+            {
+                Vector2D dir = player->GetLocation() - location;
+                dir.Normalize();
+                velocity = dir * 5.0;
 
-		case Zako2Pattern::MoveStraight:
-			velocity = { 0, 50 }; // ‰º•ûŒü‚É’¼i
-			break;
+                if (on_hit == true)
+                {
+                    SetDestroy();
+                }
+            }
+            break;
+    }
 
-		case Zako2Pattern::MoveZigzag:
-			velocity.x = sinf(pattern_timer * 3.0f) * 30; // ‰¡‚É—h‚ê‚é
-			velocity.y = 50;
-			break;
+    location += velocity * delta_second;
 
-		case Zako2Pattern::FollowPlayer:
-			// —á: ƒvƒŒƒCƒ„[‚ÌˆÊ’u‚ÖŒü‚©‚¤iƒvƒŒƒCƒ„[ˆÊ’u‚Í‰¼’èj
-			Vector2D dir = player->GetLocation() - location;
-			dir.Normalize();
-			velocity = dir * 60;
-			break;
-	}
+    Shot(delta_second);
 
-	location += velocity * delta_second;
+    if (hp <= 0)
+    {
+        is_destroy = true;
+    }
 
-	// ’e‚ğ‘Å‚Â
-	Shot(delta_second);
-
-	// HPƒ`ƒFƒbƒN
-	if (hp <= 0)
-	{
-		is_destroy = true;
-	}
-
-	__super::Update(delta_second);
+    __super::Update(delta_second);
 }
 
-
-/// <summary>
-/// •`‰æˆ—
-/// </summary>
-/// <param name="screen_offset"></param>
 void Zako2::Draw(const Vector2D& screen_offset) const
 {
-	// G‹›‚Q‚ğ•`‰æ‚·‚é
-	DrawBox(location.x - box_size.x, location.y - box_size.y,
-		location.x + box_size.x, location.y + box_size.y, GetColor(0, 0, 255), TRUE);
-
-	// ‘Ì—Í‚Ì•\¦
-	DrawFormatString(location.x - 8, location.y - 8, GetColor(0, 0, 0), "%.0f", hp);
+    DrawBox(location.x - box_size.x, location.y - box_size.y,
+            location.x + box_size.x, location.y + box_size.y, GetColor(0, 0, 255), TRUE);
+    DrawFormatString(location.x - 8, location.y - 8, GetColor(0, 0, 0), "%.0f", hp);
 }
 
-// I—¹ˆ—
 void Zako2::Finalize()
-{
-}
+{}
 
 void Zako2::Shot(float delta_second)
 {
-	shot_timer += delta_second;
+    shot_timer += delta_second;
 
-	// ŒÜ•b‚Éˆê‰ñ‘Å‚Â
-	if (shot_timer >= 5.0f)
-	{
-		is_shot = true;
-		shot_timer = 0;
-	}
+    if (shot_timer >= 5.0f)
+    {
+        is_shot = true;
+        shot_timer = 0;
+    }
+}
+
+void Zako2::ChangePatternRandomly()
+{
+    int r = rand() % 8; // 0ï½7ï¼ˆKamikazeè¿½åŠ ï¼‰
+
+    switch (r)
+    {
+        case 0: pattern = Zako2Pattern::MoveStraight; break;
+        case 1: pattern = Zako2Pattern::MoveZigzag; break;
+        case 2: pattern = Zako2Pattern::FollowPlayer; break;
+        case 3: pattern = Zako2Pattern::BackAndForth; break;
+        case 4: pattern = Zako2Pattern::LateralSweep; break;
+        case 5: pattern = Zako2Pattern::DiagonalMove; break;
+        case 6: pattern = Zako2Pattern::Hovering; break;
+        case 7: pattern = Zako2Pattern::Kamikaze; break;
+    }
+
+    pattern_timer = 0.0f;
+}
+
+void Zako2::OnHitCollision(GameObjectBase* hit_object)
+{
+    if (hit_object->GetCollision().object_type == eObjectType::ePlayer)
+    {
+        on_hit = true;
+    }
 }
