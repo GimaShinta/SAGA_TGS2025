@@ -54,6 +54,7 @@ void Zako2::Update(float delta_second)
         case Zako2Pattern::MoveZigzag:
             velocity.x = sinf(pattern_timer * 4.0f) * 80;
             velocity.y = 100;
+            Shot(delta_second);
             break;
 
         case Zako2Pattern::FollowPlayer:
@@ -144,7 +145,7 @@ void Zako2::Update(float delta_second)
 
     location += velocity * delta_second;
 
-    Shot(delta_second);
+   
 
     if (hp <= 0)
     {
@@ -164,16 +165,30 @@ void Zako2::Draw(const Vector2D& screen_offset) const
 void Zako2::Finalize()
 {}
 
-void Zako2::Shot(float delta_second)
-{
-    shot_timer += delta_second;
+ //エネミーショット
+ void Zako2::Shot(float delta_second)
+ {
+ 
+     shot_timer += delta_second;
+        
+        if (shot_timer >= 2.0f)
+        {
+            if (player)
+            {
+                Vector2D dir = player->GetLocation() - location;
+                float len = dir.Length();
+                if (len > 0) dir /= len;
 
-    if (shot_timer >= 5.0f)
-    {
-        is_shot = true;
-        shot_timer = 0;
-    }
-}
+                //ここで生成
+                auto shot = Singleton<GameObjectManager>::GetInstance()->CreateObject<EnemyShot2>(location);
+                shot->SetVelocity(dir); // 追尾型発射
+            }
+
+            shot_timer = 0.0f;
+        }
+   }
+
+
 
 void Zako2::ChangePatternRandomly()
 {
