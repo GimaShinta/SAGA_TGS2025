@@ -1,20 +1,42 @@
 #pragma once
 #include "../ItemBase.h"
-#include "../../../Object/Character/Player/Player.h"
+#include "../../../Utility/ProjectConfig.h"
 
-class ItemExp : public ItemBase
+class Exp : public ItemBase
 {
 private:
-    Player* player;
-    float speed = 150.0f;          // 追尾速度
-    float attract_range = 150.0f;  // 吸収を始める距離
-    bool is_following = false;
+    float attract_range;   //追従をONにする距離
+    float speed;           // 初期スピード
+    float max_speed;       // 最大スピード
+    float acceleration;    // 加速度（1秒あたりの増加量）
+    float lifetime;        //5秒で自動削除
+
+    bool is_attracting;    //当たっているか
 
 public:
-    void Initialize() override;
-    void Update(float delta) override;
-    void Draw(const Vector2D& offset) const override;
-    void OnHitCollision(GameObjectBase* hit_object) override;
+    Exp();
+    ~Exp();
 
-    void SetPlayer(Player* p) { player = p; }
+    /// <summary>
+    /// 初期化処理
+    /// </summary>
+    void Initialize() override; 
+
+    /// <summary>
+    /// 更新処理
+    /// </summary>
+    /// <param name="delta"></param>
+    void Update(float delta) override;
+
+    /// <summary>
+    /// 描画処理
+    /// </summary>
+    /// <param name="offset"></param>
+    void Draw(const Vector2D& offset) const override;
+
+    /// <summary>
+    /// 当たり判定処理
+    /// </summary>
+    /// <param name="ヒットオブジェクト"></param>
+    void OnHitCollision(GameObjectBase* hit_object) override;
 };

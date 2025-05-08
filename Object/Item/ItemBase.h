@@ -1,7 +1,11 @@
 #pragma once
 #include "../GameObjectBase.h"
+#include"../../Object/Character/Player/Player.h"
+
 class ItemBase : public GameObjectBase
 {
+protected:
+	Player* player;	//共有されたプレイヤー情報
 public:
 	// 初期化処理
 	virtual void Initialize();
@@ -29,5 +33,11 @@ public:
 	/// </summary>
 	/// <param name="hit_object">プレイヤーだとしたら、ここは敵とかブロックと当たったことになる</param>
 	virtual void OnHitCollision(GameObjectBase* hit_object);
+
+	/// <summary>
+	/// プレイヤー情報を共有
+	/// </summary>
+	/// <param name="p">プレイヤー情報</param>
+	void SetPlayer(Player* p);
 };
 
