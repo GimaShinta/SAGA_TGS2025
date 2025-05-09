@@ -97,7 +97,6 @@ void Boss2::Movement(float delta_second)
 {
 	move_time += delta_second;
 
-	// 浮遊感
 	const float float_amplitude_y = 30.0f;
 	const float float_speed_y = 1.5f;
 	const float float_amplitude_x = 20.0f;
@@ -106,93 +105,78 @@ void Boss2::Movement(float delta_second)
 	float_offset.y = sinf(move_time * float_speed_y) * float_amplitude_y;
 	float_offset.x = cosf(move_time * float_speed_x) * float_amplitude_x;
 
-	// 登場前の通り過ぎる演出
 	if (!generate)
 	{
-		// 高速移動
 		velocity.y = -900.0f;
-		// 横の位置を調整
 		base_position.x = generate_base_position.x;
 
-		// 画面外いったら登場したことにする
 		if (location.y < -400)
 		{
 			generate = true;
 		}
 	}
-	// 登場後
 	else
 	{
-		// ｙの戦闘位置までの距離
 		float distance_y = base_position.y - location.y;
 		float base_x = D_WIN_MAX_X / 2;
 		base_position.x = generate_base_position.x - 150.0f;
 
-		// 登場後の降りてくる演出
 		if (fabs(distance_y) > 1.0f)
 		{
 			const float max_speed = 200.0f;
 			velocity.y = distance_y;
-
-			// スピードの制限
 			if (velocity.y > max_speed) velocity.y = max_speed;
 			if (velocity.y < -max_speed) velocity.y = -max_speed;
-
-			// サイズの変更
 			box_size = 60;
 		}
-		// 登場後の動き（戦闘）
 		else
 		{
-			// 弾を打つ準備がok
 			generate2 = true;
 
-			// 反復移動の設定
 			const float swing_range = 100.0f;
 			const float move_speed = 100.0f;
-			const float wait_time_max = 0.1f;
+			// 減速距離
+			const float deceleration_distance = 50.0f;
+			const float min_speed = 10.0f;
+			const float wait_time_max = 0.2f; // 折り返し時の停止時間
 
-			// 左右どこから移動するか初期動作の設定
 			if (!has_initialized_swing_x)
 			{
-				// 左右移動の中心線を決定
 				swing_center_x = base_x;
-				// 初期移動の完了（もうこの条件は通らない）
 				has_initialized_swing_x = true;
-				swing_direction = 1; // 右から開始
+				swing_direction = 1;
 				swing_wait_timer = 0.0f;
 			}
 
-			// 留まる位置を設定
-			float left_x = (swing_center_x - swing_range);
-			float right_x = (swing_center_x + swing_range);
+			float left_x = swing_center_x - swing_range;
+			float right_x = swing_center_x + swing_range;
 
-			// 待機中かどうか
+			// 停止中の場合
 			if (swing_wait_timer > 0.0f)
 			{
 				swing_wait_timer -= delta_second;
+				if (swing_wait_timer < 0.0f) swing_wait_timer = 0.0f;
 				velocity.x = 0.0f;
 			}
 			else
 			{
-				// 端に達しているか判定（右に動く）
-				if (swing_direction == 1 && base_position.x >= right_x)
+				float distance_to_edge = (swing_direction == 1)
+					? right_x - base_position.x
+					: base_position.x - left_x;
+
+				// 端に到達
+				if (distance_to_edge <= 0.0f)
 				{
-					swing_direction = -1;
-					swing_wait_timer = wait_time_max;
-					velocity.x = 0.0f;
-				}
-				// （左に動く）
-				else if (swing_direction == -1 && base_position.x <= left_x)
-				{
-					swing_direction = 1;
+					swing_direction *= -1;
 					swing_wait_timer = wait_time_max;
 					velocity.x = 0.0f;
 				}
 				else
 				{
-					// 通常移動
-					velocity.x = move_speed * swing_direction;
+					float t = Clamp(distance_to_edge / deceleration_distance, 0.0f, 1.0f);
+					float eased = t * t * (3 - 2 * t); // easeInOut補間
+					float current_speed = Max(move_speed * eased, min_speed);
+					velocity.x = current_speed * swing_direction;
 				}
 			}
 
@@ -201,12 +185,9 @@ void Boss2::Movement(float delta_second)
 		}
 	}
 
-	// y座標の更新
 	generate_base_position += velocity * delta_second;
-	// x座標の更新
 	base_position.x += velocity.x * delta_second;
 
-	// 位置更新
 	location.y = generate_base_position.y + float_offset.y;
 	location.x = base_position.x + float_offset.x;
 }
