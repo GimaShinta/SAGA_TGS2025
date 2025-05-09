@@ -293,6 +293,7 @@ void Stage1::EnemyAppearance(float delta)
 
         Vector2D spawn_pos(400.0f, 100.0f);
         zako1 = objm->CreateObject<Zako1>(spawn_pos);
+        enemy_list.push_back(zako1);
         zako1->SetPlayer(player);
 
         // ƒpƒ^[ƒ“‚ğŠÔ‚É‰‚¶‚ÄØ‚è‘Ö‚¦
