@@ -1,5 +1,5 @@
 #include "GameMainScene.h"
-#include "../../Scene/SceneType/Stage/StageType/Stage2.h"
+#include "../../Scene/SceneType/Stage/StageType/Stage1.h"
 #include <algorithm>   // std::min ÇégÇ§ÇΩÇﬂÇ…ïKóv
 
 
@@ -19,7 +19,7 @@ void GameMainScene::Initialize()
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
     player = objm->CreateObject<Player>(Vector2D(D_WIN_MAX_X / 2, D_WIN_MAX_Y / 2));
 
-    current_stage = new Stage2(player);
+    current_stage = new Stage1(player);
     current_stage->Initialize();
 }
 
@@ -136,7 +136,23 @@ void GameMainScene::Draw()
 
         DrawFormatString(base_x, draw_y, GetColor(255, 255, 0), "%s", log.text.c_str());
     }
+    // ïKéEãZÉQÅ[ÉWï\é¶
+    if (player)
+    {
+        float rate = player->GetChargeRate();  // 0.0Å`1.0
+        int bar_width = 200;
+        int bar_height = 20;
+        int x = (D_WIN_MAX_X - bar_width) / 2;
+        int y = D_WIN_MAX_Y - 40;
 
+        DrawBox(x, y, x + bar_width, y + bar_height, GetColor(50, 50, 50), TRUE); // îwåi
+        DrawBox(x, y, x + static_cast<int>(bar_width * rate), y + bar_height, GetColor(0, 255, 255), TRUE); // ÉQÅ[ÉWñ{ëÃ
+
+        if (player->CanUseSpecial())
+        {
+            DrawFormatString(x + 220, y, GetColor(255, 100, 100), "READY!");
+        }
+    }
 
 }
 

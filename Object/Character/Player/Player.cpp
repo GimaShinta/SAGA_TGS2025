@@ -252,17 +252,18 @@ void Player::Shot(float delta_second)
 	}
 
 	// Bを押したらビーム発射
-	if (input->GetKeyDown(KEY_INPUT_B) ||
-		input->GetButtonDown(XINPUT_BUTTON_B))
+	if ((input->GetKeyDown(KEY_INPUT_B) || input->GetButtonDown(XINPUT_BUTTON_B)) &&
+		CanUseSpecial())  // チャージ完了時のみ
 	{
-		// 何も打ってなかったらビームを打てるようにする
 		if (stop == false)
 		{
 			beam_on = true;
 			stop = true;
 			beam_timer = 0.0f;
+			UseSpecial();  // ゲージ消費
 		}
 	}
+
 
 	// ５秒経ったらビームの再起
 	if (beam_timer >= 5.0f)
@@ -335,4 +336,35 @@ void Player::SetIsShot()
 void Player::SetBeamOn()
 {
 	beam_on = false;
+}
+
+void Player::AddCharge(float value)
+{
+	// ビーム中は加算しない
+	if (beam_on) return;
+
+	charge += value;
+	if (charge >= charge_max)
+	{
+		charge = charge_max;
+		charge_ready = true;
+	}
+}
+
+bool Player::CanUseSpecial() const
+{
+	return charge_ready;
+}
+
+void Player::UseSpecial()
+{
+	charge = 0.0f;
+	charge_ready = false;
+}
+
+float Player::GetChargeRate() const
+{
+	// 発動中は常にMAX表示
+	if (beam_on) return 1.0f;
+	return charge / charge_max;
 }
