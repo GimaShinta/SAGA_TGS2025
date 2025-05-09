@@ -126,6 +126,7 @@ void Zako2::Update(float delta_second)
         case Zako2Pattern::Hovering:
             velocity.x = 0;
             velocity.y = sinf(pattern_timer * 4.0f) * 20;
+
             break;
 
         case Zako2Pattern::Kamikaze:
@@ -134,11 +135,6 @@ void Zako2::Update(float delta_second)
                 Vector2D dir = player->GetLocation() - location;
                 dir.Normalize();
                 velocity = dir * 5.0;
-
-                if (on_hit == true)
-                {
-                    SetDestroy();
-                }
             }
             break;
     }
@@ -211,8 +207,8 @@ void Zako2::ChangePatternRandomly()
 
 void Zako2::OnHitCollision(GameObjectBase* hit_object)
 {
-    if (hit_object->GetCollision().object_type == eObjectType::ePlayer)
+    if (hit_object->GetCollision().object_type == eObjectType::ePlayer || hit_object->GetCollision().object_type == eObjectType::eShot)
     {
-        on_hit = true;
+        SetDestroy();
     }
 }

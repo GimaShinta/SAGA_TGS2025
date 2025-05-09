@@ -145,17 +145,16 @@ void Stage1::Update(float delta)
     }
 
     /*遷移時間*/
-    if (stage_timer >= 20.0f)
+    if (stage_timer >= 60.0f)
     {
         is_clear = true;
     }
 
 
     // 敵の出現
-    EnemyAppearance();
+    EnemyAppearance(delta);
 
-    // 敵の攻撃
-    EnemyShot(delta);
+  
 
     // 敵が倒された時は経験値を生成。
     for (auto& enemy : enemy_list)
@@ -280,186 +279,34 @@ StageBase* Stage1::GetNextStage(Player* player)
     return new Stage2(player); // 次のステージへ
 }
 
-void Stage1::EnemyAppearance()
+void Stage1::EnemyAppearance(float delta)
 {
-    enemy_spawn_timer += 1.0f / 60.0f; // 1フレームごとに加算（60FPS想定）
+    // タイマー加算
+    enemy_spawn_timer += delta;
 
-    // ステージ経過時間に応じた出現間隔
-    float spawn_interval = 3.0f;
-    if (stage_timer >= 10.0f) spawn_interval = 2.0f;
-    if (stage_timer >= 20.0f) spawn_interval = 1.5f;
-    if (stage_timer >= 30.0f) spawn_interval = 1.0f;
-    if (stage_timer >= 45.0f) spawn_interval = 0.5f;
+    const float spawn_interval = 3.0f;
 
+    // 5秒ごとに1体だけ出現
     if (enemy_spawn_timer >= spawn_interval)
     {
         GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
 
-        const int NUM_LANES = 3;
-        float lane_y[NUM_LANES] = {
-            D_WIN_MAX_Y / 4.0f,         // 上レーン
-            D_WIN_MAX_Y / 2.5f,         // 中央レーン
-            D_WIN_MAX_Y / 2.0f          // 下レーン
-        };
+        Vector2D spawn_pos(400.0f, 100.0f);
+        zako1 = objm->CreateObject<Zako1>(spawn_pos);
+        zako1->SetPlayer(player);
 
-        bool lane_occupied[NUM_LANES] = { false, false, false };
-
-        // 現在の敵の位置からレーン占有状態をチェック
-        for (const auto& enemy : enemy_list)
+        // パターンを時間に応じて切り替え
+        if (stage_timer < 30.0f)
         {
-            float e_y = enemy->GetLocation().y;
-            for (int i = 0; i < NUM_LANES; i++)
-            {
-                if (fabs(e_y - lane_y[i]) < 30.0f) // 30px以内にいるなら同一レーン
-                {
-                    lane_occupied[i] = true;
-                }
-            }
+            zako1->SetPattern(Zako1Pattern::MoveStraight); // 前半
+        }
+        else
+        {
+            zako1->SetPattern(Zako1Pattern::MoveZigzag);   // 後半
         }
 
-        // 使用可能なレーンを収集
-        std::vector<int> available_lanes;
-        for (int i = 0; i < NUM_LANES; i++)
-        {
-            if (!lane_occupied[i])
-                available_lanes.push_back(i);
-        }
-
-        // 出現可能なレーンがあるか確認
-        if (!available_lanes.empty())
-        {
-            int chosen_index = rand() % available_lanes.size(); // 使用可能なレーンの中からランダム
-            int lane_id = available_lanes[chosen_index];
-            float spawn_y = lane_y[lane_id];
-
-            int random_direction = rand() % 2; // 左からか右からか
-            float base_x = (random_direction == 0)
-                ? (rand() % ((D_WIN_MAX_X / 2) - 400))         // 左
-                : ((D_WIN_MAX_X / 2) + 400 + rand() % (D_WIN_MAX_X - ((D_WIN_MAX_X / 2) + 400))); // 右
-
-            Vector2D velocity(random_direction == 0 ? 100 : -100, 0);
-
-            for (int i = 0; i < 4; i++)
-            {
-                float offset = i * 50.0f; // 横に50pxずつずらして配置
-                float spawn_x = (random_direction == 0)
-                    ? base_x + offset
-                    : base_x - offset;
-
-                auto enemy = objm->CreateObject<Zako1>(Vector2D(spawn_x, spawn_y));
-                enemy->SetVelocity(velocity);
-                enemy_list.push_back(enemy);
-            }
-
-            // 追加した左斜め上から出現
-            float diagonal_spawn_x_left = 200;
-            float diagonal_spawn_y_left = 600; // 画面の下外から出現
-            auto enemy_left = objm->CreateObject<Zako1>(Vector2D(diagonal_spawn_x_left, diagonal_spawn_y_left));
-            enemy_left->SetVelocity(Vector2D(100.0f, -100.0f)); // 右上方向
-            enemy_list.push_back(enemy_left);
-
-
-            // 追加した右斜め上から出現
-            float diagonal_spawn_x_right = 1000; // 右斜め
-            auto enemy_right = objm->CreateObject<Zako1>(Vector2D(diagonal_spawn_x_right, 120));
-            enemy_right->SetVelocity(Vector2D(-100.0f, 100.0f)); // 斜め上方向に
-            enemy_list.push_back(enemy_right);
-        }
-
-        // Zako2を出現させる処理（Stage1の進行に合わせて）もそのまま残す
-        if (stage_timer >= 5.0f && !zako4_spawned)
-        {
-            printf("Zako2 is about to appear!\n");
-
-            Vector2D spawn_pos(150.0f, 100.0f);
-            zako4 = objm->CreateObject<Zako4>(spawn_pos);
-            if (zako4)
-            {
-                zako4->SetVelocity(Vector2D(40.0f, 0.0f));
-                enemy_list.push_back(zako4);
-                zako4_spawned = true;
-            }
-        }
-
-        // タイマーリセット
+        // タイマーリセットして次の出現に備える
         enemy_spawn_timer = 0.0f;
-    }
-}
-
-
-void Stage1::EnemyShot(float delta_second)
-{
-    // ステージタイマーが半分（15秒）を過ぎていない場合は攻撃させない
-    if (stage_timer < 15.0f) return;
-
-    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
-
-    for (int i = 0; i < enemy_list.size(); i++)
-    {
-        if (enemy_list[i]->GetIsShot())
-        {
-            int enemy_type = enemy_list[i]->GetEnemyType();
-
-            if (enemy_type == ENE_ZAKO1)
-            {
-                Vector2D e_location = enemy_list[i]->GetLocation();
-                objm->CreateObject<EnemyShot1>(Vector2D(e_location.x, e_location.y + D_OBJECT_SIZE));
-                objm->CreateObject<EnemyShot1>(Vector2D(e_location.x, e_location.y + D_OBJECT_SIZE));
-                enemy_list[i]->SetIsShot();
-            }
-            else if (enemy_type == ENE_ZAKO2)
-            {
-                Vector2D b = player->GetLocation() - enemy_list[i]->GetLocation();
-                float c = sqrt(pow(b.x, 2) + pow(b.y, 2));
-
-                e_shot2 = objm->CreateObject<EnemyShot2>(enemy_list[i]->GetLocation());
-                e_shot2->SetVelocity(Vector2D(b.x / c, b.y / c));
-                enemy_list[i]->SetIsShot();
-            }
-            else if (enemy_type == ENE_ZAKO4)
-            {
-                // Zako4の弾発射タイミング管理
-                static float shot_timer = 0.0f;  // 発射タイマーを保持
-                static int shot_count = 0;       // 発射回数を保持
-
-                if (shot_count < 3) // 3発発射するまで
-                {
-                    shot_timer += delta_second;
-
-                    if (shot_timer >= 1.0f)  // 1秒ごとに発射
-                    {
-                        // 発射処理
-                        Vector2D e_location = enemy_list[i]->GetLocation();
-                        float shot_speed = 100.0f;
-
-                        std::vector<Vector2D> directions = {
-                            Vector2D(-0.5f, 1.0f), // 左斜め
-                            Vector2D(0.0f, 1.0f), // 真下
-                            Vector2D(0.5f, 1.0f), // 右斜め
-                        };
-
-                        for (const auto& dir : directions)
-                        {
-                            float length = std::sqrt(dir.x * dir.x + dir.y * dir.y);
-                            Vector2D normalized = (length != 0) ? Vector2D(dir.x / length, dir.y / length) : Vector2D(0.0f, 0.0f);
-                            Vector2D velocity = Vector2D(normalized.x * shot_speed, normalized.y * shot_speed);
-
-                            auto shot = objm->CreateObject<EnemyShot1>(e_location);
-                            shot->SetVelocity(velocity);
-                        }
-
-                        shot_timer = 0.0f;  // 発射後にタイマーをリセット
-                        shot_count++;       // 発射回数を増やす
-                    }
-                }
-                else
-                {
-                    // 3発撃ち終わった後の処理
-                    enemy_list[i]->SetIsShot();  // 発射が終わったことを通知
-                    shot_count = 0;  // 発射回数をリセット
-                }
-            }
-        }
     }
 }
 
