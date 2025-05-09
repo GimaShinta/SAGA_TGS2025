@@ -198,13 +198,7 @@ void Zako1::ChangePatternRandomly()
     pattern_timer = 0.0f;
 }
 
-void Zako1::OnHitCollision(GameObjectBase* hit_object)
-{
-    if (hit_object->GetCollision().object_type == eObjectType::ePlayer|| hit_object->GetCollision().object_type == eObjectType::eShot)
-    {
-        SetDestroy();
-    }
-}
+
 
 void Zako1::SetPattern(Zako1Pattern new_pattern)
 {
