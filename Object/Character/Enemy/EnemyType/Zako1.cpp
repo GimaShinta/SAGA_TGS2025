@@ -1,93 +1,211 @@
 #include "Zako1.h"
-#include "../../../Item/Exp/Exp.h"
-#include "../../../Character/Player/Player.h"
+#include "../../Player/Player.h"
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+#include<vector>
 
 Zako1::Zako1()
 {
+    srand(static_cast<unsigned int>(time(nullptr)));
 }
 
 Zako1::~Zako1()
-{
-}
+{}
 
-// 初期化処理
 void Zako1::Initialize()
 {
-	enemy_type = ENE_ZAKO1;
-	z_layer = 2;
-	velocity.y = 60;
-	box_size = 12;
-	hp = 30;
+    enemy_type = ENE_ZAKO1;
+    z_layer = 2;
+    box_size = 12;
+    hp = 10;
 
-	// 当たり判定のオブジェクト設定
-	collision.is_blocking = true;
-	// 自分のオブジェクトタイプ
-	collision.object_type = eObjectType::eEnemy;
-	// 当たる相手のオブジェクトタイプ
-	collision.hit_object_type.push_back(eObjectType::eShot);
-	collision.hit_object_type.push_back(eObjectType::eBeam);
+    collision.is_blocking = true;
+    collision.object_type = eObjectType::eEnemy;
+    collision.hit_object_type.push_back(eObjectType::eShot);
+    collision.hit_object_type.push_back(eObjectType::eBeam);
 
-	// 動くかどうか（trueなら動く、falseなら止まる）
-	is_mobility = true;
+    is_mobility = true;
+
+    start_location = location;
+    is_returning = false;
+    spawn_delay_timer = 1.0f; // 1秒後に動き出す（例）
+
+
+
+    ChangePatternRandomly();
 }
 
-/// <summary>
-/// 更新処理
-/// </summary>
-/// <param name="delata_second">1フレーム当たりの時間</param>
 void Zako1::Update(float delta_second)
 {
-	// 移動処理
-	location += velocity * delta_second;
+    spawn_delay_timer -= delta_second;
+    pattern_timer += delta_second;
 
-	// 弾を打つ
-	Shot(delta_second);
+    switch (pattern)
+    {
+        case Zako1Pattern::MoveStraight:
+            velocity = { 0, 120 };
+            break;
 
-	// 体力がなくなったら削除
-	if (hp <= 0)
-	{
-		is_destroy = true;
+        case Zako1Pattern::MoveZigzag:
+            velocity.x = sinf(pattern_timer * 4.0f) * 80;
+            velocity.y = 100;
+            Shot(delta_second);
+            break;
 
-		ScoreData* score = Singleton<ScoreData>::GetInstance();
-		score->SetScoreData(100);
+        case Zako1Pattern::FollowPlayer:
+            if (player)
+            {
+                Vector2D dir = player->GetLocation() - location;
+                float distance = dir.Length();
 
-		//Exp生成
-		//Exp* exp = Singleton<GameObjectManager>::GetInstance()->CreateObject<Exp>(this->location);
-	}
+                if (distance > 10.0f)
+                {
+                    dir.Normalize();
+                    velocity = dir * 1.0f;
+                }
+                else
+                {
+                    velocity = { 0, 0 };
+                }
+            }
+            break;
 
-	// 親クラスの更新処理を呼び出す
-	__super::Update(delta_second);
+        case Zako1Pattern::BackAndForth:
+        {
+            float offset = location.y - start_location.y;
+            if (!is_returning && offset > 150.0f)
+                is_returning = true;
+            else if (is_returning && offset < 0.0f)
+                is_returning = false;
+
+            velocity.y = is_returning ? -80 : 80;
+            velocity.x = 0;
+            break;
+        }
+
+        case Zako1Pattern::LateralSweep:
+            velocity.x = sinf(pattern_timer * 2.0f) * 100;
+            velocity.y = 0;
+            break;
+
+        case Zako1Pattern::DiagonalMove:
+        {
+            if (velocity.Length() == 0)
+            {
+                // 初期方向設定（右下へ移動）
+                velocity = { 100, 100 };
+            }
+
+            location += velocity * delta_second;
+
+            // 一定のY座標を下回ったら跳ね返る（上に戻る）
+            if (location.y > 400)  // ←しきい値（任意）
+            {
+                velocity.y *= -1;
+            }
+
+            // 上に行きすぎたらまた戻る（オプション）
+            else if (location.y < 100)
+            {
+                velocity.y *= -1;
+            }
+
+            break;
+        }
+
+
+        case Zako1Pattern::Hovering:
+            velocity.x = 0;
+            velocity.y = sinf(pattern_timer * 4.0f) * 20;
+            break;
+
+        case Zako1Pattern::Kamikaze:
+            if (player)
+            {
+                Vector2D dir = player->GetLocation() - location;
+                dir.Normalize();
+                velocity = dir * 5.0;
+            }
+            break;
+    }
+
+    location += velocity * delta_second;
+
+
+
+    if (hp <= 0)
+    {
+        is_destroy = true;
+    }
+
+    __super::Update(delta_second);
 }
 
-/// <summary>
-/// 描画処理
-/// </summary>
-/// <param name="screen_offset"></param>
 void Zako1::Draw(const Vector2D& screen_offset) const
 {
-	// 雑魚１を描画する
-	DrawBox(location.x - box_size.x, location.y - box_size.y,
-		location.x + box_size.x, location.y + box_size.y, GetColor(255, 0, 0), TRUE);
-
-	// 体力の表示
-	DrawFormatString(location.x - 8, location.y - 8, GetColor(0, 0, 0), "%.0f", hp);
+    DrawBox(location.x - box_size.x, location.y - box_size.y,
+            location.x + box_size.x, location.y + box_size.y, GetColor(0, 0, 255), TRUE);
+    DrawFormatString(location.x - 8, location.y - 8, GetColor(0, 0, 0), "%.0f", hp);
 }
 
-// 終了時処理
 void Zako1::Finalize()
-{
-}
+{}
 
-// 弾を打つ
+//エネミーショット
 void Zako1::Shot(float delta_second)
 {
-	shot_timer += delta_second;
 
-	// 五秒に一回打つ
-	if (shot_timer >= 5.0f)
-	{
-		velocity.y *= -1;
-		is_shot = true;
-		shot_timer = 0;
-	}
+    shot_timer += delta_second;
+
+    if (shot_timer >= 2.0f)
+    {
+        if (player)
+        {
+            Vector2D dir = player->GetLocation() - location;
+            float len = dir.Length();
+            if (len > 0) dir /= len;
+
+            //ここで生成
+            auto shot = Singleton<GameObjectManager>::GetInstance()->CreateObject<EnemyShot2>(location);
+            shot->SetVelocity(dir); // 追尾型発射
+        }
+
+        shot_timer = 0.0f;
+    }
+}
+
+
+
+void Zako1::ChangePatternRandomly()
+{
+    int r = rand() % 8; // 0～7（Kamikaze追加）
+
+    switch (r)
+    {
+        case 0: pattern = Zako1Pattern::MoveStraight; break;
+        case 1: pattern = Zako1Pattern::MoveZigzag; break;
+        case 2: pattern = Zako1Pattern::FollowPlayer; break;
+        case 3: pattern = Zako1Pattern::BackAndForth; break;
+        case 4: pattern = Zako1Pattern::LateralSweep; break;
+        case 5: pattern = Zako1Pattern::DiagonalMove; break;
+        case 6: pattern = Zako1Pattern::Hovering; break;
+        case 7: pattern = Zako1Pattern::Kamikaze; break;
+    }
+
+    pattern_timer = 0.0f;
+}
+
+void Zako1::OnHitCollision(GameObjectBase* hit_object)
+{
+    if (hit_object->GetCollision().object_type == eObjectType::ePlayer|| hit_object->GetCollision().object_type == eObjectType::eShot)
+    {
+        SetDestroy();
+    }
+}
+
+void Zako1::SetPattern(Zako1Pattern new_pattern)
+{
+    pattern = new_pattern;
+    pattern_timer = 0.0f; // 任意で初期化
 }
