@@ -65,7 +65,7 @@ void EnemyBase::OnHitCollision(GameObjectBase* hit_object)
 	{
 		beam_damage_timer += delta;
 
-		if (beam_damage_timer >= 0.15f)
+		if (beam_damage_timer >= 0.05f)
 		{
 			hp -= 10;
 			beam_damage_timer = 0;
@@ -98,4 +98,9 @@ int EnemyBase::GetEnemyType() const
 void EnemyBase::SetIsShot()
 {
 	this->is_shot = false;
+}
+
+void EnemyBase::SetPlayer(Player* p)
+{
+	player = p;
 }

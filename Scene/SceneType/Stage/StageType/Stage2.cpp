@@ -11,7 +11,7 @@
 #include "../../../../Object/Character/Enemy/EnemyType/Zako2.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako4.h"
 
-
+#include <cstdlib> 
 
 Stage2::Stage2(Player* player) : StageBase(player) {}
 Stage2::~Stage2() {}
@@ -153,30 +153,24 @@ StageBase* Stage2::GetNextStage(Player* player)
 }
 void Stage2::EnemyAppearance(float delta)
 {
-    enemy_spawn_timer += 1.0f / 60.0f; // 1フレームごとに加算（60FPS想定）
+    // 1フレームごとに加算（60FPS想定）
+    enemy_spawn_timer += delta;
 
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
 
-        // Zako2を出現させる処理（Stage1の進行に合わせて）もそのまま残す
-        if (stage_timer >= 5.0f && !zako4_spawned)
-        {
-            printf("Zako2 is about to appear!\n");
+    // 一定間隔ごと（5秒ごと）にZako2出現
+    const float spawn_interval = 1.0f; // 出現間隔
 
-            Vector2D spawn_pos(400.0f, 100.0f);
-            zako2 = objm->CreateObject<Zako2>(spawn_pos);
-            if (zako2 != nullptr)
-            {
-                zako2->Initialize(); 
-                enemy_list.push_back(zako2);
-                zako4_spawned = true;
-            }
+    if (enemy_spawn_timer >= spawn_interval)
+    {
+        Vector2D spawn_pos(400.0f, 100.0f);
+        zako2 = objm->CreateObject<Zako2>(spawn_pos);
+        zako2->SetPlayer(player);
+        enemy_spawn_timer = 0.0f; // タイマーリセット
+    }
 
-        }
-
-        // タイマーリセット
-        enemy_spawn_timer = 0.0f;
-    
 }
+
 void Stage2::DrawScrollBackground() const
 {
     const int grid_size1 = 80;  // 背面グリッド
@@ -206,3 +200,4 @@ void Stage2::DrawScrollBackground() const
 
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 }
+

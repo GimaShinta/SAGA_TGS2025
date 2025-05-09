@@ -51,8 +51,8 @@ void Zako1::Update(float delta_second)
 		ScoreData* score = Singleton<ScoreData>::GetInstance();
 		score->SetScoreData(100);
 
-		// 経験値アイテムを生成して登録
-		ItemExp* exp = Singleton<GameObjectManager>::GetInstance()->CreateObject<ItemExp>(this->location);
+		//Exp生成
+		//Exp* exp = Singleton<GameObjectManager>::GetInstance()->CreateObject<Exp>(this->location);
 	}
 
 	// 親クラスの更新処理を呼び出す

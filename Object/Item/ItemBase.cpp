@@ -19,3 +19,8 @@ void ItemBase::Finalize()
 void ItemBase::OnHitCollision(GameObjectBase* hit_object)
 {
 }
+
+void ItemBase::SetPlayer(Player* p)
+{
+	player = p;
+}

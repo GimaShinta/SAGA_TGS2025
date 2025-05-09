@@ -1,5 +1,5 @@
 #include "Stage1.h"
-#include "Stage2.h" // 次のステージがある場合
+#include "Stage2.h"
 #include "Stage3.h"  
 
 #include <algorithm>
@@ -20,6 +20,9 @@
 #include "../../../../Object/Character/Enemy/EnemyType/Boss.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Boss2.h"
 #include "../../../../Scene/SceneType/Stage/StageType/Stage1.h"
+
+#include"../../../../Object/Item/Exp/Exp.h"
+
 #include <math.h>
 #include <stdlib.h> // rand(), srand()
 #include <time.h>   // time()
@@ -153,6 +156,16 @@ void Stage1::Update(float delta)
 
     // 敵の攻撃
     EnemyShot(delta);
+
+    // 敵が倒された時は経験値を生成。
+    for (auto& enemy : enemy_list)
+    {
+        if (enemy->is_destroy == true)
+        {
+            Exp* exp = Singleton<GameObjectManager>::GetInstance()->CreateObject<Exp>(enemy->GetLocation());
+            exp->SetPlayer(player);
+        }
+    }
 
     // ゲームクリア・オーバー判定
     if (boss && !boss->GetIsAlive() && !is_over)
