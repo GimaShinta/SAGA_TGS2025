@@ -13,11 +13,13 @@ private:
 	float next_scene_timer;
 
 	// ↓ スコアログ処理用構造体と変数
-	struct ScoreLog {
+	struct ScoreLog 
+	{
 		std::string text;
 		float timer;
 		float y_offset;
 	};
+
 	std::vector<ScoreLog> score_logs;
 	float previous_score_count = 0.0f;
 

@@ -39,4 +39,5 @@ public:
     /// </summary>
     /// <param name="ヒットオブジェクト"></param>
     void OnHitCollision(GameObjectBase* hit_object) override;
+
 };

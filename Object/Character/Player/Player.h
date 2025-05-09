@@ -36,9 +36,12 @@ private:
 	int powerd = 1;
 	bool powerd_on = false;
 	float powerd_time = 0.0f;
-
-
 	bool is_alive = true;
+
+private:
+	float charge = 0.0f;
+	const float charge_max = 100.0f;
+	bool charge_ready = false;
 
 public:
 	Player();
@@ -88,5 +91,12 @@ public:
 	bool GetShotFlip() const;
 	void SetIsShot();
 	void SetBeamOn();
+
+public:
+	void AddCharge(float value);
+	bool CanUseSpecial() const;
+	void UseSpecial();
+	float GetChargeRate() const;
+
 };
 
