@@ -13,8 +13,10 @@ enum class Zako2Pattern
 	LateralSweep,
 	DiagonalMove,
 	Hovering,
-	Kamikaze // ← 追加！
+	Kamikaze,
+	HitAndAway,
 };
+
 
 
 
@@ -41,6 +43,8 @@ private:
 	Vector2D start_location;   // 初期位置
 	bool is_returning = false; // 戻る状態かどうか
 	bool on_hit;
+	bool is_attacking = true;        // 今は近づくフェーズか？
+	float attack_cooldown = 0.0f;    // 離脱 → 再アタックまでの待機時間
 
 private:
 	Vector2D follow_velocity;

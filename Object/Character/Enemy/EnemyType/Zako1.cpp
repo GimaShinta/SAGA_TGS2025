@@ -47,86 +47,12 @@ void Zako1::Update(float delta_second)
             velocity = { 0, 120 };
             break;
 
-        case Zako1Pattern::MoveZigzag:
-            velocity.x = sinf(pattern_timer * 4.0f) * 80;
-            velocity.y = 100;
-            Shot(delta_second);
+        case Zako1Pattern::RightMove:
+            velocity = { 120,0 };
             break;
 
-        case Zako1Pattern::FollowPlayer:
-            if (player)
-            {
-                Vector2D dir = player->GetLocation() - location;
-                float distance = dir.Length();
-
-                if (distance > 10.0f)
-                {
-                    dir.Normalize();
-                    velocity = dir * 1.0f;
-                }
-                else
-                {
-                    velocity = { 0, 0 };
-                }
-            }
-            break;
-
-        case Zako1Pattern::BackAndForth:
-        {
-            float offset = location.y - start_location.y;
-            if (!is_returning && offset > 150.0f)
-                is_returning = true;
-            else if (is_returning && offset < 0.0f)
-                is_returning = false;
-
-            velocity.y = is_returning ? -80 : 80;
-            velocity.x = 0;
-            break;
-        }
-
-        case Zako1Pattern::LateralSweep:
-            velocity.x = sinf(pattern_timer * 2.0f) * 100;
-            velocity.y = 0;
-            break;
-
-        case Zako1Pattern::DiagonalMove:
-        {
-            if (velocity.Length() == 0)
-            {
-                // 初期方向設定（右下へ移動）
-                velocity = { 100, 100 };
-            }
-
-            location += velocity * delta_second;
-
-            // 一定のY座標を下回ったら跳ね返る（上に戻る）
-            if (location.y > 400)  // ←しきい値（任意）
-            {
-                velocity.y *= -1;
-            }
-
-            // 上に行きすぎたらまた戻る（オプション）
-            else if (location.y < 100)
-            {
-                velocity.y *= -1;
-            }
-
-            break;
-        }
-
-
-        case Zako1Pattern::Hovering:
-            velocity.x = 0;
-            velocity.y = sinf(pattern_timer * 4.0f) * 20;
-            break;
-
-        case Zako1Pattern::Kamikaze:
-            if (player)
-            {
-                Vector2D dir = player->GetLocation() - location;
-                dir.Normalize();
-                velocity = dir * 5.0;
-            }
+        case Zako1Pattern::LeftMove:
+            velocity = { 120,0 };
             break;
     }
 
@@ -181,18 +107,13 @@ void Zako1::Shot(float delta_second)
 
 void Zako1::ChangePatternRandomly()
 {
-    int r = rand() % 8; // 0～7（Kamikaze追加）
+    int r = rand() % 1; // 0～7（Kamikaze追加）
 
     switch (r)
     {
         case 0: pattern = Zako1Pattern::MoveStraight; break;
-        case 1: pattern = Zako1Pattern::MoveZigzag; break;
-        case 2: pattern = Zako1Pattern::FollowPlayer; break;
-        case 3: pattern = Zako1Pattern::BackAndForth; break;
-        case 4: pattern = Zako1Pattern::LateralSweep; break;
-        case 5: pattern = Zako1Pattern::DiagonalMove; break;
-        case 6: pattern = Zako1Pattern::Hovering; break;
-        case 7: pattern = Zako1Pattern::Kamikaze; break;
+        case 1: pattern = Zako1Pattern::RightMove; break;
+        case 2: pattern = Zako1Pattern::LeftMove; break;
     }
 
     pattern_timer = 0.0f;
