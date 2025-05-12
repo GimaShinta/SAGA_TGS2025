@@ -6,13 +6,8 @@
 enum class Zako1Pattern
 {
 	MoveStraight,
-	MoveZigzag,
-	FollowPlayer,
-	BackAndForth,
-	LateralSweep,
-	DiagonalMove,
-	Hovering,
-	Kamikaze 
+	RightMove,
+	LeftMove
 };
 
 
@@ -37,7 +32,7 @@ private:
 	Zako1Pattern pattern = Zako1Pattern::MoveStraight;
 	float pattern_timer = 0.0f;
 	Vector2D start_location;   // ‰ŠúˆÊ’u
-	bool is_returning = false; // –ß‚éó‘Ô‚©‚Ç‚¤‚©
+	bool is_returning = false; // –ß‚éó‘Ô‚©‚Ç‚¤‚©z
 	bool on_hit;
 
 private:

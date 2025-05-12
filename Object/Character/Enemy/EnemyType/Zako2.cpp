@@ -26,6 +26,8 @@ void Zako2::Initialize()
     collision.hit_object_type.push_back(eObjectType::eBeam);
 
     is_mobility = true;
+    is_attacking = true;
+    attack_cooldown = 0.0f;
 
     start_location = location;
     is_returning = false;
@@ -137,6 +139,48 @@ void Zako2::Update(float delta_second)
                 velocity = dir * 5.0;
             }
             break;
+
+        case Zako2Pattern::HitAndAway:
+            if (player)
+            {
+                if (attack_cooldown > 0.0f)
+                {
+                    attack_cooldown -= delta_second;
+                    velocity = { 0, 0 };
+                    break;
+                }
+
+                Vector2D dir = player->GetLocation() - location;
+                float distance = dir.Length();
+
+                if (is_attacking)
+                {
+                    if (distance > 80.0f)
+                    {
+                        dir.Normalize();
+                        velocity = dir * 100.0f;
+                    }
+                    else
+                    {
+                        // 発射して離脱に切り替え
+                        Shot(delta_second);
+                        is_attacking = false;
+                    }
+                }
+                else
+                {
+                    dir.Normalize();
+                    velocity = dir * -100.0f; // プレイヤーから離れる方向
+
+                    if (distance > 200.0f)
+                    {
+                        is_attacking = true;
+                        attack_cooldown = 1.5f; // 1.5秒待機してから次の突撃
+                    }
+                }
+            }
+            break;
+
     }
 
     location += velocity * delta_second;
@@ -188,7 +232,7 @@ void Zako2::Finalize()
 
 void Zako2::ChangePatternRandomly()
 {
-    int r = rand() % 8; // 0～7（Kamikaze追加）
+    int r = rand() % 9; // 0～7（Kamikaze追加）
 
     switch (r)
     {
@@ -200,6 +244,8 @@ void Zako2::ChangePatternRandomly()
         case 5: pattern = Zako2Pattern::DiagonalMove; break;
         case 6: pattern = Zako2Pattern::Hovering; break;
         case 7: pattern = Zako2Pattern::Kamikaze; break;
+        case 8: pattern = Zako2Pattern::HitAndAway; break;
+
     }
 
     pattern_timer = 0.0f;

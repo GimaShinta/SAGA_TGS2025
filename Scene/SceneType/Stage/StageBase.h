@@ -46,4 +46,6 @@ public:
 
     virtual void DrawScrollBackground() const = 0; // 各ステージで具体実装
 
+
+
 };
