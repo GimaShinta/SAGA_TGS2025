@@ -103,6 +103,12 @@ public:
 	/// <returns>右スティック入力状態(-1.0f～1.0f)</returns>
 	Vector2D GetRightStick() const;
 
+	// キーボード or コントローラの入力（任意のキーとボタン）
+	bool GetAnyInput(int keyCode, int buttonCode) const {
+		return GetKeyDown(keyCode) || GetButtonDown(buttonCode);
+	}
+
+
 private:
 	/// <summary>
 	/// トリガー入力値の正規化

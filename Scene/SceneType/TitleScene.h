@@ -4,6 +4,7 @@ class TitleScene : public SceneBase
 {
 private:
 	int m_selectedIndex; // 選択中のインデックス
+	int m_titleFontHandle;
 
 
 public:
