@@ -333,42 +333,32 @@ void Stage1::EnemyAppearance(float delta)
 }
 
 
-//スクロール描画
 void Stage1::DrawScrollBackground() const
 {
-    // 背景色（明るめの紺）
-    DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(20, 20, 40), TRUE);
+    // 背景色（濃い緑系）
+    DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(10, 30, 10), TRUE);
 
-    // 背面グリッド（遠く・細かく・線細く）
-    const int grid_size_back = 40;
-    const int alpha_back = 100;
-    SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha_back);
+    const int grid_back = 80;
+    const int grid_front = 40;
 
-    for (int x = 0; x < D_WIN_MAX_X; x += grid_size_back)
-        DrawLine(x, 0, x, D_WIN_MAX_Y, GetColor(0, 100, 255)); // ネオンブルー（薄）
-
-    //画像だとここを変更
-    for (int y = -grid_size_back; y < D_WIN_MAX_Y + grid_size_back; y += grid_size_back)
+    // 背面グリッド
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 60);
+    for (int x = 0; x < D_WIN_MAX_X; x += grid_back)
+        DrawLine(x, 0, x, D_WIN_MAX_Y, GetColor(0, 200, 100));
+    for (int y = -grid_back; y < D_WIN_MAX_Y + grid_back; y += grid_back)
     {
-        int sy = y - static_cast<int>(bg_scroll_offset_layer1) % grid_size_back;
-        DrawLine(0, sy, D_WIN_MAX_X, sy, GetColor(0, 100, 255));
+        int sy = y - static_cast<int>(bg_scroll_offset_layer1) % grid_back;
+        DrawLine(0, sy, D_WIN_MAX_X, sy, GetColor(0, 200, 100));
     }
 
-    /**     二枚目     **/
-
-    // 手前グリッド（近く・広め・線太め）
-    const int grid_size_front = 80;
-    const int alpha_front = 120;
-    SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha_front);
-
-    // 太いライン用の四角（縦ライン）
-    for (int x = 0; x < D_WIN_MAX_X; x += grid_size_front)
-        DrawBox(x - 1, 0, x + 1, D_WIN_MAX_Y, GetColor(180, 0, 255), TRUE); // 手前は太めパープル
-
-    //画像だとここを変更
-    for (int y = -grid_size_front; y < D_WIN_MAX_Y + grid_size_front; y += grid_size_front) {
-        int sy = y - static_cast<int>(bg_scroll_offset_layer2) % grid_size_front;
-        DrawBox(0, sy - 1, D_WIN_MAX_X, sy + 1, GetColor(180, 0, 255), TRUE); // 太線で遠近感
+    // 前面グリッド
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 120);
+    for (int x = 0; x < D_WIN_MAX_X; x += grid_front)
+        DrawBox(x - 1, 0, x + 1, D_WIN_MAX_Y, GetColor(0, 255, 150), TRUE);
+    for (int y = -grid_front; y < D_WIN_MAX_Y + grid_front; y += grid_front)
+    {
+        int sy = y - static_cast<int>(bg_scroll_offset_layer2) % grid_front;
+        DrawBox(0, sy - 1, D_WIN_MAX_X, sy + 1, GetColor(0, 255, 150), TRUE);
     }
 
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
