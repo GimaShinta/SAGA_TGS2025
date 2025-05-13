@@ -228,11 +228,18 @@ void Stage1::Draw()
     // 右の黒帯
     DrawBox((D_WIN_MAX_X / 2) + 350, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
 
-    DrawString(0, 0, "ゲームメイン", GetColor(255, 255, 255));
-    DrawString(0, 300, "操作方法\n\n左スティック\n十字ボタン\nWASDキー : 移動\n\nAボタン\nスペースキー : 発射\n\nBボタン\nBキー : レーザー\n\nRBボタン\nLキー : 射出反転", GetColor(255, 255, 255));
-    DrawFormatString(0, 20, GetColor(255, 255, 0), "敵数: %d", enemy_list.size());
+    DrawString(0, 0, "ステージ1", GetColor(255, 255, 255));
+    // 右側操作説明パネル
+    int panel_x = D_WIN_MAX_X - 270;
+    int panel_y = 60;
+    int panel_w = 250;
+    int panel_h = 180;
+
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
+    DrawBox(panel_x, panel_y, panel_x + panel_w, panel_y + panel_h, GetColor(0, 0, 0), TRUE);
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
     // ステージタイマーの表示（右上）
-    DrawFormatString(D_WIN_MAX_X - 200, 20, GetColor(255, 255, 255), "Time: %.1f", stage_timer);
+    DrawFormatString(0, 20, GetColor(255, 255, 255), "Time: %.1f", stage_timer);
 
 
     // ステージ描画
@@ -349,6 +356,14 @@ void Stage1::DrawScrollBackground() const
     {
         int sy = y - static_cast<int>(bg_scroll_offset_layer1) % grid_back;
         DrawLine(0, sy, D_WIN_MAX_X, sy, GetColor(0, 200, 100));
+    }
+
+    // ランダムに点滅するライン（デジタル演出）
+    if (GetNowCount() % 120 < 60)
+    {
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
+        DrawLine(600, 0, 600, D_WIN_MAX_Y, GetColor(0, 255, 255));
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
     }
 
     // 前面グリッド

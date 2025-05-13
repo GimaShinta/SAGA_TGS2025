@@ -89,7 +89,7 @@ eSceneType GameMainScene::Update(float delta_second)
 
         // スコアログ用メッセージ作成
         char buf[64];
-        sprintf_s(buf, sizeof(buf), "敵撃破 +%.0f", new_score);
+        sprintf_s(buf, sizeof(buf), "Enemy +%.0f", new_score);
 
         // ★ 先に最大行数チェック（10行超えたら古いのから削除）
         if (score_logs.size() >= 10)
@@ -121,41 +121,97 @@ eSceneType GameMainScene::Update(float delta_second)
 /// <returns></returns>
 void GameMainScene::Draw()
 {
-    if (current_stage) 
-    {
+    if (current_stage) {
         current_stage->Draw();
     }
-    int base_x = 30;
-    int base_y = 50;
+
+    // ==== スコアログ（左下） ====
+    int log_base_x = 30;
+    int log_base_y = D_WIN_MAX_Y - 220;
     int line_height = 20;
 
     int count = static_cast<int>(score_logs.size());
     for (int i = 0; i < count; ++i)
     {
-        const auto& log = score_logs[count - 1 - i]; // 上に新しいログ
-        int draw_y = base_y + static_cast<int>(i * line_height + log.y_offset);
+        const auto& log = score_logs[count - 1 - i];
+        int draw_y = log_base_y + static_cast<int>(i * line_height + log.y_offset);
 
-        DrawFormatString(base_x, draw_y, GetColor(255, 255, 0), "%s", log.text.c_str());
+        DrawBox(log_base_x - 10, draw_y - 2, log_base_x + 200, draw_y + 18, GetColor(10, 10, 30), TRUE);
+        DrawLine(log_base_x - 10, draw_y - 2, log_base_x + 200, draw_y - 2, GetColor(0, 255, 255)); // 上ライン
+        DrawFormatString(log_base_x, draw_y, GetColor(0, 255, 255), "%s", log.text.c_str());
     }
-    // 必殺技ゲージ表示
+
+// ==== 必殺技ゲージ（右上テキストボックス形式） ====
     if (player)
     {
-        float rate = player->GetChargeRate();  // 0.0～1.0
-        int bar_width = 200;
-        int bar_height = 20;
-        int x = (D_WIN_MAX_X - bar_width) / 2;
-        int y = D_WIN_MAX_Y - 40;
+        float rate = player->GetChargeRate(); // 0.0?1.0
+        int gauge_x = D_WIN_MAX_X - 260;
+        int gauge_y = 30;
+        int gauge_w = 200;
+        int gauge_h = 22;
 
-        DrawBox(x, y, x + bar_width, y + bar_height, GetColor(50, 50, 50), TRUE); // 背景
-        DrawBox(x, y, x + static_cast<int>(bar_width * rate), y + bar_height, GetColor(0, 255, 255), TRUE); // ゲージ本体
+        // テキストボックス風背景
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
+        DrawBox(gauge_x, gauge_y, gauge_x + gauge_w, gauge_y + gauge_h + 20, GetColor(10, 10, 30), TRUE);
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+        DrawBox(gauge_x, gauge_y, gauge_x + gauge_w, gauge_y + gauge_h + 20, GetColor(0, 255, 255), FALSE);
 
+        // ラベル
+        DrawString(gauge_x + 10, gauge_y + 2, "CHARGE", GetColor(0, 255, 255));
+
+        // ゲージ本体
+        int bar_x = gauge_x + 80;
+        int bar_y = gauge_y + 40;
+        int bar_w = gauge_w - 90;
+        int bar_h = 14;
+
+        DrawBox(bar_x, bar_y, bar_x + bar_w, bar_y + bar_h, GetColor(30, 30, 30), TRUE); // 背景
+        DrawBox(bar_x, bar_y, bar_x + static_cast<int>(bar_w * rate), bar_y + bar_h, GetColor(0, 255, 255), TRUE); // 本体
+
+        // READY!点滅
         if (player->CanUseSpecial())
         {
-            DrawFormatString(x + 220, y, GetColor(255, 100, 100), "READY!");
+            int pulse = static_cast<int>(GetNowCount() % 100) > 50 ? 255 : 100;
+            DrawFormatString(bar_x, bar_y +4, GetColor(255, pulse, pulse), "READY!");
         }
     }
 
+    // ==== LIFE表示（右上） ====
+    {
+        int life_x = D_WIN_MAX_X - 260;
+        int life_y = 70;
+        int life_w = 200;
+        int life_h = 30;
+
+        // テキストボックス風背景
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
+        DrawBox(life_x, life_y, life_x + life_w, life_y + life_h, GetColor(10, 10, 30), TRUE);
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+        DrawBox(life_x, life_y, life_x + life_w, life_y + life_h, GetColor(0, 255, 255), FALSE);
+
+        // ラベル＋ライフ数
+        DrawString(life_x + 10, life_y + 6, "LIFE", GetColor(0, 255, 255));
+    }
+
+
+    // ==== 操作UI（右下） ====
+    int panel_x = D_WIN_MAX_X - 260;
+    int panel_y = D_WIN_MAX_Y - 150;
+    int panel_w = 230;
+    int panel_h = 130;
+
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
+    DrawBox(panel_x, panel_y, panel_x + panel_w, panel_y + panel_h, GetColor(10, 10, 30), TRUE); // 背景
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+    DrawBox(panel_x, panel_y, panel_x + panel_w, panel_y + panel_h, GetColor(0, 255, 255), FALSE); // 枠線
+
+    DrawString(panel_x + 10, panel_y + 10, "【Manual】", GetColor(0, 255, 255));
+    DrawString(panel_x + 10, panel_y + 40, "Move : WASD / R-Stick", GetColor(255, 255, 255));
+    DrawString(panel_x + 10, panel_y + 60, "Shot : Space", GetColor(255, 255, 255));
+    DrawString(panel_x + 10, panel_y + 80, "Beam : B", GetColor(255, 255, 255));
+    DrawString(panel_x + 10, panel_y + 100,"Flip : RB / L", GetColor(255, 255, 255));
 }
+
 
 // 終了時処理（使ったインスタンスの削除とか）
 void GameMainScene::Finalize()
