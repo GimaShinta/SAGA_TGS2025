@@ -17,6 +17,10 @@ private:
 
     // 敵の出現タイマー
     float enemy_spawn_timer = 0.0f;
+    int stage = 2;
+    int brend = 0;
+    bool is_warning = false;   // 警告表示中かどうか
+    bool is_brend = false;     // ブレンド演出中かどうか
 
 public:
     Stage2(Player* player);
