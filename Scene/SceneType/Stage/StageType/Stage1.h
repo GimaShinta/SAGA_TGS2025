@@ -44,7 +44,6 @@ private:
 	bool is_brend = false;     // ブレンド演出中かどうか
 	int bs_attack_pattrn = 0;  // ボスの攻撃パターン制御用インデックス
 	float shot_timer;          // ショット発射の間隔制御タイマー
-
 	float stage_timer = 0.0f;  // ステージの経過時間（秒単位）
 	float scene_timer = 0.0f;  // 演出や状態遷移用タイマー
 
