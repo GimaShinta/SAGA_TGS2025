@@ -75,11 +75,11 @@ private:
 	/*ÉXÉNÉçÅ[Éã*/
 	void DrawScrollBackground() const override;
 
-	void Pattrn4(int bullet_num, float speed, float spiral_interval, float spiral_duration_limit, float delta_second);
-	void Pattrn5(float spiral_interval, float spiral_duration_limit, float spiral_speed, float delta_second);
-	void Pattrn6(float fan_angle_range, float bullet_speed, float fan_interval, float fan_duration_limit, float delta_second);
-	void Pattrn7(float fan_angle_range, float bullet_speed, float fan_interval, float fan_duration_limit, float delta_second);
-	void Pattrn8(float wave_interval, float wave_duration_limit, float delta_second);
-	void Pattrn9(int shot_count, float radius, float angular_speed, float bullet_speed, float delta_second);
-	void Pattrn10(int shot_count, float radius, float angular_speed, float center_speed, float duration_limit, Vector2D center_location, float delta_second);
+	void Pattrn4(int bullet_num, float speed, float spiral_interval, float spiral_duration_limit, const Vector2D& generate_location, float delta_second);
+	void Pattrn5(float spiral_interval, float spiral_duration_limit, float spiral_speed, const Vector2D& generate_location, float delta_second);
+	void Pattrn6(float fan_angle_range, float bullet_speed, float fan_interval, float fan_duration_limit, const Vector2D& generate_location, float delta_second);
+	void Pattrn7(float fan_angle_range, float bullet_speed, float fan_interval, float fan_duration_limit, const Vector2D& generate_location, float delta_second);
+	void Pattrn8(float wave_interval, float wave_duration_limit, const Vector2D& generate_location, float delta_second);
+	void Pattrn9(int shot_count, float radius, float angular_speed, float bullet_speed, const Vector2D& generate_location, float delta_second);
+	void Pattrn10(int shot_count, float radius, float angular_speed, float center_speed, float duration_limit, const Vector2D& center_location, float delta_second);
 };

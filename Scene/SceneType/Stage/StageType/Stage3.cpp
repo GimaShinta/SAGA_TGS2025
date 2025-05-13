@@ -521,8 +521,9 @@ void Stage3::EnemyShot(float delta_second)
                     /// <param name="speed">弾の速度</param>
                     /// <param name="spiral_interval">発射間隔</param>
                     /// <param name="spiral_duration_limit">攻撃する時間</param>
-                    /// <param name="delta_second">１フレームあたりの時間</param>
-                    Pattrn4(24, 150.0f, 3.0f, 0.3f, delta_second);
+                    /// <param name="generate_location">生成する位置</param>
+                    /// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
+                    Pattrn4(24, 150.0f, 3.0f, 0.3f, boss2->GetLocation(), delta_second);
                 }
                 // 攻撃パターン５（渦巻き）
                 else if (bs_attack_pattrn == 5)
@@ -563,8 +564,9 @@ void Stage3::EnemyShot(float delta_second)
                     /// <param name="spiral_interval">発射間隔</param>
                     /// <param name="spiral_duration_limit">攻撃する時間</param>
                     /// <param name="spiral_speed">弾の速度</param>
-                    /// <param name="delta_second">１フレームあたりの時間</param>
-                    Pattrn5(0.3f, 3.0f, 160.0f, delta_second);
+                    /// <param name="generate_location">生成する位置</param>
+                    /// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
+                    Pattrn5(0.3f, 3.0f, 160.0f, boss2->GetLocation(), delta_second);
 #endif
                 }
                 else if (bs_attack_pattrn == 6)
@@ -576,8 +578,9 @@ void Stage3::EnemyShot(float delta_second)
                     /// <param name="bullet_speed">弾の速度</param>
                     /// <param name="fan_interval">発射間隔</param>
                     /// <param name="fan_duration_limit">攻撃する時間</param>
-                    /// <param name="delta_second">１フレームあたりの時間</param>
-                    Pattrn6(60.0f, 180.0f, 0.2f, 3.0f, delta_second);
+                    /// <param name="generate_location">生成する位置</param>
+                    /// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
+                    Pattrn6(60.0f, 180.0f, 0.2f, 3.0f, boss2->GetLocation(), delta_second);
                 }
                 else if (bs_attack_pattrn == 7)
                 {
@@ -588,8 +591,9 @@ void Stage3::EnemyShot(float delta_second)
                     /// <param name="bullet_speed">弾の速度</param>
                     /// <param name="fan_interval">発射の間隔</param>
                     /// <param name="fan_duration_limit">攻撃時間</param>
-                    /// <param name="delta_second">１フレームあたりの時間</param>
-                    Pattrn7(60.0f, 180.0f, 0.4f, 3.0f, delta_second);
+                    /// <param name="generate_location">生成する位置</param>
+                    /// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
+                    Pattrn7(60.0f, 180.0f, 0.4f, 3.0f, boss2->GetLocation(), delta_second);
                 }
                 else if (bs_attack_pattrn == 8)
                 {
@@ -598,8 +602,9 @@ void Stage3::EnemyShot(float delta_second)
                     /// </summary>
                     /// <param name="wave_interval">発射間隔</param>
                     /// <param name="wave_duration_limit">発車時間の上限</param>
-                    /// <param name="delta_second">１フレームあたりの時間</param>
-                    Pattrn8(0.1f, 1.0f, delta_second);
+                    /// <param name="generate_location">生成する位置</param>
+                    /// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
+                    Pattrn8(0.1f, 1.0f, boss2->GetLocation(), delta_second);
                 }
                 else if (bs_attack_pattrn == 9)
                 {
@@ -611,8 +616,9 @@ void Stage3::EnemyShot(float delta_second)
                     /// <param name="angular_speed">回転速度</param>
                     /// <param name="bullet_speed">弾速</param>
                     /// <param name="rotation_timer">回転の時間計測</param>
-                    /// <param name="delta_second">１フレームあたりの時間</param>
-                    Pattrn9(27, 150.0f, 90.0f, 0.0f, delta_second);
+                    /// <param name="generate_location">生成する位置</param>
+                    /// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
+                    Pattrn9(27, 150.0f, 90.0f, 0.0f, boss2->GetLocation(), delta_second);
                 }
                 else if (bs_attack_pattrn == 10)
                 {
@@ -625,8 +631,9 @@ void Stage3::EnemyShot(float delta_second)
                     /// <param name="bullet_speed">弾速</param>
                     /// <param name="rotation_timer">回転の時間計測</param>
                     /// <param name="center_location">生成する場所</param>
-                    /// <param name="delta_second">１フレームあたりの時間</param>
-                    Pattrn10(8, 120.0f, 90.0f, 150.0f, 5.0f, Vector2D(D_WIN_MAX_X / 2, D_WIN_MAX_Y / 2), delta_second);
+                    /// <param name="generate_location">生成する場所</param>
+                    /// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
+                    Pattrn10(8, 120.0f, 90.0f, 150.0f, 5.0f, boss2->GetLocation(), delta_second);
                 }
             }
         }
@@ -726,12 +733,12 @@ void Stage3::DrawScrollBackground() const
 /// <param name="speed">弾の速度</param>
 /// <param name="spiral_interval">発射間隔</param>
 /// <param name="spiral_duration_limit">攻撃する時間</param>
+/// <param name="generate_location">生成する場所</param>
 /// <param name="delta_second">１フレームあたりの時間</param>
-void Stage3::Pattrn4(int bullet_num, float speed, float spiral_interval, float spiral_duration_limit, float delta_second)
+void Stage3::Pattrn4(int bullet_num, float speed, float spiral_interval, float spiral_duration_limit, const Vector2D& generate_location, float delta_second)
 {
     // オブジェクト管理クラスのインスタンスを取得
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
-    Vector2D e_location = boss2->GetLocation();
 
     static float spiral_timer = 0.0f;
     static float spiral_total_time = 0.0f;
@@ -750,7 +757,7 @@ void Stage3::Pattrn4(int bullet_num, float speed, float spiral_interval, float s
 
             Vector2D velocity(cos(rad) * speed, sin(rad) * speed);
 
-            EnemyShot4* e_shot4 = objm->CreateObject<EnemyShot4>(e_location);
+            EnemyShot4* e_shot4 = objm->CreateObject<EnemyShot4>(generate_location);
             e_shot4->SetVelocity(velocity);
         }
     }
@@ -768,8 +775,9 @@ void Stage3::Pattrn4(int bullet_num, float speed, float spiral_interval, float s
 /// <param name="spiral_interval">発射間隔</param>
 /// <param name="spiral_duration_limit">攻撃する時間</param>
 /// <param name="spiral_speed">弾の速度</param>
+/// <param name="generate_location">生成する場所</param>
 /// <param name="delta_second">１フレームあたりの時間</param>
-void Stage3::Pattrn5(float spiral_interval, float spiral_duration_limit, float spiral_speed, float delta_second)
+void Stage3::Pattrn5(float spiral_interval, float spiral_duration_limit, float spiral_speed, const Vector2D& generate_location, float delta_second)
 {
     // オブジェクト管理クラスのインスタンスを取得
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
@@ -785,8 +793,6 @@ void Stage3::Pattrn5(float spiral_interval, float spiral_duration_limit, float s
     {
         spiral_timer = 0.0f;
 
-        Vector2D boss_pos = boss2->GetLocation();
-
         for (int dir = 0; dir < 2; dir++)
         {
             float base_angle = (dir == 0) ? 90.0f : 270.0f;
@@ -795,7 +801,7 @@ void Stage3::Pattrn5(float spiral_interval, float spiral_duration_limit, float s
             float rad = current_angle * DX_PI / 180.0f;
             Vector2D velocity(cos(rad) * spiral_speed, sin(rad) * spiral_speed);
 
-            EnemyShot4* shot = objm->CreateObject<EnemyShot4>(boss_pos);
+            EnemyShot4* shot = objm->CreateObject<EnemyShot4>(generate_location);
             shot->SetVelocity(velocity);
         }
 
@@ -818,8 +824,9 @@ void Stage3::Pattrn5(float spiral_interval, float spiral_duration_limit, float s
 /// <param name="bullet_speed">弾の速度</param>
 /// <param name="fan_interval">発射間隔</param>
 /// <param name="fan_duration_limit">攻撃する時間</param>
+/// <param name="generate_location">生成する場所</param>
 /// <param name="delta_second">１フレームあたりの時間</param>
-void Stage3::Pattrn6(float fan_angle_range, float bullet_speed, float fan_interval, float fan_duration_limit, float delta_second)
+void Stage3::Pattrn6(float fan_angle_range, float bullet_speed, float fan_interval, float fan_duration_limit, const Vector2D& generate_location, float delta_second)
 {
     // オブジェクト管理クラスのインスタンスを取得
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
@@ -845,7 +852,7 @@ void Stage3::Pattrn6(float fan_angle_range, float bullet_speed, float fan_interv
         float rad = random_angle * DX_PI / 180.0f;
         Vector2D velocity(cos(rad) * bullet_speed, sin(rad) * bullet_speed);
 
-        e_shot4 = objm->CreateObject<EnemyShot4>(boss2->GetLocation());
+        e_shot4 = objm->CreateObject<EnemyShot4>(generate_location);
         e_shot4->SetVelocity(velocity);
     }
 
@@ -864,8 +871,9 @@ void Stage3::Pattrn6(float fan_angle_range, float bullet_speed, float fan_interv
 /// <param name="bullet_speed">弾の速度</param>
 /// <param name="fan_interval">発射の間隔</param>
 /// <param name="fan_duration_limit">攻撃時間</param>
+/// <param name="generate_location">生成する場所</param>
 /// <param name="delta_second">１フレームあたりの時間</param>
-void Stage3::Pattrn7(float fan_angle_range, float bullet_speed, float fan_interval, float fan_duration_limit, float delta_second)
+void Stage3::Pattrn7(float fan_angle_range, float bullet_speed, float fan_interval, float fan_duration_limit, const Vector2D& generate_location, float delta_second)
 {
     // オブジェクト管理クラスのインスタンスを取得
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
@@ -891,7 +899,7 @@ void Stage3::Pattrn7(float fan_angle_range, float bullet_speed, float fan_interv
             float rad = angle * DX_PI / 180.0f;
             Vector2D velocity(cos(rad) * bullet_speed, sin(rad) * bullet_speed);
 
-            e_shot4 = objm->CreateObject<EnemyShot4>(boss2->GetLocation());
+            e_shot4 = objm->CreateObject<EnemyShot4>(generate_location);
             e_shot4->SetVelocity(velocity);
         }
     }
@@ -909,8 +917,9 @@ void Stage3::Pattrn7(float fan_angle_range, float bullet_speed, float fan_interv
 /// </summary>
 /// <param name="wave_interval">発射間隔</param>
 /// <param name="wave_duration_limit">発車時間の上限</param>
+/// <param name="generate_location">生成する場所</param>
 /// <param name="delta_second">１フレームあたりの時間</param>
-void Stage3::Pattrn8(float wave_interval, float wave_duration_limit, float delta_second)
+void Stage3::Pattrn8(float wave_interval, float wave_duration_limit, const Vector2D& generate_location, float delta_second)
 {
     // オブジェクト管理クラスのインスタンスを取得
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
@@ -925,7 +934,7 @@ void Stage3::Pattrn8(float wave_interval, float wave_duration_limit, float delta
     if (wave_timer >= wave_interval)
     {
         wave_timer = 0.0f;
-        Vector2D e_lo = boss2->GetLocation();
+        Vector2D e_lo = generate_location;
 
         // 右側
         e_shot5 = objm->CreateObject<EnemyShot5>(Vector2D(e_lo.x + 50, e_lo.y));
@@ -974,8 +983,9 @@ void Stage3::Pattrn8(float wave_interval, float wave_duration_limit, float delta
 /// <param name="angular_speed">回転速度</param>
 /// <param name="bullet_speed">弾速</param>
 /// <param name="rotation_timer">回転の時間計測</param>
+/// <param name="generate_location">生成する場所</param>
 /// <param name="delta_second">１フレームあたりの時間</param>
-void Stage3::Pattrn9(int shot_count, float radius, float angular_speed, float bullet_speed, float delta_second)
+void Stage3::Pattrn9(int shot_count, float radius, float angular_speed, float bullet_speed, const Vector2D& generate_location, float delta_second)
 {
     // オブジェクト管理クラスのインスタンスを取得
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
@@ -998,7 +1008,7 @@ void Stage3::Pattrn9(int shot_count, float radius, float angular_speed, float bu
             angles.push_back(angle);
 
             // ボスの周囲に弾を配置
-            e_shot4 = objm->CreateObject<EnemyShot4>(boss2->GetLocation());
+            e_shot4 = objm->CreateObject<EnemyShot4>(generate_location);
 
             if (e_shot4)
             {
@@ -1015,10 +1025,9 @@ void Stage3::Pattrn9(int shot_count, float radius, float angular_speed, float bu
         if (angles[i] >= 360.0f) angles[i] -= 360.0f; // 角度を0?360度に調整
 
         float rad = angles[i] * DX_PI / 180.0f;  // ラジアンに変換
-        Vector2D boss_pos = boss2->GetLocation();  // ボスの位置を取得
 
         // ボスを中心に半径 `radius` の円軌道を描く
-        Vector2D new_pos = boss_pos + Vector2D(cos(rad) * radius, sin(rad) * radius);
+        Vector2D new_pos = generate_location + Vector2D(cos(rad) * radius, sin(rad) * radius);
 
         // 弾の位置を更新
         if (rotating_shots[i])  // 弾が正しく存在するか確認
@@ -1058,9 +1067,9 @@ void Stage3::Pattrn9(int shot_count, float radius, float angular_speed, float bu
 /// <param name="angular_speed">回転速度</param>
 /// <param name="bullet_speed">弾速</param>
 /// <param name="rotation_timer">回転の時間計測</param>
-/// <param name="center_location">生成する場所</param>
+/// <param name="generate_location">生成する場所</param>
 /// <param name="delta_second">１フレームあたりの時間</param>
-void Stage3::Pattrn10(int shot_count, float radius, float angular_speed, float center_speed, float duration_limit, Vector2D center_location, float delta_second)
+void Stage3::Pattrn10(int shot_count, float radius, float angular_speed, float center_speed, float duration_limit, const Vector2D& generate_location, float delta_second)
 {
     // オブジェクト管理クラスのインスタンスを取得
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
@@ -1080,7 +1089,7 @@ void Stage3::Pattrn10(int shot_count, float radius, float angular_speed, float c
         if (!initialized) // 初期化処理
         {
             // ボスの位置を初期中心として、真下に移動させる
-            center_pos = center_location;
+            center_pos = generate_location;
             center_velocity = Vector2D(0.0f, center_speed); // 真下方向
 
             angles.clear();
