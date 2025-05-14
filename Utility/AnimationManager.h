@@ -4,6 +4,7 @@
 #include <memory>
 #include <unordered_map>
 #include "Vector2D.h"
+#include <algorithm>
 
 // AnimationID を int型と同等にする
 using AnimationID = int;
@@ -36,6 +37,8 @@ private:
 	};
 
 public:
+	AnimationManager() = default;
+
 	/// <summary>
 	/// アニメーション再生
 	/// </summary>
@@ -78,15 +81,7 @@ public:
 	// レイヤーの設定
 	void SetZLayer(AnimationID id, int z);
 
-	template <typename T>
-	T clamp(T value, T min, T max) 
-	{
-		return std::max(min, std::min(value, max));
-	}
-
 private:
-	AnimationManager() = default;
-
 	// 次に再生するID番号
 	AnimationID next_id = 0;
 

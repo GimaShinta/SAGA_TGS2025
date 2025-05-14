@@ -18,6 +18,9 @@
 #include "../../../../Object/Character/Enemy/EnemyType/Boss2.h"
 #include "../../../../Object/Item/PowerUp/PowerUp.h"
 #include "../../../../Scene/SceneType/Stage/StageType/Stage3.h"
+#include "../../../../Utility/AnimationManager.h"
+#include "../../../../Utility/ResourceManager.h"
+#include "../../../../Utility/InputManager.h"
 #include <math.h>
 #include <memory>
 
@@ -39,6 +42,18 @@ void Stage3::Initialize()
     objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2 + 100, (D_WIN_MAX_Y / 2) - 100.0f));
     objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2 + 150, (D_WIN_MAX_Y / 2) - 100.0f));
 
+    // 画像の読み込み
+    ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
+    image_handles = rm->GetImages("Resource/Image/Effect/E_Explosion.png", 54, 9, 6, 517, 517);
+
+    // アニメーション作成
+    AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+    anim_id = manager->PlayerAnimation(image_handles, Vector2D(D_WIN_MAX_X / 2, D_WIN_MAX_Y / 2), 0.05f, true);
+
+    // アニメーションの追加設定
+    manager->SetAlpha(anim_id, 255);       // 半透明
+    manager->SetScale(anim_id, 5.0f);      // 1.5倍拡大
+    manager->SetZLayer(anim_id, 1);        // 描画順指定
 }
 
 void Stage3::Finalize()
@@ -50,6 +65,15 @@ void Stage3::Finalize()
 
 void Stage3::Update(float delta)
 {
+    // ｘ押したらアニメーションの生成
+    InputManager* input = Singleton<InputManager>::GetInstance();
+    if (input->GetKeyDown(KEY_INPUT_X))
+    {
+        AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+        // アニメーション作成
+        anim_id = manager->PlayerAnimation(image_handles, Vector2D(player->GetLocation().x, player->GetLocation().y), 0.1f, true);
+    }
+
     UpdateBackgroundScroll(delta);
 
     //// ゲームの骨組みとなる処理を、ここに記述する
@@ -88,6 +112,16 @@ void Stage3::Update(float delta)
     // オブジェクト管理クラスのインスタンスを取得
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
     objm->Update(delta);
+
+    AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+    // 毎フレーム
+    manager->Update(delta);       // 更新（deltaTimeは前のフレームとの経過時間）
+
+    // アニメーションが終了したか確認（削除が必要な場合）
+    if (manager->GetAnimationFinished(anim_id) == true)
+    {
+        manager->RemoveAnimation(anim_id);  // 不要になったら削除
+    }
 
     // プレイヤーの攻撃
     PlayerShot();
@@ -146,6 +180,9 @@ void Stage3::Draw()
     {
         DrawString((D_WIN_MAX_X / 2) - 60, (D_WIN_MAX_Y / 2) - 100, "ゲームオーバー", GetColor(0, 0, 0));
     }
+
+    AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+    manager->Draw();                  // 描画
 }
 
 bool Stage3::IsFinished()

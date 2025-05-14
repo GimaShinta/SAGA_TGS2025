@@ -21,6 +21,8 @@ private:
 	class EnemyShot1* e_shot1;
 	std::vector<EnemyBase*> enemy_list;
 	StageBase* current_stage;
+	int anim_id = 0;
+	std::vector<int> image_handles;
 
 private:
 	int distance = 0;   // ステージ終端までの距離
