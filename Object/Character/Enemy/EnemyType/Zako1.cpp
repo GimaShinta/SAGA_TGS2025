@@ -47,7 +47,7 @@ void Zako1::Update(float delta_second)
         case Zako1Pattern::MoveStraight: velocity = { 0, 120 };  break;
         case Zako1Pattern::RightMove:    velocity = { 120, 0 };  break;
         case Zako1Pattern::LeftMove:     velocity = { -120, 0 }; break;
-        case Zako1Pattern::ZIgzag:       velocity.x = sinf(pattern_timer * 1.5f) * 160;
+        case Zako1Pattern::ZIgzag:       velocity.x = sinf(pattern_timer * 1.5f) * 320;
                                          velocity.y = 100;       break;
 
     }
