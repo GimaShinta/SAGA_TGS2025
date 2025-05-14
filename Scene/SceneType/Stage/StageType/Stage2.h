@@ -37,6 +37,7 @@ public:
 
 private:
     bool finished = false;
+    float scene_timer = 0.0f;  // 演出や状態遷移用タイマー
 
     // 敵出現処理
     void EnemyAppearance(float delta);

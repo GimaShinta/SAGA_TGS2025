@@ -25,9 +25,12 @@ void Stage2::Initialize()
 void Stage2::Finalize() 
 {
     // 終了処理
-        // オブジェクト管理クラスのインスタンスを取得
-    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
-    objm->Finalize();
+        // 敵リストをすべて削除
+    for (auto& enemy : enemy_list)
+    {
+        enemy->SetDestroy();
+    }
+    enemy_list.clear();
 
 }
 
@@ -98,6 +101,28 @@ void Stage2::Update(float delta)
     {
         is_over = true;
     }
+
+    /*遷移時間*/
+    if (stage_timer >= 10.0f)
+    {
+        is_clear = true;
+    }
+    if (is_clear == true || is_over == true)
+    {
+        // 敵全削除（既に削除されているものは何も起きない）
+        for (auto& enemy : enemy_list)
+        {
+            enemy->SetDestroy();
+        }
+
+        enemy_list.clear(); // 管理リストもクリア
+
+        scene_timer += delta;
+        if (scene_timer >= 5.0f)
+        {
+            finished = true;
+        }
+    }
 }
 
 void Stage2::Draw() 
@@ -158,6 +183,7 @@ StageBase* Stage2::GetNextStage(Player* player)
 {
     return new Stage3(player); // 次のステージへ
 }
+
 void Stage2::EnemyAppearance(float delta)
 {
     // 1フレームごとに加算（60FPS想定）
