@@ -10,7 +10,8 @@ enum class Zako1Pattern
 {
 	MoveStraight, // 真っすぐ進む
 	RightMove,    // 右に移動しながら進む
-	LeftMove      // 左に移動しながら進む
+	LeftMove,      // 左に移動しながら進む
+	ZIgzag
 };
 
 /// <summary>

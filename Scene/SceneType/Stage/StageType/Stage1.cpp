@@ -146,7 +146,7 @@ void Stage1::Update(float delta)
     }
 
     /*‘JˆÚŽžŠÔ*/
-    if (stage_timer >= 60.0f)
+    if (stage_timer >= 120.0f)
     {
         is_clear = true;
     }
@@ -300,27 +300,37 @@ void Stage1::EnemyAppearance(float delta)
         Vector2D spawn_pos;
         Zako1Pattern pattern;
 
-        if (stage_timer < 30.0f)
+        if (stage_timer < 24.0f)
         {
             spawn_interval = 1.0;
             const int num_lanes = 7;
             const int lane_x[num_lanes] = { 250, 350, 450, 550, 650, 750, 850 };
             int lane_index = GetRand(num_lanes);
             float x = static_cast<float>(lane_x[lane_index]);
-            float y = 80.0f;
+            float y = 0.0f;
             spawn_pos = Vector2D(x, y);
-            pattern = Zako1Pattern::MoveStraight;
+            pattern =Zako1Pattern::MoveStraight;
         }
-        else
+        else if(stage_timer < 48.0f)
         {
             const int num_lanes = 3;
-            const int lane_y[num_lanes] = { 60, 180, 300 };
+            const int lane_y[num_lanes] = { 80, 200, 320 };
             int lane_index_y = GetRand(num_lanes);
             float y = static_cast<float>(lane_y[lane_index_y]);
 
             bool from_left = fmod(stage_timer, 20.0f) < 10.0f; 
             spawn_pos = from_left ? Vector2D(0.0f, y) : Vector2D(1000.0f, y);
             pattern = from_left ? Zako1Pattern::RightMove : Zako1Pattern::LeftMove;
+
+           /* zako4 = objm->CreateObject<Zako4>(spawn_pos=(0,20));
+            zako4->SetPlayer(player);
+            enemy_list.push_back(zako4);*/
+            
+        }
+        else
+        {
+            spawn_pos = Vector2D(200, 0);
+            pattern = Zako1Pattern::ZIgzag;
         }
 
         zako1 = objm->CreateObject<Zako1>(spawn_pos);

@@ -29,7 +29,7 @@ void Zako1::Initialize()
     is_mobility = true;
     start_location = location;
     is_returning = false;
-    spawn_delay_timer = 1.0f; // 出現後の待機時間
+   
 
     ChangePatternRandomly(); // 初期パターンをランダムで決定
 }
@@ -39,14 +39,17 @@ void Zako1::Update(float delta_second)
     spawn_delay_timer -= delta_second;
     pattern_timer += delta_second;
 
-    if (spawn_delay_timer > 0.0f) return; // 待機中は動かない
+   
 
     // パターンに応じて移動方向を設定
     switch (pattern)
     {
-        case Zako1Pattern::MoveStraight: velocity = { 0, 120 }; break;
-        case Zako1Pattern::RightMove:    velocity = { 120, 0 }; break;
+        case Zako1Pattern::MoveStraight: velocity = { 0, 120 };  break;
+        case Zako1Pattern::RightMove:    velocity = { 120, 0 };  break;
         case Zako1Pattern::LeftMove:     velocity = { -120, 0 }; break;
+        case Zako1Pattern::ZIgzag:       velocity.x = sinf(pattern_timer * 1.5f) * 160;
+                                         velocity.y = 100;       break;
+
     }
 
     location += velocity * delta_second; // 移動処理
@@ -94,13 +97,14 @@ void Zako1::Shot(float delta_second)
 
 void Zako1::ChangePatternRandomly()
 {
-    int r = rand() % 3; // 0?2
+    int r = rand() % 4; 
 
     switch (r)
     {
         case 0: pattern = Zako1Pattern::MoveStraight; break;
         case 1: pattern = Zako1Pattern::RightMove;    break;
         case 2: pattern = Zako1Pattern::LeftMove;     break;
+        case 3: pattern = Zako1Pattern::ZIgzag;       break;
     }
 
     pattern_timer = 0.0f;
