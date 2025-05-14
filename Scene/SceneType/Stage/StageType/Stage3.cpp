@@ -580,7 +580,7 @@ void Stage3::EnemyShot(float delta_second)
                     /// <param name="fan_duration_limit">攻撃する時間</param>
                     /// <param name="generate_location">生成する位置</param>
                     /// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
-                    Pattrn6(60.0f, 180.0f, 0.2f, 3.0f, boss2->GetLocation(), delta_second);
+                    Pattrn6(0.0f, 180.0f, 0.2f, 3.0f, boss2->GetLocation(), delta_second);
                 }
                 else if (bs_attack_pattrn == 7)
                 {

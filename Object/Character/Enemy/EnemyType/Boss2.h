@@ -9,7 +9,7 @@ private:
 	int attack_pattrn = 0;
 	int prev_attack_pattrn = -1; // 前フレームのパターン記録用
 
-	std::vector<int> attack_pattrn_num = { 10 };
+	std::vector<int> attack_pattrn_num;
 	int attack_count = 0;
 
 	bool generate = false;
