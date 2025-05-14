@@ -43,6 +43,11 @@ void Stage2::Update(float delta)
 
     UpdateBackgroundScroll(delta);
 
+    if (stage_timer >= 10.0f)
+    {
+        is_clear = true;
+    }
+
     stage_timer += delta; 
 
     // ƒvƒŒƒCƒ„[‚ª’e‚ğ‘Å‚Â€”õ‚ª‚Å‚«‚Ä‚¢‚½‚ç’e‚ğ¶¬        
