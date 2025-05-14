@@ -116,19 +116,26 @@ void Stage2::Draw()
     // 右の黒帯
     DrawBox((D_WIN_MAX_X / 2) + 350, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
 
-    DrawString(0, 0, "ゲームメイン", GetColor(255, 255, 255));
-    DrawString(0, 300, "操作方法\n\n左スティック\n十字ボタン\nWASDキー : 移動\n\nAボタン\nスペースキー : 発射\n\nBボタン\nBキー : レーザー\n\nRBボタン\nLキー : 射出反転", GetColor(255, 255, 255));
-    DrawFormatString(0, 20, GetColor(255, 255, 0), "敵数: %d", enemy_list.size());
+    DrawString(0, 0, "ステージ2", GetColor(255, 255, 255));
+    // 右側操作説明パネル
+    int panel_x = D_WIN_MAX_X - 270;
+    int panel_y = 60;
+    int panel_w = 250;
+    int panel_h = 180;
+
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
+    DrawBox(panel_x, panel_y, panel_x + panel_w, panel_y + panel_h, GetColor(0, 0, 0), TRUE);
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
     // ステージタイマーの表示（右上）
-    DrawFormatString(D_WIN_MAX_X - 200, 20, GetColor(255, 255, 255), "Time: %.1f", stage_timer);
+    DrawFormatString(0, 20, GetColor(255, 255, 255), "Time: %.1f", stage_timer);
 
     if (is_clear)
     {
-        DrawString((D_WIN_MAX_X / 2) - 40, (D_WIN_MAX_Y / 2) - 100, "ゲームクリア", GetColor(0, 0, 0));
+        DrawString((D_WIN_MAX_X / 2) - 40, (D_WIN_MAX_Y / 2) - 100, "ゲームクリア", GetColor(255, 255, 255));
     }
     else if (is_over)
     {
-        DrawString((D_WIN_MAX_X / 2) - 60, (D_WIN_MAX_Y / 2) - 100, "ゲームオーバー", GetColor(0, 0, 0));
+        DrawString((D_WIN_MAX_X / 2) - 60, (D_WIN_MAX_Y / 2) - 100, "ゲームオーバー", GetColor(255, 255, 255));
     }
 }
 
