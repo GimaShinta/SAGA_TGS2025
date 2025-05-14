@@ -142,55 +142,39 @@ void GameMainScene::Draw()
     }
 
 // ==== 必殺技ゲージ（右上テキストボックス形式） ====
+   // 必殺技ゲージ（右上テキストボックス形式）
     if (player)
     {
         float rate = player->GetChargeRate(); // 0.0?1.0
         int gauge_x = D_WIN_MAX_X - 260;
         int gauge_y = 30;
         int gauge_w = 200;
-        int gauge_h = 22;
+        int gauge_h = 60; // ラベル＋ゲージの高さをカバー
 
         // テキストボックス風背景
         SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
-        DrawBox(gauge_x, gauge_y, gauge_x + gauge_w, gauge_y + gauge_h + 20, GetColor(10, 10, 30), TRUE);
+        DrawBox(gauge_x, gauge_y, gauge_x + gauge_w, gauge_y + gauge_h, GetColor(10, 10, 30), TRUE);
         SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
-        DrawBox(gauge_x, gauge_y, gauge_x + gauge_w, gauge_y + gauge_h + 20, GetColor(0, 255, 255), FALSE);
+        DrawBox(gauge_x, gauge_y, gauge_x + gauge_w, gauge_y + gauge_h, GetColor(0, 255, 255), FALSE);
 
         // ラベル
-        DrawString(gauge_x + 10, gauge_y + 2, "CHARGE", GetColor(0, 255, 255));
+        DrawString(gauge_x + 10, gauge_y + 4, "CHARGE", GetColor(0, 255, 255));
 
         // ゲージ本体
         int bar_x = gauge_x + 80;
-        int bar_y = gauge_y + 40;
+        int bar_y = gauge_y + 30;
         int bar_w = gauge_w - 90;
         int bar_h = 14;
 
         DrawBox(bar_x, bar_y, bar_x + bar_w, bar_y + bar_h, GetColor(30, 30, 30), TRUE); // 背景
         DrawBox(bar_x, bar_y, bar_x + static_cast<int>(bar_w * rate), bar_y + bar_h, GetColor(0, 255, 255), TRUE); // 本体
 
-        // READY!点滅
+        // READY! 点滅
         if (player->CanUseSpecial())
         {
             int pulse = static_cast<int>(GetNowCount() % 100) > 50 ? 255 : 100;
-            DrawFormatString(bar_x, bar_y +4, GetColor(255, pulse, pulse), "READY!");
+            DrawFormatString(bar_x + 10, bar_y - 20, GetColor(255, pulse, pulse), "READY!");
         }
-    }
-
-    // ==== LIFE表示（右上） ====
-    {
-        int life_x = D_WIN_MAX_X - 260;
-        int life_y = 70;
-        int life_w = 200;
-        int life_h = 30;
-
-        // テキストボックス風背景
-        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
-        DrawBox(life_x, life_y, life_x + life_w, life_y + life_h, GetColor(10, 10, 30), TRUE);
-        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
-        DrawBox(life_x, life_y, life_x + life_w, life_y + life_h, GetColor(0, 255, 255), FALSE);
-
-        // ラベル＋ライフ数
-        DrawString(life_x + 10, life_y + 6, "LIFE", GetColor(0, 255, 255));
     }
 
 
