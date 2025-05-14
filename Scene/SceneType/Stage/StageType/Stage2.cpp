@@ -174,6 +174,7 @@ void Stage2::EnemyAppearance(float delta)
         zako2 = objm->CreateObject<Zako2>(spawn_pos);
         zako2->SetPlayer(player);
         enemy_spawn_timer = 0.0f; // タイマーリセット
+        enemy_list.push_back(zako2);
     }
 
 }
