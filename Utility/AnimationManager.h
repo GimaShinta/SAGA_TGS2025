@@ -6,12 +6,36 @@
 #include "Vector2D.h"
 #include <algorithm>
 
+enum EffectName
+{
+	eExprotion = 0,
+	eExprotion2,
+	eExprotion3
+};
+
 // AnimationID を int型と同等にする
 using AnimationID = int;
 
 // アニメーション制御クラス
 class AnimationManager : public Singleton<AnimationManager>
 {
+private:
+	// エフェクト画像読み込みに必要なデータ 
+	struct EffectData
+	{
+		const char* image_handle;
+		int all_num;
+		int num_x;
+		int num_y;
+		int size_x;
+		int size_y;
+	};
+
+	EffectData effect_data_nums[eExprotion3] =
+	{
+		{"Resource/Image/Effect/E_Explosion.png", 54, 9, 6, 517, 517},
+	};
+
 private:
 	// 各アニメーションに項目設定
 	struct Animation
@@ -48,6 +72,8 @@ public:
 	/// <param name="loop">ループ再生するかどうか</param>
 	/// <returns></returns>
 	AnimationID PlayerAnimation(const std::vector<int>& imageHandles, const Vector2D& position,
+		float frame_time_sec, bool loop);
+	AnimationID PlayerAnimation(EffectName effect_name, const Vector2D& position,
 		float frame_time_sec, bool loop);
 
 	// 更新処理
@@ -88,4 +114,3 @@ private:
 	// IDとアニメーションの対応マップ
 	std::unordered_map<AnimationID, std::unique_ptr<Animation>> animations;
 };
-

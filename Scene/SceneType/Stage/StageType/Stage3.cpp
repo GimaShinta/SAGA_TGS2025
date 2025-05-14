@@ -42,13 +42,23 @@ void Stage3::Initialize()
     objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2 + 100, (D_WIN_MAX_Y / 2) - 100.0f));
     objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2 + 150, (D_WIN_MAX_Y / 2) - 100.0f));
 
-    // 画像の読み込み
+
+#if 0
+    //-----------アニメーション生成パターン１-----------
+    // 画像を読み込んでから生成
     ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
     image_handles = rm->GetImages("Resource/Image/Effect/E_Explosion.png", 54, 9, 6, 517, 517);
 
-    // アニメーション作成
     AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
-    anim_id = manager->PlayerAnimation(image_handles, Vector2D(D_WIN_MAX_X / 2, D_WIN_MAX_Y / 2), 0.05f, true);
+    manager->PlayerAnimation(image_handles, Vector2D(player->GetLocation().x, player->GetLocation().y), 0.05f, false);
+    //---------------------------------------------------
+#else
+    //-----------アニメーション生成パターン２-----------
+    // 生成したいエフェクトを指定する（エフェクトのみ）
+    AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+    anim_id = manager->PlayerAnimation(EffectName::eExprotion, Vector2D(D_WIN_MAX_X / 2, D_WIN_MAX_Y / 2), 0.05f, false);
+    //--------------------------------------------------
+#endif
 
     // アニメーションの追加設定
     manager->SetAlpha(anim_id, 255);       // 半透明
@@ -71,7 +81,7 @@ void Stage3::Update(float delta)
     {
         AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
         // アニメーション作成
-        anim_id = manager->PlayerAnimation(image_handles, Vector2D(player->GetLocation().x, player->GetLocation().y), 0.1f, true);
+        manager->PlayerAnimation(EffectName::eExprotion, Vector2D(player->GetLocation().x, player->GetLocation().y), 0.05f, false);
     }
 
     UpdateBackgroundScroll(delta);
