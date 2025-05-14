@@ -71,7 +71,7 @@ void Stage1::Update(float delta)
     {
         Vector2D enemy_pos = (*it)->GetLocation();
 
-        if (enemy_pos.x < -100 || enemy_pos.x > 1100)
+        if (enemy_pos.x < -100 || enemy_pos.x > 1100 || enemy_pos.y > 720)
         {
             (*it)->SetDestroy();
             it = enemy_list.erase(it);
@@ -146,7 +146,7 @@ void Stage1::Update(float delta)
     }
 
     /*遷移時間*/
-    if (stage_timer >= 120.0f)
+    if (stage_timer >= 90.0f)
     {
         is_clear = true;
     }
@@ -291,10 +291,8 @@ void Stage1::EnemyAppearance(float delta)
 {
     enemy_spawn_timer += delta;
 
-    // 経過時間に応じてスポーン間隔を短くする（最短0.5秒）
-    float spawn_interval = 2.0f - (stage_timer / 20.0f);
-
-    // 下限値0.5を if 文で制御（maxが使えない環境用）
+    // 経過時間に応じてスポーン間隔を調整（最低0.5秒）
+    float spawn_interval = 2.0f - (stage_timer / 5.0f);
     if (spawn_interval < 0.5f)
     {
         spawn_interval = 0.5f;
@@ -304,50 +302,74 @@ void Stage1::EnemyAppearance(float delta)
     {
         GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
 
-        Vector2D spawn_pos;
-        Zako1Pattern pattern;
-
         if (stage_timer < 24.0f)
         {
-            spawn_interval = 1.0;
+            // ランダムレーンにZako1を1体出現
             const int num_lanes = 7;
             const int lane_x[num_lanes] = { 250, 350, 450, 550, 650, 750, 850 };
             int lane_index = GetRand(num_lanes);
             float x = static_cast<float>(lane_x[lane_index]);
-            float y = 0.0f;
-            spawn_pos = Vector2D(x, y);
-            pattern =Zako1Pattern::MoveStraight;
+            Vector2D spawn_pos(x, 0.0f);
+            Zako1* zako1 = objm->CreateObject<Zako1>(spawn_pos);
+            zako1->SetPattern(Zako1Pattern::MoveStraight);
+            zako1->SetPlayer(player);
+            enemy_list.push_back(zako1);
         }
-        else if(stage_timer < 48.0f)
+        else if (stage_timer < 48.0f)
         {
+            // ランダムなY位置で左右からZako1が来る + 一定条件でZako4も出現
             const int num_lanes = 3;
-            const int lane_y[num_lanes] = { 80, 200, 320 };
+            const int lane_y[num_lanes] = { 100, 220, 340 };
             int lane_index_y = GetRand(num_lanes);
             float y = static_cast<float>(lane_y[lane_index_y]);
 
-            bool from_left = fmod(stage_timer, 20.0f) < 10.0f; 
-            spawn_pos = from_left ? Vector2D(0.0f, y) : Vector2D(1000.0f, y);
-            pattern = from_left ? Zako1Pattern::RightMove : Zako1Pattern::LeftMove;
+            bool from_left = fmod(stage_timer, 20.0f) < 10.0f;
+            Vector2D spawn_pos = from_left ? Vector2D(0.0f, y) : Vector2D(1000.0f, y);
+            Zako1Pattern pattern = from_left ? Zako1Pattern::RightMove : Zako1Pattern::LeftMove;
 
-           /* zako4 = objm->CreateObject<Zako4>(spawn_pos=(0,20));
-            zako4->SetPlayer(player);
-            enemy_list.push_back(zako4);*/
-            
+            Zako1* zako1 = objm->CreateObject<Zako1>(spawn_pos);
+            zako1->SetPattern(pattern);
+            zako1->SetPlayer(player);
+            enemy_list.push_back(zako1);
+
+            if (stage_timer >= 20.0f && !zako4_spawned)
+            {
+                Zako4* zako4 = objm->CreateObject<Zako4>(Vector2D(60, 20));
+                zako4->SetPlayer(player);
+                enemy_list.push_back(zako4);
+
+                zako4_spawned = true;
+            }
+
         }
         else
         {
-            spawn_pos = Vector2D(200, 0);
-            pattern = Zako1Pattern::ZIgzag;
-        }
 
-        zako1 = objm->CreateObject<Zako1>(spawn_pos);
-        zako1->SetPattern(pattern);
-        zako1->SetPlayer(player);
-        enemy_list.push_back(zako1);
+
+            // Zigzagパターンで3体同時に出現
+            struct SpawnData
+            {
+                Vector2D pos;
+                Zako1Pattern pattern;
+            };
+
+            std::vector<SpawnData> spawns = {
+                { Vector2D(450, 0), Zako1Pattern::ZIgzag }
+            };
+
+            for (const auto& s : spawns)
+            {
+                Zako1* z = objm->CreateObject<Zako1>(s.pos);
+                z->SetPattern(s.pattern);
+                z->SetPlayer(player);
+                enemy_list.push_back(z);
+            }
+        }
 
         enemy_spawn_timer = 0.0f;
     }
 }
+
 
 
 void Stage1::DrawScrollBackground() const
