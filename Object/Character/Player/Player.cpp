@@ -15,7 +15,7 @@ void Player::Initialize()
 {
 	z_layer = 2;
 	velocity = 0;
-	box_size = 12;
+	box_size = 10;
 
 	// 当たり判定のオブジェクト設定
 	collision.is_blocking = true;
@@ -29,6 +29,9 @@ void Player::Initialize()
 
 	// 動くかどうか（trueなら動く、falseなら止まる）
 	is_mobility = true;
+
+	ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
+	image = rm->GetImages("Resource/Image/Object/Player/Player_01/transparent/player01.png")[0];
 }
 
 /// <summary>
@@ -76,6 +79,8 @@ void Player::Draw(const Vector2D& screen_offset) const
 {
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, brend);
 
+	DrawRotaGraph(location.x, location.y, 1.0f, 0.0f, image, TRUE);
+
 	int color;
 	// プレイヤーを描画する
 	if (powerd <= 1)
@@ -91,7 +96,7 @@ void Player::Draw(const Vector2D& screen_offset) const
 		color = GetColor(0, 0, 255);
 	}
 	DrawBox(location.x - box_size.x, location.y - box_size.y,
-		location.x + box_size.x, location.y + box_size.y, color, TRUE);
+		location.x + box_size.x, location.y + box_size.y, color, FALSE);
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 
 	// ライフの表示
@@ -279,7 +284,7 @@ void Player::Damage(float delta_second)
 	{
 		// カウント加算
 		damage_timer += delta_second;
-		if (damage_timer >= 0.1f)
+		if (damage_timer >= 0.05f)
 		{
 			// 到達カウントを加算
 			reach_count++;
@@ -297,7 +302,7 @@ void Player::Damage(float delta_second)
 			damage_timer = 0;
 		}
 		// チカチカが終わったら全てリセット
-		if (reach_count >= 20)
+		if (reach_count >= 30)
 		{
 			is_damage = false;
 			on_hit = false;
