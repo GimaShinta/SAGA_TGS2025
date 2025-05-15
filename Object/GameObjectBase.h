@@ -2,6 +2,7 @@
 
 #include "../Utility/Vector2D.h"
 #include "../Utility/BoxCollision.h"
+#include"../Utility/ResourceManager.h"
 
 #define D_OBJECT_SIZE	(24.0f)			// オブジェクトサイズ（共通）
 

@@ -43,6 +43,7 @@ private:
 	const float charge_max = 100.0f;
 	bool charge_ready = false;
 
+
 public:
 	Player();
 	~Player();
