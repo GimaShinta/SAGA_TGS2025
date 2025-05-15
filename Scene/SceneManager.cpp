@@ -154,7 +154,7 @@ SceneBase* SceneManager::CreateScene(eSceneType type)
 	case eSceneType::eResult:
 		return dynamic_cast<SceneBase*>(new GameMainScene());
 	case eSceneType::eXit:
-		// ã‚Ì‚Ç‚ê‚à“–‚Ä‚Í‚Ü‚ç‚È‚¢ê‡
+		return nullptr;  // ³íI—¹‚È‚Ì‚Åthrow‚³‚¹‚È‚¢
 	default:
 		return nullptr;
 	}

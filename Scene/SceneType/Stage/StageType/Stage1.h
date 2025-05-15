@@ -46,7 +46,13 @@ private:
 	float shot_timer;          // ショット発射の間隔制御タイマー
 	float stage_timer = 0.0f;  // ステージの経過時間（秒単位）
 	float scene_timer = 0.0f;  // 演出や状態遷移用タイマー
-	int bgm;
+
+	static const int TILE_COLS = 8;
+	static const int TILE_ROWS = 6;
+
+	bool tile_destroy_flags[TILE_ROWS][TILE_COLS] = { false };
+	float tile_destroy_timer = 0.0f;
+
 
 public:
 	// コンストラクタ・デストラクタ

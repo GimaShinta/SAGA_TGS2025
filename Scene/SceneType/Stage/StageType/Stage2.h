@@ -14,6 +14,7 @@ private:
     std::vector<EnemyBase*> enemy_list;
     float stage_timer = 0.0f; // 経過時間（秒）
     bool zako4_spawned = false;
+    bool zako5_spawned = false;
 
     // 敵の出現タイマー
     float enemy_spawn_timer = 0.0f;

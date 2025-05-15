@@ -7,6 +7,7 @@ class StageBase {
 protected:
     bool is_clear = false;
     bool is_over = false;
+    int se;
 
 public:
     StageBase(Player* player) : player(player) {}
@@ -46,6 +47,54 @@ public:
 
     virtual void DrawScrollBackground() const = 0; // 各ステージで具体実装
 
+    // StageBase.h の protected 部分に追加
+protected:
+    // フェード制御
+    bool is_fading_in = true;     // 初期状態でフェードイン
+    bool is_fading_out = false;   // クリア／オーバー時にフェードアウト開始
+    float fade_alpha = 255.0f;    // 0: 完全表示, 255: 完全黒
+
+public:
+    // 毎フレーム呼び出すフェード更新
+    virtual void UpdateFade(float delta)
+    {
+        // ステージクリア／オーバーでフェードアウトへ
+        if (!is_fading_out && (is_clear || is_over))
+        {
+            is_fading_out = true;
+        }
+
+        // フェードイン中：alpha→0
+        if (is_fading_in)
+        {
+            fade_alpha -= 300.0f * delta;
+            if (fade_alpha <= 0.0f)
+            {
+                fade_alpha = 0.0f;
+                is_fading_in = false;
+            }
+        }
+        // フェードアウト中：alpha→255
+        else if (is_fading_out)
+        {
+            fade_alpha += 300.0f * delta;
+            if (fade_alpha >= 255.0f)
+            {
+                fade_alpha = 255.0f;
+            }
+        }
+    }
+
+    // 描画の最後に呼ぶフェード描画
+    virtual void DrawFadeOverlay() const
+    {
+        if (is_fading_in || is_fading_out)
+        {
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(fade_alpha));
+            DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
+            SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+        }
+    }
 
 
 };

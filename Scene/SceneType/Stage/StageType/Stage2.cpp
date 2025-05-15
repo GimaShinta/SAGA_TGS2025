@@ -10,6 +10,8 @@
 #include "../../../../Object/Character/Enemy/EnemyType/Zako1.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako2.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako4.h"
+#include "../../../../Object/Character/Enemy/EnemyType/Zako5.h"
+
 
 #include <cstdlib> 
 
@@ -31,7 +33,7 @@ void Stage2::Finalize()
         enemy->SetDestroy();
     }
     enemy_list.clear();
-
+    
 }
 
 void Stage2::Update(float delta) 
@@ -43,10 +45,6 @@ void Stage2::Update(float delta)
 
     UpdateBackgroundScroll(delta);
 
-    if (stage_timer >= 10.0f)
-    {
-        is_clear = true;
-    }
 
     stage_timer += delta; 
 
@@ -108,30 +106,32 @@ void Stage2::Update(float delta)
     }
 
     /*遷移時間*/
-    if (stage_timer >= 10.0f)
+    if (stage_timer >= 30.0f)
     {
         is_clear = true;
     }
+
+    //画面遷移用オブジェクト削除
     if (is_clear == true || is_over == true)
     {
-        // 敵全削除（既に削除されているものは何も起きない）
-        for (auto& enemy : enemy_list)
-        {
+        for (auto& enemy : enemy_list) {
             enemy->SetDestroy();
         }
+        enemy_list.clear();
 
-        enemy_list.clear(); // 管理リストもクリア
-
+        // フェードアウト完了かつ少し待機したら終了
         scene_timer += delta;
-        if (scene_timer >= 5.0f)
+        if (fade_alpha >= 255.0f && scene_timer >= 1.5f)
         {
             finished = true;
         }
     }
+    UpdateFade(delta);
 }
 
 void Stage2::Draw() 
 {
+
     // 背景を白で塗る（最初に描画）
     DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(255, 255, 255), TRUE);
 
@@ -161,12 +161,14 @@ void Stage2::Draw()
 
     if (is_clear)
     {
-        DrawString((D_WIN_MAX_X / 2) - 40, (D_WIN_MAX_Y / 2) - 100, "ゲームクリア", GetColor(255, 255, 255));
+        DrawString((D_WIN_MAX_X / 2) - 40, (D_WIN_MAX_Y / 2) - 100, "NEXT STAGE...", GetColor(255, 255, 255));
     }
     else if (is_over)
     {
         DrawString((D_WIN_MAX_X / 2) - 60, (D_WIN_MAX_Y / 2) - 100, "ゲームオーバー", GetColor(255, 255, 255));
     }
+
+    DrawFadeOverlay();
 }
 
 bool Stage2::IsFinished() 
@@ -191,24 +193,38 @@ StageBase* Stage2::GetNextStage(Player* player)
 
 void Stage2::EnemyAppearance(float delta)
 {
-    // 1フレームごとに加算（60FPS想定）
     enemy_spawn_timer += delta;
 
-    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+    // 経過時間に応じてスポーン間隔を調整（最低0.4秒）
+    float spawn_interval = 2.5f - (stage_timer / 5.0f);
 
-    // 一定間隔ごと（5秒ごと）にZako2出現
-    const float spawn_interval = 1.0f; // 出現間隔
+    if (spawn_interval < 0.4f)
+    {
+        spawn_interval = 0.4f;
+    }
 
     if (enemy_spawn_timer >= spawn_interval)
     {
-        Vector2D spawn_pos(400.0f, 100.0f);
-        zako2 = objm->CreateObject<Zako2>(spawn_pos);
-        zako2->SetPlayer(player);
-        enemy_spawn_timer = 0.0f; // タイマーリセット
-        enemy_list.push_back(zako2);
-    }
+        if (stage_timer >= 3.0f && !zako5_spawned)
+        {
+            // Zako5出現（1度だけ）
+            GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
 
+            Zako5* left = objm->CreateObject<Zako5>(Vector2D(420, 100));
+            Zako5* right = objm->CreateObject<Zako5>(Vector2D(850, 100));
+            left->SetPlayer(player);
+            right->SetPlayer(player);
+
+            enemy_list.push_back(left);
+            enemy_list.push_back(right);
+
+            zako5_spawned = true;
+        }
+
+
+    }
 }
+
 
 //スクロール描画
 void Stage2::DrawScrollBackground() const

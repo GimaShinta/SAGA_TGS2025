@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Object\Character\Enemy\EnemyType\Zako5.cpp" />
     <ClCompile Include="Utility\AnimationManager.cpp" />
     <ClCompile Include="Application\Application.cpp" />
     <ClCompile Include="AppMain.cpp" />
@@ -176,6 +177,7 @@
     <ClCompile Include="Object\Character\Enemy\EnemyType\Zako4.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Object\Character\Enemy\EnemyType\Zako5.h" />
     <ClInclude Include="Utility\AnimationManager.h" />
     <ClInclude Include="Application\Application.h" />
     <ClInclude Include="Object\Item\Exp\Exp.h" />

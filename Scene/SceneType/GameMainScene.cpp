@@ -2,6 +2,7 @@
 #include "../../Scene/SceneType/Stage/StageType/Stage1.h"
 #include "../../Scene/SceneType/Stage/StageType/Stage2.h"
 #include <algorithm>   // std::min を使うために必要
+#include "Stage/StageType/Stage3.h"
 
 
 
@@ -22,6 +23,16 @@ void GameMainScene::Initialize()
 
     current_stage = new Stage1(player);
     current_stage->Initialize();
+
+    // BGM読み込み（初回のみ）
+    ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
+    stage_bgm1 = rm->GetSounds("Resource/sound/bgm/stage/Magical World.mp3");
+    stage_bgm3 = rm->GetSounds("Resource/sound/bgm/stage/Cryonic Pulse.mp3");
+
+    // ステージ1用BGMを再生
+    current_bgm_handle = stage_bgm1;
+    ChangeVolumeSoundMem(255 * 60 / 100, current_bgm_handle);
+    PlaySoundMem(current_bgm_handle, DX_PLAYTYPE_LOOP);
 }
 
 /// <summary>
@@ -47,12 +58,21 @@ eSceneType GameMainScene::Update(float delta_second)
 
                 if (next_stage != nullptr)
                 {
+                    // === ステージの切替とBGM処理 ===
                     current_stage = next_stage;
                     current_stage->Initialize();
+
+                    // ステージ3に到達した場合のみBGM切替
+                    if (dynamic_cast<Stage3*>(current_stage) != nullptr)
+                    {
+                        StopSoundMem(current_bgm_handle); // 現在のBGMを停止
+                        current_bgm_handle = stage_bgm3;  // ステージ3用BGMに切り替え
+                        ChangeVolumeSoundMem(255 * 60 / 100, current_bgm_handle);
+                        PlaySoundMem(current_bgm_handle, DX_PLAYTYPE_LOOP);
+                    }
                 }
                 else
                 {
-                    // 最終ステージが終わったらリザルトへ
                     return eSceneType::eTitle;
                 }
             }
@@ -62,10 +82,10 @@ eSceneType GameMainScene::Update(float delta_second)
                 delete current_stage;
                 current_stage = nullptr;
 
-                // 最終ステージが終わったらリザルトへ
                 return eSceneType::eTitle;
             }
         }
+
     }
 
     // ======= スコアログのスライド演出更新 =======
@@ -205,6 +225,11 @@ void GameMainScene::Finalize()
         current_stage->Finalize();
         delete current_stage;
         current_stage = nullptr;
+    }
+    if (current_bgm_handle != -1)
+    {
+        StopSoundMem(current_bgm_handle);
+        current_bgm_handle = -1;
     }
 }
 

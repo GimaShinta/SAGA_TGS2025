@@ -12,6 +12,12 @@ private:
 	StageBase* current_stage;
 	float next_scene_timer;
 
+private:
+	int current_bgm_handle = -1;
+	int stage_bgm1 = -1; // ステージ1,2の共通BGM
+	int stage_bgm3 = -1; // ステージ3用BGM
+
+
 	// ↓ スコアログ処理用構造体と変数
 	struct ScoreLog 
 	{

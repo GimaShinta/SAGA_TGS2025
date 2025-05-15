@@ -4,6 +4,7 @@
 //#include "../Objects/GameObjectManager.h"
 #include "../Utility/InputManager.h"
 #include "../Utility/ProjectConfig.h"
+#include "../Utility/ResourceManager.h"
 
 // ƒV[ƒ“‚Ìí—Ş
 enum class eSceneType
