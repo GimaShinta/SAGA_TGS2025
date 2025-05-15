@@ -1,5 +1,6 @@
 #include "Stage3.h"
 #include "Stage2.h" // 次のステージがある場合
+#include "../../../../Scene/SceneType/TitleScene.h"
 
 #include "../../../../Object/GameObjectManager.h"
 #include "../../../../Object/Character/Player/Player.h"
@@ -163,8 +164,7 @@ void Stage3::Draw()
     // 右の黒帯
     DrawBox((D_WIN_MAX_X / 2) + 350, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
 
-    DrawString(0, 0, "ゲームメイン", GetColor(255, 255, 255));
-    DrawString(0, 300, "操作方法\n\n左スティック\n十字ボタン\nWASDキー : 移動\n\nAボタン\nスペースキー : 発射\n\nBボタン\nBキー : レーザー\n\nRBボタン\nLキー : 射出反転", GetColor(255, 255, 255));
+    DrawString(0, 0, "Stage3", GetColor(255, 255, 255));
     DrawFormatString(0, 20, GetColor(255, 255, 0), "敵数: %d", enemy_list.size());
 
     // ステージ描画

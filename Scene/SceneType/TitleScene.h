@@ -4,7 +4,26 @@ class TitleScene : public SceneBase
 {
 private:
 	int m_selectedIndex; // 選択中のインデックス
-	int m_titleFontHandle;
+	int m_menuFontHandle;
+
+	int m_logoHandle;
+	float m_logoScale; // アニメ用スケール
+	int m_logoAlpha;   // アニメ用透明度
+
+	//ロゴの座標調整変数
+	int m_logoX;
+	int m_logoY;
+	int m_logoW;
+	int m_logoH;
+
+	int drawY;
+
+	//パーティクルの演出用
+	struct Particle {
+		float x, y, vy;
+		int alpha;
+	};
+	std::vector<Particle> m_particles;
 
 
 public:
@@ -33,5 +52,12 @@ public:
 	// 現在のシーンタイプ（オーバーライド必須）
 	virtual eSceneType GetNowSceneType() const override;
 
+
+private:
+	//描画系関数
+	void DrawBackgroundGrid();	//背景
+	void DrawLogo();			//ロゴ
+	void DrawParticles();		//パーティクル
+	void DrawMenu();			//メニュー
 };
 

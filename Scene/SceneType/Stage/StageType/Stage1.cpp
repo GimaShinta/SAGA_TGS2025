@@ -47,11 +47,6 @@ void Stage1::Initialize()
 
     // 乱数初期化（1回だけ行う）
     srand(static_cast<unsigned int>(time(NULL)));
-
-    ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
-    bgm = rm->GetSounds("Resource/sound/bgm/stage/Magical World.mp3");
-    ChangeVolumeSoundMem(255 * 60 / 100, bgm);
-    PlaySoundMem(bgm, DX_PLAYTYPE_BACK);
 }
 
 void Stage1::Finalize()
@@ -64,6 +59,8 @@ void Stage1::Finalize()
         }
         enemy_list.clear();
 
+        //BGMを止める
+        //StopSoundMem(bgm);
 }
 
 void Stage1::Update(float delta)
@@ -152,7 +149,7 @@ void Stage1::Update(float delta)
     }
 
     /*遷移時間*/
-    if (stage_timer >= 90.0f)
+    if (stage_timer >= 65.0f)
     {
         is_clear = true;
     }
@@ -195,27 +192,27 @@ void Stage1::Update(float delta)
 
     if (is_clear == true || is_over == true)
     {
-        // 敵全削除（既に削除されているものは何も起きない）
-        for (auto& enemy : enemy_list)
-        {
+        for (auto& enemy : enemy_list) {
             enemy->SetDestroy();
         }
+        enemy_list.clear();
 
-        enemy_list.clear(); // 管理リストもクリア
-
+        // フェードアウト完了かつ少し待機したら終了
         scene_timer += delta;
-        if (scene_timer >= 5.0f)
+        if (fade_alpha >= 255.0f && scene_timer >= 1.5f)
         {
             finished = true;
         }
     }
 
 
-    // 仮の条件：スペースキーを押したらステージ終了
+    // 仮の条件：N押したらステージ終了
     if (CheckHitKey(KEY_INPUT_N))
     {
         finished = true;
     }
+
+    UpdateFade(delta);
 }
 
 void Stage1::Draw()
@@ -268,12 +265,14 @@ void Stage1::Draw()
 
     if (is_clear)
     {
-        DrawString((D_WIN_MAX_X / 2) - 40, (D_WIN_MAX_Y / 2) - 100, "ゲームクリア", GetColor(255, 255, 255));
+        DrawString((D_WIN_MAX_X / 2) - 40, (D_WIN_MAX_Y / 2) - 100, "NEXT STAGE...", GetColor(255, 255, 255));
     }
     else if (is_over)
     {
         DrawString((D_WIN_MAX_X / 2) - 60, (D_WIN_MAX_Y / 2) - 100, "ゲームオーバー", GetColor(255, 255, 255));
     }
+
+    DrawFadeOverlay();
 }
 
 bool Stage1::IsFinished()
