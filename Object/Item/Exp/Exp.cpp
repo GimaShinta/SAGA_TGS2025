@@ -107,7 +107,7 @@ void Exp::OnHitCollision(GameObjectBase* hit_object)
     {
         if (player && !player->GetBeamOn())  // ビーム中でなければ加算
         {
-            player->AddCharge(5.0f);  // 調整可能
+            player->AddCharge(1.0f);  // 調整可能
         }
         this->SetDestroy(); // 吸収 → 削除
     }

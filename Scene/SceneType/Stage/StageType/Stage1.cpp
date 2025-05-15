@@ -48,6 +48,10 @@ void Stage1::Initialize()
     // 乱数初期化（1回だけ行う）
     srand(static_cast<unsigned int>(time(NULL)));
 
+    ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
+    bgm = rm->GetSounds("Resource/sound/bgm/stage/Magical World.mp3");
+    ChangeVolumeSoundMem(255 * 60 / 100, bgm);
+    PlaySoundMem(bgm, DX_PLAYTYPE_BACK);
 }
 
 void Stage1::Finalize()
@@ -63,7 +67,7 @@ void Stage1::Finalize()
 }
 
 void Stage1::Update(float delta)
-{
+{   
     UpdateBackgroundScroll(delta);
 
     // 敵が画面外に出た場合に削除
@@ -85,7 +89,6 @@ void Stage1::Update(float delta)
 
     // タイマーをカウント
     timer++;
-
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
     objm->Update(delta);
 

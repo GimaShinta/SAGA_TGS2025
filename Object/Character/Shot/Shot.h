@@ -5,6 +5,7 @@ class Shot : public CharacterBase
 {
 private:
 	bool shot_flip = false;
+	int se;
 
 public:
 	Shot();
