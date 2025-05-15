@@ -33,6 +33,7 @@ protected:
 	float delta = 0.0f;
 	float beam_damage_timer = 0.0f;
 	Player* player;
+	int anim_id;
 
 public:
 	EnemyBase();

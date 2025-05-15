@@ -1,5 +1,6 @@
 #include "Zako1.h"
 #include "../../Player/Player.h"
+#include"../../../../Utility/AnimationManager.h"
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
@@ -29,6 +30,13 @@ void Zako1::Initialize()
     is_mobility = true;
     start_location = location;
     is_returning = false;
+
+    ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
+    image_num = rm->GetImages("Resource/Image/Object/Enemy/Zako1/anime_enemy30_a.png", 4, 4, 1, 32, 8);
+
+    AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+    anim_id =  manager->PlayerAnimation(image_num, location, 0.01f, true);
+
    
 
     ChangePatternRandomly(); // 初期パターンをランダムで決定
@@ -39,7 +47,8 @@ void Zako1::Update(float delta_second)
     spawn_delay_timer -= delta_second;
     pattern_timer += delta_second;
 
-   
+    AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+    manager->SetPosition(anim_id, location); 
 
     // パターンに応じて移動方向を設定
     switch (pattern)
@@ -75,6 +84,9 @@ void Zako1::Draw(const Vector2D& screen_offset) const
 void Zako1::Finalize()
 {
     // 後処理が必要な場合に記述
+
+    AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+    manager->RemoveAnimation(anim_id);     
 }
 
 void Zako1::Shot(float delta_second)

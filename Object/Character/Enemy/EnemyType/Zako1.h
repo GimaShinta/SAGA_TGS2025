@@ -68,6 +68,8 @@ private:
 	bool is_returning = false;                          // 戻り動作中かどうかのフラグ
 	bool on_hit;                                        // 被弾中かどうか
 
+	std::vector<int> image_num;
+
 	Vector2D follow_velocity;                           // プレイヤーを追従する際の速度
 	float spawn_delay_timer;                            // 出現後の一定時間行動を停止するタイマー
 

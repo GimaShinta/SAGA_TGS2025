@@ -22,7 +22,7 @@
 #include "../../../../Scene/SceneType/Stage/StageType/Stage1.h"
 
 #include"../../../../Object/Item/Exp/Exp.h"
-
+#include"../../../../Utility/AnimationManager.h"
 #include <math.h>
 #include <stdlib.h> // rand(), srand()
 #include <time.h>   // time()
@@ -88,6 +88,9 @@ void Stage1::Update(float delta)
 
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
     objm->Update(delta);
+
+   
+
 
     // プレイヤーが弾を打つ準備ができていたら弾を生成
     if (player->GetIsShot())
@@ -241,6 +244,9 @@ void Stage1::Draw()
     // ステージタイマーの表示（右上）
     DrawFormatString(0, 20, GetColor(255, 255, 255), "Time: %.1f", stage_timer);
 
+
+    AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+    manager->Draw();
 
     // ステージ描画
     if (stage <= 1)
