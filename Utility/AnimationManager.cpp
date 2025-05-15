@@ -177,3 +177,12 @@ void AnimationManager::SetZLayer(AnimationID id, int z)
 		animations[id]->z_layer = z;  // © C³Ï‚ÝF‘ã“ü˜R‚ê‚ðC³
 	}
 }
+
+// ˆÊ’uî•ñ‚ÌÝ’è
+void AnimationManager::SetPosition(AnimationID id, const Vector2D& posi)
+{
+	if (animations.count(id))
+	{
+		animations[id]->position = posi;
+	}
+}

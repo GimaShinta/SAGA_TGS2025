@@ -107,6 +107,9 @@ public:
 	// ƒŒƒCƒ„[‚Ìİ’è
 	void SetZLayer(AnimationID id, int z);
 
+	// ˆÊ’uî•ñ‚Ìİ’è
+	void SetPosition(AnimationID id, const Vector2D& posi);
+
 private:
 	// Ÿ‚ÉÄ¶‚·‚éID”Ô†
 	AnimationID next_id = 0;
