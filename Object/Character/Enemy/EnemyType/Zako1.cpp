@@ -19,7 +19,7 @@ void Zako1::Initialize()
     enemy_type = ENE_ZAKO1;
     z_layer = 2;
     box_size = 12;
-    hp = 10;
+    hp = 30;
 
     // è’ìÀîªíËê›íË
     collision.is_blocking = true;
@@ -57,7 +57,7 @@ void Zako1::Update(float delta_second)
         case Zako1Pattern::RightMove:    velocity = { 120, 0 };  break;
         case Zako1Pattern::LeftMove:     velocity = { -120, 0 }; break;
         case Zako1Pattern::ZIgzag:       velocity.x = sinf(pattern_timer * 1.5f) * 320;
-                                         velocity.y = 100;       break;
+            velocity.y = 100;       Shot(delta); break;
 
     }
 

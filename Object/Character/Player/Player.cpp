@@ -95,8 +95,11 @@ void Player::Draw(const Vector2D& screen_offset) const
 	{
 		color = GetColor(0, 0, 255);
 	}
-	DrawBox(location.x - box_size.x, location.y - box_size.y,
-		location.x + box_size.x, location.y + box_size.y, color, FALSE);
+
+	//“–‚½‚è”»’è‚Ì‰ÂŽ‹‰»
+	//DrawBox(location.x - box_size.x, location.y - box_size.y,
+	//	location.x + box_size.x, location.y + box_size.y, color, FALSE);
+
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 
 	// ƒ‰ƒCƒt‚Ì•\Ž¦

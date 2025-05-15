@@ -27,6 +27,11 @@ void Shot::Initialize()
 
 	// “®‚­‚©‚Ç‚¤‚©itrue‚È‚ç“®‚­Afalse‚È‚ç~‚Ü‚éj
 	is_mobility = true;
+
+	ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
+	se = rm->GetSounds("Resource/sound/se/shot/shot_01.mp3");
+	ChangeVolumeSoundMem(255 * 30 / 100, se);
+	PlaySoundMem(se, DX_PLAYTYPE_BACK);
 }
 
 /// <summary>
