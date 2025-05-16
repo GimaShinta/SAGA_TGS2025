@@ -31,11 +31,11 @@ void Zako1::Initialize()
     start_location = location;
     is_returning = false;
 
-    ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
-    image_num = rm->GetImages("Resource/Image/Object/Enemy/Zako1/anime_enemy30_a.png", 4, 4, 1, 32, 8);
+    //ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
+    //image_num = rm->GetImages("Resource/Image/Object/Enemy/Zako1/anime_enemy30_a.png", 4, 4, 1, 32, 8);
 
-    AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
-    anim_id =  manager->PlayerAnimation(image_num, location, 0.01f, true);
+    //AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+    //anim_id =  manager->PlayerAnimation(image_num, location, 0.01f, true);
 
    
 
