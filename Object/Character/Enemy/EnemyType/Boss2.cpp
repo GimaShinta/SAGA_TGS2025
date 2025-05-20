@@ -18,7 +18,7 @@ void Boss2::Initialize()
 	hp = 100;
 
 	// 攻撃パターンの設定
-	attack_pattrn_num = { 11 };
+	attack_pattrn_num = { 0 };
 
 	// 当たり判定のオブジェクト設定
 	collision.is_blocking = true;
@@ -39,6 +39,9 @@ void Boss2::Initialize()
 
 	// 初期座標は登場時のものを使用
 	location = generate_base_position;
+
+	ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
+	images = rm->GetImages("Resource/Image/Object/Enemy/Zako1/anime_enemy30_b.png", 12, 12, 1, 24, 24);
 }
 
 /// <summary>
@@ -47,6 +50,8 @@ void Boss2::Initialize()
 /// <param name="delata_second">1フレーム当たりの時間</param>
 void Boss2::Update(float delta_second)
 {
+	// アニメーション
+	GameObjectBase::AnimationControl(delta_second, images, { 0, 1, 2, 3, 4, 5, 4, 3 ,2 ,1 }, 100.0f);
 	// 攻撃パターンを設定して弾を打つ
 	Shot(delta_second);
 
@@ -85,6 +90,9 @@ void Boss2::Draw(const Vector2D& screen_offset) const
 
 	// 体力の表示
 	DrawFormatString(location.x - 8, location.y - 8, GetColor(0, 0, 0), "%.0f", hp);
+
+	DrawRotaGraph(location.x, location.y, 10.0f, 0.0f, image, TRUE);
+
 }
 
 // 終了時処理
