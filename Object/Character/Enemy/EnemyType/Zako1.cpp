@@ -32,10 +32,10 @@ void Zako1::Initialize()
     is_returning = false;
 
     ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
-    image_num = rm->GetImages("Resource/Image/Object/Enemy/Zako1/anime_enemy30_a.png", 4, 4, 1, 32, 8);
+    image = rm->GetImages("Resource/Image/Object/Enemy/Zako2/enemy45.png")[0];
 
-    AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
-    anim_id =  manager->PlayerAnimation(image_num, location, 0.01f, true);
+    /*AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+    anim_id =  manager->PlayerAnimation(image_num, location, 0.01f, true);*/
 
    
 
@@ -47,8 +47,8 @@ void Zako1::Update(float delta_second)
     spawn_delay_timer -= delta_second;
     pattern_timer += delta_second;
 
-    AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
-    manager->SetPosition(anim_id, location); 
+  /*  AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+    manager->SetPosition(anim_id, location); */
 
     // パターンに応じて移動方向を設定
     switch (pattern)
@@ -79,12 +79,12 @@ void Zako1::Draw(const Vector2D& screen_offset) const
             location.x + box_size.x, location.y + box_size.y, GetColor(0, 0, 255), TRUE);
 
     DrawFormatString(location.x - 8, location.y - 8, GetColor(0, 0, 0), "%.0f", hp);
+    DrawRotaGraph(location.x, location.y, 1.0f, 0.0f, image, TRUE);
+
 }
 
 void Zako1::Finalize()
 {
-    // 後処理が必要な場合に記述
-
     AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
     manager->RemoveAnimation(anim_id);     
 }
