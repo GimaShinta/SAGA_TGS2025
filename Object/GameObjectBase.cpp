@@ -80,7 +80,7 @@ void GameObjectBase::OnHitCollision(GameObjectBase* hit_object)
 /// <param name="animation_image">アニメーション総画像</param>
 /// <param name="animation_num">アニメーション順序</param>
 /// <param name="animation_num">アニメーション切り替え時間</param>
-void GameObjectBase::AnimationControl(float delta_second, std::vector<int>& animation_image, std::vector<int>& animation_num, float chenge_time)
+void GameObjectBase::AnimationControl(float delta_second, std::vector<int>& animation_image, std::vector<int> animation_num, float chenge_time)
 {
 	//フレームレートで時間を計測
 	animation_time += delta_second;

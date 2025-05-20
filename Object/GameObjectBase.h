@@ -69,7 +69,7 @@ public:
 	/// <param name="delta_second">１フレーム当たりの時間</param>
 	/// <param name="animation_image">アニメーション総画像</param>
 	/// <param name="animation_num">アニメーション順序</param>
-	virtual void AnimationControl(float delta_second, std::vector<int>& animation_image, std::vector<int>& animation_num, float chenge_time);
+	virtual void AnimationControl(float delta_second, std::vector<int>& animation_image, std::vector<int> animation_num, float chenge_time);
 	/// <summary>
 	/// 画像の設定
 	/// </summary>

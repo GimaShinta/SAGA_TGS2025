@@ -72,6 +72,7 @@ private:
 	bool has_shot = false;                              // ’e‚ðŒ‚‚Á‚½‚©‚Ç‚¤‚©
 	float after_shot_timer = 0.0f; // ’e”­ŽËŒã‚Ì‘Ò‹@ŽžŠÔ
 	bool just_shot = false;                             // ’e‚ðŒ‚‚Á‚½’¼Œã‚ÌˆêŽžƒtƒ‰ƒO
+	std::vector<int> images;
 
 
 	//std::vector<int> image_num;

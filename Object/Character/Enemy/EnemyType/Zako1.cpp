@@ -33,7 +33,7 @@ void Zako1::Initialize()
     has_shot = false;
 
     ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
-    image = rm->GetImages("Resource/Image/Object/Enemy/Zako2/enemy45.png")[0];
+    images = rm->GetImages("Resource/Image/Object/Enemy/Zako2/anime_enemy45.png", 6, 6, 1, 32, 32);
 
     /*AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
     anim_id =  manager->PlayerAnimation(image_num, location, 0.01f, true);*/
@@ -48,6 +48,8 @@ void Zako1::Update(float delta_second)
 {
     spawn_delay_timer -= delta_second;
     pattern_timer += delta_second;
+
+    GameObjectBase::AnimationControl(delta_second, images, {1, 2, 3, 4, 5, 4, 3, 2}, 1.0f);
 
   /*  AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
     manager->SetPosition(anim_id, location); */
@@ -139,7 +141,7 @@ void Zako1::Draw(const Vector2D& screen_offset) const
             location.x + box_size.x, location.y + box_size.y, GetColor(0, 0, 255), TRUE);
 
     DrawFormatString(location.x - 8, location.y - 8, GetColor(0, 0, 0), "%.0f", hp);
-    DrawRotaGraph(location.x, location.y, 1.0f, 0.0f, image, TRUE);
+   
 
 }
 
