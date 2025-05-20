@@ -11,7 +11,9 @@ enum class Zako1Pattern
 	MoveStraight, // 真っすぐ進む
 	RightMove,    // 右に移動しながら進む
 	LeftMove,      // 左に移動しながら進む
-	ZIgzag
+	ZIgzag,
+	MoveAndStopShoot,   // ★追加
+	MoveThenDiagonal    // ★追加
 };
 
 /// <summary>
@@ -62,11 +64,15 @@ protected:
 	void Shot(float delta_second) override;
 
 private:
-	Zako1Pattern pattern = Zako1Pattern::MoveStraight; // 現在の行動パターン
+	Zako1Pattern pattern = Zako1Pattern::MoveStraight;  // 現在の行動パターン
 	float pattern_timer = 0.0f;                         // パターン切り替えのためのタイマー
 	Vector2D start_location;                            // 出現時の初期位置
 	bool is_returning = false;                          // 戻り動作中かどうかのフラグ
 	bool on_hit;                                        // 被弾中かどうか
+	bool has_shot = false;                              // 弾を撃ったかどうか
+	float after_shot_timer = 0.0f; // 弾発射後の待機時間
+	bool just_shot = false;                             // 弾を撃った直後の一時フラグ
+
 
 	//std::vector<int> image_num;
 
