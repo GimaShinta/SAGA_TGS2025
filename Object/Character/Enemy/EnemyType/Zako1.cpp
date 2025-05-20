@@ -30,12 +30,14 @@ void Zako1::Initialize()
     is_mobility = true;
     start_location = location;
     is_returning = false;
+    has_shot = false;
 
-    //ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
-    //image_num = rm->GetImages("Resource/Image/Object/Enemy/Zako1/anime_enemy30_a.png", 4, 4, 1, 32, 8);
+    ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
+    image = rm->GetImages("Resource/Image/Object/Enemy/Zako2/enemy45.png")[0];
 
-    //AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
-    //anim_id =  manager->PlayerAnimation(image_num, location, 0.01f, true);
+    /*AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+    anim_id =  manager->PlayerAnimation(image_num, location, 0.01f, true);*/
+
 
    
 
@@ -47,19 +49,77 @@ void Zako1::Update(float delta_second)
     spawn_delay_timer -= delta_second;
     pattern_timer += delta_second;
 
-    AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
-    manager->SetPosition(anim_id, location); 
+  /*  AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+    manager->SetPosition(anim_id, location); */
 
     // パターンに応じて移動方向を設定
     switch (pattern)
     {
-        case Zako1Pattern::MoveStraight: velocity = { 0, 120 };  break;
-        case Zako1Pattern::RightMove:    velocity = { 120, 0 };  break;
-        case Zako1Pattern::LeftMove:     velocity = { -120, 0 }; break;
-        case Zako1Pattern::ZIgzag:       velocity.x = sinf(pattern_timer * 1.5f) * 320;
-            velocity.y = 100;       Shot(delta); break;
+        case Zako1Pattern::MoveStraight:
+            velocity = { 0, 120 };
+            break;
+        case Zako1Pattern::RightMove:
+            velocity = { 120, 0 };
+            break;
+        case Zako1Pattern::LeftMove:
+            velocity = { -120, 0 };
+            break;
+        case Zako1Pattern::ZIgzag:
+            velocity.x = sinf(pattern_timer * 1.5f) * 320;
+            velocity.y = 100;
+            Shot(delta_second);
+            break;
 
+        case Zako1Pattern::MoveAndStopShoot:
+            if (!has_shot)
+            {
+                // 降下処理
+                if (location.y < 300)
+                {
+                    velocity = { 0, 100 };
+                }
+                else
+                {
+                    velocity = { 0, 0 }; // 停止
+                    shot_timer += delta_second;
+
+                    if (shot_timer >= 2.0f && player)
+                    {
+                        Shot(delta_second);        // 弾発射
+                        has_shot = true;
+                        shot_timer = 0.0f;
+                    }
+                }
+            }
+            else
+            {
+                velocity = { 0, 0 }; // 弾を撃った後もしばらく静止
+
+                after_shot_timer += delta_second;
+                if (after_shot_timer >= 2.0f)
+                {
+                    velocity = { 0, -150 }; // 上昇開始
+                    if (location.y + box_size.y < 0)
+                    {
+                        ChangePatternRandomly(); // 画面外で次へ
+                    }
+                }
+            }
+            break;
+
+
+        case Zako1Pattern::MoveThenDiagonal:
+            if (pattern_timer < 1.0f)
+            {
+                velocity = { 0, 100 }; // 最初は真下
+            }
+            else
+            {
+                velocity = { 100, 100 }; // 斜め右下（左下なら -100 に）
+            }
+            break;
     }
+
 
     location += velocity * delta_second; // 移動処理
 
@@ -79,14 +139,13 @@ void Zako1::Draw(const Vector2D& screen_offset) const
             location.x + box_size.x, location.y + box_size.y, GetColor(0, 0, 255), TRUE);
 
     DrawFormatString(location.x - 8, location.y - 8, GetColor(0, 0, 0), "%.0f", hp);
+    DrawRotaGraph(location.x, location.y, 1.0f, 0.0f, image, TRUE);
+
 }
 
 void Zako1::Finalize()
 {
-    // 後処理が必要な場合に記述
-
-    AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
-    manager->RemoveAnimation(anim_id);     
+       
 }
 
 void Zako1::Shot(float delta_second)
@@ -109,15 +168,17 @@ void Zako1::Shot(float delta_second)
 
 void Zako1::ChangePatternRandomly()
 {
-    int r = rand() % 4; 
-
+    int r = rand() % 6; // 6パターンに拡張
     switch (r)
     {
         case 0: pattern = Zako1Pattern::MoveStraight; break;
         case 1: pattern = Zako1Pattern::RightMove;    break;
         case 2: pattern = Zako1Pattern::LeftMove;     break;
         case 3: pattern = Zako1Pattern::ZIgzag;       break;
+        case 4: pattern = Zako1Pattern::MoveAndStopShoot; break;
+        case 5: pattern = Zako1Pattern::MoveThenDiagonal; break;
     }
+
 
     pattern_timer = 0.0f;
 }
@@ -126,4 +187,6 @@ void Zako1::SetPattern(Zako1Pattern new_pattern)
 {
     pattern = new_pattern;
     pattern_timer = 0.0f;
+    has_shot = false;
+    after_shot_timer = 0.0f;
 }

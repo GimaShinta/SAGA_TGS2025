@@ -319,7 +319,7 @@ void Stage1::EnemyAppearance(float delta)
             float x = static_cast<float>(lane_x[lane_index]);
             Vector2D spawn_pos(x, 0.0f);
             Zako1* zako1 = objm->CreateObject<Zako1>(spawn_pos);
-            zako1->SetPattern(Zako1Pattern::MoveStraight);
+            zako1->SetPattern(Zako1Pattern::MoveAndStopShoot);
             zako1->SetPlayer(player);
             enemy_list.push_back(zako1);
         }
