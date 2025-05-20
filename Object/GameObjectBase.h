@@ -73,9 +73,8 @@ public:
 	/// <summary>
 	/// ‰æ‘œ‚Ìİ’è
 	/// </summary>
-	/// <param name="delta_second">‚PƒtƒŒ[ƒ€“–‚½‚è‚ÌŠÔ</param>
 	/// <param name="animation_imag">•`‰æ‚µ‚½‚¢’P‘Ì‰æ‘œ</param>
-	virtual void AnimationControl(float delta_second, int animation_image);
+	virtual void AnimationControl(int animation_image);
 
 public:
 	void SetOwnerScene(class GameObjectManager* scene); // 

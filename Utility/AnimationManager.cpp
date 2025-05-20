@@ -32,7 +32,7 @@ void AnimationManager::Update(const float& delta_second)
 		Animation* anim = it->second.get();
 
 		// 停止中 or 一時停止中のアニメーションはスキップ
-		if (anim->is_finished || anim->is_paused)
+		if (anim->is_paused)
 		{
 			++it;
 			continue;

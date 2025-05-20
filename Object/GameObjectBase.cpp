@@ -107,7 +107,7 @@ void GameObjectBase::AnimationControl(float delta_second, std::vector<int>& anim
 /// </summary>
 /// <param name="delta_second">‚PƒtƒŒ[ƒ€“–‚½‚è‚ÌŠÔ</param>
 /// <param name="animation_imag">•`‰æ‚µ‚½‚¢’P‘Ì‰æ‘œ</param>
-void GameObjectBase::AnimationControl(float delta_second, int animation_imag)
+void GameObjectBase::AnimationControl(int animation_imag)
 {
 	image = animation_imag;
 }

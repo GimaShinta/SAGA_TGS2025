@@ -11,6 +11,7 @@
 #include "../../../../Object/Character/Shot/EnemyShot/EnemyShot3.h"
 #include "../../../../Object/Character/Shot/EnemyShot/EnemyShot4.h"
 #include "../../../../Object/Character/Shot/EnemyShot/EnemyShot5.h"
+#include "../../../../Object/Character/Shot/EnemyBeam1.h"
 #include "../../../../Object/Character/Enemy/EnemyBase.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako1.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako2.h"
@@ -72,6 +73,8 @@ void Stage3::Finalize()
     // 終了処理
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
     objm->Finalize();
+    AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+    manager->RemoveAnimation(anim_id);
 }
 
 void Stage3::Update(float delta)
@@ -363,6 +366,10 @@ void Stage3::EnemyAppearance()
     {
         //enemy_list.push_back(boss = objm->CreateObject<Boss>(Vector2D(D_WIN_MAX_X / 2 + 200, D_WIN_MAX_Y + 200)));
         enemy_list.push_back(boss2 = objm->CreateObject<Boss2>(Vector2D(D_WIN_MAX_X / 2, D_WIN_MAX_Y / 2)));
+        // オブジェクト管理クラスのインスタンスを取得
+        GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+        objm->CreateObject<EnemyBeam1>(Vector2D(boss2->GetLocation().x, (boss2->GetLocation().y - D_OBJECT_SIZE) + boss2->GetBoxSize().y))->SetBoss2(boss2);
+        
     }
 }
 
@@ -681,6 +688,12 @@ void Stage3::EnemyShot(float delta_second)
                     /// <param name="generate_location">生成する場所</param>
                     /// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
                     Pattrn10(8, 120.0f, 90.0f, 150.0f, 5.0f, boss2->GetLocation(), delta_second);
+                }
+                else if (bs_attack_pattrn == 11)
+                {
+                    //// オブジェクト管理クラスのインスタンスを取得
+                    //GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+                    //objm->CreateObject<EnemyBeam1>(Vector2D(boss2->GetLocation().x, (player->GetLocation().y - D_OBJECT_SIZE) + boss->GetBoxSize().y));
                 }
             }
         }

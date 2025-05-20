@@ -118,7 +118,8 @@ void Player::Finalize()
 void Player::OnHitCollision(GameObjectBase* hit_object)
 {
 	if (hit_object->GetCollision().object_type == eObjectType::eEnemy ||
-		hit_object->GetCollision().object_type == eObjectType::eEnemyShot )
+		hit_object->GetCollision().object_type == eObjectType::eEnemyShot ||
+		hit_object->GetCollision().object_type == eObjectType::eEnemyBeam)
 	{
 		if (on_hit == false)
 		{

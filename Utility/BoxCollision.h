@@ -10,6 +10,7 @@ enum eObjectType
     ePlayer,
     eShot,
     eBeam,
+    eEnemyBeam,
     eEnemyShot,
     eEnemy,
     eBoss,
