@@ -5,6 +5,11 @@ class EnemyBeam1 : public EnemyShotBase
 private:
 	class Boss2* boss2;
 
+	float beam_time = 0.0f;
+
+	float alpha_timer = 0.0f;          // 点滅用のタイマー
+	const float growth_duration = 1.0f;  // ビームが完成するまでの時間
+
 public:
 	EnemyBeam1();
 	~EnemyBeam1();

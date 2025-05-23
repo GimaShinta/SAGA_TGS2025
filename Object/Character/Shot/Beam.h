@@ -8,6 +8,7 @@ private:
 	class Player* player;
 	float destroy_time = 0.0f;
 
+
 public:
 	Beam();
 	~Beam();

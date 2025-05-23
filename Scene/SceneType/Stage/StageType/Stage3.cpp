@@ -366,9 +366,6 @@ void Stage3::EnemyAppearance()
     {
         //enemy_list.push_back(boss = objm->CreateObject<Boss>(Vector2D(D_WIN_MAX_X / 2 + 200, D_WIN_MAX_Y + 200)));
         enemy_list.push_back(boss2 = objm->CreateObject<Boss2>(Vector2D(D_WIN_MAX_X / 2, D_WIN_MAX_Y / 2)));
-        // オブジェクト管理クラスのインスタンスを取得
-        GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
-        objm->CreateObject<EnemyBeam1>(Vector2D(boss2->GetLocation().x, (boss2->GetLocation().y - D_OBJECT_SIZE) + boss2->GetBoxSize().y))->SetBoss2(boss2);
         
     }
 }
@@ -691,9 +688,22 @@ void Stage3::EnemyShot(float delta_second)
                 }
                 else if (bs_attack_pattrn == 11)
                 {
-                    //// オブジェクト管理クラスのインスタンスを取得
-                    //GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
-                    //objm->CreateObject<EnemyBeam1>(Vector2D(boss2->GetLocation().x, (player->GetLocation().y - D_OBJECT_SIZE) + boss->GetBoxSize().y));
+                    /// <summary>
+                    /// 攻撃パターン11（一本ビーム）
+                    /// </summary>
+                    /// <param name="offsets_x">ボスからの距離(横)</param>
+                    Pattrn11(0.0f);
+                }
+                else if (bs_attack_pattrn == 12)
+                {
+                    /// <summary>
+                    /// 攻撃パターン12（二本ビーム）
+                    /// </summary>
+                    Pattrn12();
+                }
+                else if (bs_attack_pattrn == 13)
+                {
+                    Pattrn13(delta_second);
                 }
             }
         }
@@ -1196,3 +1206,211 @@ void Stage3::Pattrn10(int shot_count, float radius, float angular_speed, float c
         initialized = false;  // 初期化フラグをリセット
     }
 }
+
+/// <summary>
+/// 攻撃パターン11（一本ビーム）
+/// </summary>
+/// <param name="offsets_x">ボスからの距離</param>
+void Stage3::Pattrn11(float offsets_x)
+{
+    static bool                         beam_on = false;          // いま発射中か？
+    static EnemyBeam1*     b;                     // 発射中ビーム
+
+    if (!beam_on)
+    {
+        GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+
+        b = objm->CreateObject<EnemyBeam1>(
+            Vector2D(
+                boss2->GetLocation().x + offsets_x,
+                (boss2->GetLocation().y - D_OBJECT_SIZE) - boss2->GetBoxSize().y
+            ));
+        b->SetBoss2(boss2);
+        beam_on = true;
+    }
+
+    if (b != nullptr)
+    {
+        // それぞれ +100 / -100 のオフセットで追従
+        b->SetLocation(
+            Vector2D(
+                boss2->GetLocation().x + offsets_x,
+                (boss2->GetLocation().y - D_OBJECT_SIZE) + b->GetBoxSize().y
+            ));
+    }
+
+    if (b != nullptr && b->is_destroy)   // 5 秒後などに true になる想定
+    {
+        b->SetDestroy();                 // 必要なら明示削除
+        boss2->SetIsShot();  // 攻撃終了フラグ
+        beam_on = false;
+    }
+}
+
+/// <summary>
+/// 攻撃パターン12（ビーム二本）
+/// </summary>
+void Stage3::Pattrn12()
+{
+    static bool                         beam_on = false;          // いま発射中か？
+    static std::vector<EnemyBeam1*>     beams;                     // 発射中ビーム
+    static const float                  OFFSETS_X[2] = { +100.f, -100.f }; // +100 / -100 の並び
+
+    if (!beam_on)
+    {
+        GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+
+        for (int i = 0; i < 2; ++i)
+        {
+            EnemyBeam1* b = objm->CreateObject<EnemyBeam1>(
+                Vector2D(
+                    boss2->GetLocation().x + OFFSETS_X[i],
+                    (boss2->GetLocation().y - D_OBJECT_SIZE) - boss2->GetBoxSize().y
+                ));
+            b->SetBoss2(boss2);
+            beams.push_back(b);
+        }
+        beam_on = true;
+    }
+
+    for (size_t i = 0; i < beams.size(); ++i)
+    {
+        if (beams[i] == nullptr) continue;   // 念のため
+
+        // それぞれ +100 / -100 のオフセットで追従
+        beams[i]->SetLocation(
+            Vector2D(
+                boss2->GetLocation().x + OFFSETS_X[i],
+                (boss2->GetLocation().y - D_OBJECT_SIZE) + beams[i]->GetBoxSize().y
+            ));
+    }
+
+    for (auto it = beams.begin(); it != beams.end(); )
+    {
+        EnemyBeam1* b = *it;
+
+        if (b != nullptr && b->is_destroy)   // 5 秒後などに true になる想定
+        {
+            b->SetDestroy();                 // 必要なら明示削除
+            it = beams.erase(it);            // vector から外す
+        }
+        else
+        {
+            ++it;
+        }
+    }
+
+    // 全部消えたら次の攻撃を解禁
+    if (beam_on && beams.empty())
+    {
+        boss2->SetIsShot();  // 攻撃終了フラグ
+        beam_on = false;
+    }
+}
+
+/// <summary>
+/// 攻撃パターン13（ビームの段階攻撃）バグあり
+/// </summary>
+/// <param name="delta_second">1フレーム当たりの時間</param>
+void Stage3::Pattrn13(float delta_second)
+{
+    static int   step = 0;
+    static float timer = 0.0f;
+    static std::vector<EnemyBeam1*> beams;
+
+    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+
+    timer += delta_second; // 可変FPSなら delta_second を使う
+
+    switch (step)
+    {
+    case 0: // 第1段階：中央に1本
+    {
+        EnemyBeam1* b = objm->CreateObject<EnemyBeam1>(
+            Vector2D(boss2->GetLocation().x, boss2->GetLocation().y - D_OBJECT_SIZE)
+        );
+        b->SetBoss2(boss2);
+        beams.push_back(b);
+        step = 1;
+        timer = 0.0f;
+    }
+    break;
+
+    case 1: // 2秒後に第2段階：2本（左右）
+        if (timer >= 2.0f)
+        {
+            float offsets[] = { +100.0f, -100.0f };
+            for (float ox : offsets)
+            {
+                EnemyBeam1* b = objm->CreateObject<EnemyBeam1>(
+                    Vector2D(boss2->GetLocation().x + ox, boss2->GetLocation().y - D_OBJECT_SIZE)
+                );
+                b->SetBoss2(boss2);
+                beams.push_back(b);
+            }
+            step = 2;
+            timer = 0.0f;
+        }
+        break;
+
+    case 2: // 2秒後に第3段階：3本（全体）
+        if (timer >= 2.0f)
+        {
+            float offsets[] = { +200.0f, 0.0f, -200.0f };
+            for (float ox : offsets)
+            {
+                EnemyBeam1* b = objm->CreateObject<EnemyBeam1>(
+                    Vector2D(boss2->GetLocation().x + ox, boss2->GetLocation().y - D_OBJECT_SIZE)
+                );
+                b->SetBoss2(boss2);
+                beams.push_back(b);
+            }
+            step = 3;
+        }
+        break;
+
+    case 3: // ビーム位置追従と終了判定
+        for (size_t i = 0; i < beams.size(); ++i)
+        {
+            if (beams[i] == nullptr) continue;
+
+            float offset = 0.0f;
+            switch (beams.size())
+            {
+            case 1: offset = 0.0f; break;
+            case 3: offset = (i == 0) ? +100.0f : (i == 1) ? -100.0f : 0.0f; break;
+            case 6: offset = (i == 0) ? +0.0f : (i == 1) ? +100.0f : (i == 2) ? -100.0f :
+                (i == 3) ? +200.0f : (i == 4) ? 0.0f : -200.0f;
+                break;
+            }
+
+            beams[i]->SetLocation(
+                Vector2D(
+                    boss2->GetLocation().x + offset,
+                    (boss2->GetLocation().y - D_OBJECT_SIZE) + beams[i]->GetBoxSize().y
+                )
+            );
+        }
+
+        // ビームがすべて消えたら終了
+        for (auto it = beams.begin(); it != beams.end(); )
+        {
+            EnemyBeam1* b = *it;
+            if (b != nullptr && b->is_destroy)
+            {
+                b->SetDestroy();
+                it = beams.erase(it);
+            }
+            else ++it;
+        }
+
+        if (beams.empty())
+        {
+            boss2->SetIsShot();  // 攻撃終了フラグ
+            step = 0;
+            timer = 0.0f;
+        }
+        break;
+    }
+}
+

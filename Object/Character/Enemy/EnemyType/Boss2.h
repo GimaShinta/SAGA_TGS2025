@@ -25,6 +25,8 @@ private:
 	float swing_timer = 0.0f;        // 静止中のタイマー
 	bool is_pausing = false;         // 静止中かどうか
 
+	float image_size = 1.0f;
+
 	// クラス Boss2 に以下の変数を追加
 
 	bool has_initialized_swing_x = false;

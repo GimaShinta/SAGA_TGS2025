@@ -84,4 +84,7 @@ private:
 	void Pattrn8(float wave_interval, float wave_duration_limit, const Vector2D& generate_location, float delta_second);
 	void Pattrn9(int shot_count, float radius, float angular_speed, float bullet_speed, const Vector2D& generate_location, float delta_second);
 	void Pattrn10(int shot_count, float radius, float angular_speed, float center_speed, float duration_limit, const Vector2D& center_location, float delta_second);
+	void Pattrn11(float offsets_x);
+	void Pattrn12();
+	void Pattrn13(float delta_second);
 };
