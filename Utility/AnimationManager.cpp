@@ -3,6 +3,13 @@
 #include <DxLib.h>
 #include <algorithm>
 
+void AnimationManager::LoadAllEffects()
+{
+	ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
+
+	effect_images[EffectName::eExprotion] = rm->GetImages("Resource/Image/Effect/E_Explosion.png", 54, 9, 6, 517, 517);
+}
+
 // アニメーションを再生する
 AnimationID AnimationManager::PlayerAnimation(const std::vector<int>& image_handles, const Vector2D& position, float frame_time_sec, bool loop)
 {
@@ -13,14 +20,24 @@ AnimationID AnimationManager::PlayerAnimation(const std::vector<int>& image_hand
 
 AnimationID AnimationManager::PlayerAnimation(EffectName effect_name, const Vector2D& position, float frame_time_sec, bool loop)
 {
-	const EffectData data = effect_data_nums[effect_name];
+	auto it = effect_images.find(effect_name);
 
-	// 画像の読み込み
-	ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
-	std::vector<int> handle = rm->GetImages(data.image_handle, data.all_num, data.num_x, data.num_y, data.size_x, data.size_y);
+	// ★防御コード：未登録 or 空 vector を検出
+	if (it == effect_images.end() || it->second.empty())
+	{
+		// デバッグ時の通知
+#ifndef NDEBUG
+		printfDx("Error: エフェクトがロードされていない (%d)\n", effect_name);
+#endif
 
-	AnimationID id = next_id++;  // 一意のIDを発行
-	animations[id] = std::make_unique<Animation>(id, handle, position, frame_time_sec, loop);
+		return -1;  // 無効なIDを返して呼び出し元で無視させる
+	}
+
+	const std::vector<int>& handles = it->second;
+
+	AnimationID id = next_id++;
+	animations[id] = std::make_unique<Animation>(id, handles, position,
+		frame_time_sec, loop);
 	return id;
 }
 

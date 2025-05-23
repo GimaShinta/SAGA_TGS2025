@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <unordered_map>
+#include <map>
 #include "Vector2D.h"
 #include <algorithm>
 
@@ -19,23 +20,6 @@ using AnimationID = int;
 // アニメーション制御クラス
 class AnimationManager : public Singleton<AnimationManager>
 {
-private:
-	// エフェクト画像読み込みに必要なデータ 
-	struct EffectData
-	{
-		const char* image_handle;
-		int all_num;
-		int num_x;
-		int num_y;
-		int size_x;
-		int size_y;
-	};
-
-	EffectData effect_data_nums[eExprotion3] =
-	{
-		{"Resource/Image/Effect/E_Explosion.png", 54, 9, 6, 517, 517},
-	};
-
 private:
 	// 各アニメーションに項目設定
 	struct Animation
@@ -62,6 +46,8 @@ private:
 
 public:
 	AnimationManager() = default;
+
+	void LoadAllEffects();
 
 	/// <summary>
 	/// アニメーション再生
@@ -116,4 +102,6 @@ private:
 
 	// IDとアニメーションの対応マップ
 	std::unordered_map<AnimationID, std::unique_ptr<Animation>> animations;
+
+	std::map<int, std::vector<int>> effect_images;
 };
