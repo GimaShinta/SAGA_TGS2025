@@ -14,7 +14,6 @@
 #include "../../../../Object/Character/Shot/EnemyShot/EnemyShot3.h"
 #include "../../../../Object/Character/Enemy/EnemyBase.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako1.h"
-#include "../../../../Object/Character/Enemy/EnemyType/Zako2.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako3.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako4.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Boss.h"
@@ -88,7 +87,8 @@ void Stage1::Update(float delta)
     timer++;
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
     objm->Update(delta);
-
+    AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+    manager->Update(delta);
    
 
 
@@ -318,10 +318,10 @@ void Stage1::EnemyAppearance(float delta)
             int lane_index = GetRand(num_lanes);
             float x = static_cast<float>(lane_x[lane_index]);
             Vector2D spawn_pos(x, 0.0f);
-            Zako1* zako1 = objm->CreateObject<Zako1>(spawn_pos);
-            zako1->SetPattern(Zako1Pattern::MoveAndStopShoot);
-            zako1->SetPlayer(player);
-            enemy_list.push_back(zako1);
+            Zako* zako = objm->CreateObject<Zako>(spawn_pos);
+            zako->SetPattern(ZakoPattern::MoveStraight);
+            zako->SetPlayer(player);
+            enemy_list.push_back(zako);
         }
         else if (stage_timer < 48.0f)
         {
@@ -333,12 +333,12 @@ void Stage1::EnemyAppearance(float delta)
 
             bool from_left = fmod(stage_timer, 20.0f) < 10.0f;
             Vector2D spawn_pos = from_left ? Vector2D(0.0f, y) : Vector2D(1000.0f, y);
-            Zako1Pattern pattern = from_left ? Zako1Pattern::RightMove : Zako1Pattern::LeftMove;
+            ZakoPattern pattern = from_left ? ZakoPattern::RightMove : ZakoPattern::LeftMove;
 
-            Zako1* zako1 = objm->CreateObject<Zako1>(spawn_pos);
-            zako1->SetPattern(pattern);
-            zako1->SetPlayer(player);
-            enemy_list.push_back(zako1);
+            Zako* zako = objm->CreateObject<Zako>(spawn_pos);
+            zako->SetPattern(pattern);
+            zako->SetPlayer(player);
+            enemy_list.push_back(zako);
 
             if (stage_timer >= 20.0f && !zako4_spawned)
             {
@@ -358,16 +358,16 @@ void Stage1::EnemyAppearance(float delta)
             struct SpawnData
             {
                 Vector2D pos;
-                Zako1Pattern pattern;
+                ZakoPattern pattern;
             };
 
             std::vector<SpawnData> spawns = {
-                { Vector2D(450, 0), Zako1Pattern::ZIgzag }
+                { Vector2D(450, 0), ZakoPattern::MoveAndStopShoot }
             };
 
             for (const auto& s : spawns)
             {
-                Zako1* z = objm->CreateObject<Zako1>(s.pos);
+                Zako* z = objm->CreateObject<Zako>(s.pos);
                 z->SetPattern(s.pattern);
                 z->SetPlayer(player);
                 enemy_list.push_back(z);

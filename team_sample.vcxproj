@@ -173,7 +173,6 @@
     <ClCompile Include="Utility\ScoreData.cpp" />
     <ClCompile Include="Utility\Vector2D.cpp" />
     <ClCompile Include="Object\Character\Enemy\EnemyType\Zako1.cpp" />
-    <ClCompile Include="Object\Character\Enemy\EnemyType\Zako2.cpp" />
     <ClCompile Include="Object\Character\Enemy\EnemyType\Zako3.cpp" />
     <ClCompile Include="Object\Character\Enemy\EnemyType\Zako4.cpp" />
   </ItemGroup>
@@ -219,7 +218,6 @@
     <ClInclude Include="Utility\ScoreData.h" />
     <ClInclude Include="Utility\Vector2D.h" />
     <ClInclude Include="Object\Character\Enemy\EnemyType\Zako1.h" />
-    <ClInclude Include="Object\Character\Enemy\EnemyType\Zako2.h" />
     <ClInclude Include="Object\Character\Enemy\EnemyType\Zako3.h" />
     <ClInclude Include="Object\Character\Enemy\EnemyType\Zako4.h" />
   </ItemGroup>

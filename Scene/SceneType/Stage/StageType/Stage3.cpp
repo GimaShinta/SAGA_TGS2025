@@ -14,7 +14,6 @@
 #include "../../../../Object/Character/Shot/EnemyBeam1.h"
 #include "../../../../Object/Character/Enemy/EnemyBase.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako1.h"
-#include "../../../../Object/Character/Enemy/EnemyType/Zako2.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako3.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Boss.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Boss2.h"
@@ -329,7 +328,7 @@ void Stage3::EnemyAppearance()
         int e = 1 + rand() % 2;
         if (e == ENE_ZAKO1)
         {
-            enemy_list.push_back(objm->CreateObject<Zako1>(Vector2D(x, y)));
+            enemy_list.push_back(objm->CreateObject<Zako>(Vector2D(x, y)));
         }
         if (e == ENE_ZAKO2)
         {
@@ -342,8 +341,6 @@ void Stage3::EnemyAppearance()
             {
                 vx = 60;
             }
-            enemy_list.push_back(zako2 = objm->CreateObject<Zako2>(Vector2D(x, -100)));
-            zako2->SetVelocity(Vector2D(vx, 50));
         }
     }
     // ÉUÉR3ÇÃèoåª

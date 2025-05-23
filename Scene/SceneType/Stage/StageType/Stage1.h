@@ -12,7 +12,7 @@ private:
 	// 各種攻撃・敵キャラクターのポインタ定義
 	class Shot* shot;               // プレイヤーのショット
 	class Beam* beam;               // プレイヤーのビーム攻撃
-	class Zako1* zako1;             // 雑魚敵その1
+	class Zako* zako;             // 雑魚敵その1
 	class Zako2* zako2;             // 雑魚敵その2
 	class Zako4* zako4;             // 雑魚敵その4（1回のみ出現）
 	class Boss* boss;               // ボスキャラ1

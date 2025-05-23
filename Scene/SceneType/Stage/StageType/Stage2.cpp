@@ -8,7 +8,6 @@
 #include "../../../../Object/GameObjectManager.h"
 
 #include "../../../../Object/Character/Enemy/EnemyType/Zako1.h"
-#include "../../../../Object/Character/Enemy/EnemyType/Zako2.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako4.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako5.h"
 
