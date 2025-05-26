@@ -320,7 +320,7 @@ void Stage1::EnemyAppearance(float delta)
             float x = static_cast<float>(lane_x[lane_index]);
             Vector2D spawn_pos(x, 0.0f);
             Zako* zako = objm->CreateObject<Zako>(spawn_pos);
-            zako->SetPattern(ZakoPattern::MoveStraight);
+            zako->SetPattern(ZakoPattern::Formation);
             zako->SetPlayer(player);
             enemy_list.push_back(zako);
         }
@@ -351,6 +351,37 @@ void Stage1::EnemyAppearance(float delta)
             }
 
         }
+        else if (stage_timer < 60.0f)
+        {
+            static bool zakoFormationSpawned = false;
+            if (!zakoFormationSpawned)
+            {
+                const int cols = 3;
+                const int rows = 3;
+                const int startX = 400; // X座標の基準
+                const int startY = 0;   // Y座標の基準
+                const int spacingX = 60;
+                const int spacingY = 60;
+
+                for (int row = 0; row < rows; ++row)
+                {
+                    for (int col = 0; col < cols; ++col)
+                    {
+                        float x = startX + col * spacingX;
+                        float y = startY + row * spacingY;
+
+                        Zako* zako = objm->CreateObject<Zako>(Vector2D(x, y));
+                        zako->SetPattern(ZakoPattern::RightMove); // 横移動パターン
+                        zako->SetPlayer(player);
+                        enemy_list.push_back(zako);
+                    }
+                }
+
+                zakoFormationSpawned = true; // これで一度だけ出す
+            }
+        }
+
+
         else
         {
 
