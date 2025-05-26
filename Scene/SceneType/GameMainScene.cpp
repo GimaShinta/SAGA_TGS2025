@@ -29,6 +29,9 @@ void GameMainScene::Initialize()
     stage_bgm1 = rm->GetSounds("Resource/sound/bgm/stage/Magical World.mp3");
     stage_bgm3 = rm->GetSounds("Resource/sound/bgm/stage/Cryonic Pulse.mp3");
 
+    AnimationManager* anim = Singleton<AnimationManager>::GetInstance();
+    anim->LoadAllEffects();
+
     // ステージ1用BGMを再生
     current_bgm_handle = stage_bgm1;
     ChangeVolumeSoundMem(255 * 60 / 100, current_bgm_handle);
@@ -44,6 +47,9 @@ eSceneType GameMainScene::Update(float delta_second)
 {
     if (current_stage)
     {
+        AnimationManager* anim = Singleton<AnimationManager>::GetInstance();
+        anim->Update(delta_second);
+
         current_stage->Update(delta_second);
 
         if (current_stage->IsFinished())
@@ -141,7 +147,11 @@ eSceneType GameMainScene::Update(float delta_second)
 /// <returns></returns>
 void GameMainScene::Draw()
 {
-    if (current_stage) {
+    if (current_stage) 
+    {
+        AnimationManager* anim = Singleton<AnimationManager>::GetInstance();
+        anim->Draw();
+
         current_stage->Draw();
     }
 
