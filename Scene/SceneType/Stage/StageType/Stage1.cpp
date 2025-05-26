@@ -163,10 +163,11 @@ void Stage1::Update(float delta)
     // “G‚ª“|‚³‚ê‚½Žž‚ÍŒoŒ±’l‚ð¶¬B
     for (auto& enemy : enemy_list)
     {
-        if (enemy->is_destroy == true)
+        if (enemy->is_destroy == true && !enemy->is_exp_generated)
         {
             Exp* exp = Singleton<GameObjectManager>::GetInstance()->CreateObject<Exp>(enemy->GetLocation());
             exp->SetPlayer(player);
+            enemy->is_exp_generated = true;
         }
     }
 

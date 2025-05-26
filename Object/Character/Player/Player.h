@@ -19,11 +19,12 @@ enum
 
 class Player : public CharacterBase
 {
+public:
+	int life;
 private:
 	bool is_shot;
 	int count_space;
 	float shot_timer = 0.0f;
-	int life;
 	bool on_hit;
 	bool beam_on = false;
 	bool stop = false;

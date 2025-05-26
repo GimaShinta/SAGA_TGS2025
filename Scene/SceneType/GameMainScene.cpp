@@ -145,6 +145,8 @@ void GameMainScene::Draw()
         current_stage->Draw();
     }
 
+    DrawFormatString(D_WIN_MAX_X - 150, 0, GetColor(255, 255, 255), "プレイヤーライフ : %d", player->life);
+
     // ==== スコアログ（左下） ====
     int log_base_x = 30;
     int log_base_y = D_WIN_MAX_Y - 220;

@@ -58,5 +58,5 @@ public:
 	
 	void SetPlayer(Player* p);
 
-
+	bool is_exp_generated = false;
 };
