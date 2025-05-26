@@ -24,10 +24,15 @@ void Zako5::Initialize()
     collision.hit_object_type.push_back(eObjectType::eBeam);
 
     is_mobility = true;
+
+    ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
+    image = rm->GetImages("Resource/Image/Object/Enemy/Zako5/enemy53.png")[0];
+
 }
 
 void Zako5::Update(float delta_second)
 {
+    GameObjectBase::AnimationControl(image);
     location += velocity * delta_second;
 
     // âÊñ îÕàÕÇ≈è„â∫îΩì]
@@ -80,6 +85,7 @@ void Zako5::Draw(const Vector2D& screen_offset) const
     DrawBox(location.x - box_size.x, location.y - box_size.y,
         location.x + box_size.x, location.y + box_size.y,
         GetColor(255, 100, 0), TRUE);
+    DrawRotaGraph(location.x, location.y, 1.5f, 3.14, image, TRUE);
 
     DrawFormatString(location.x - 20, location.y - 30, GetColor(255, 255, 255), "Zako5: %.0f", hp);
 }

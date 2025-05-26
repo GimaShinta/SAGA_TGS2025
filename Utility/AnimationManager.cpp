@@ -8,6 +8,7 @@ void AnimationManager::LoadAllEffects()
 	ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
 
 	effect_images[EffectName::eExprotion] = rm->GetImages("Resource/Image/Effect/E_Explosion.png", 54, 9, 6, 517, 517);
+	effect_images[EffectName::eExprotion2] = rm->GetImages("Resource/Image/Effect/E_Explosion2.png", 54, 9, 6, 355, 365);
 }
 
 // アニメーションを再生する
