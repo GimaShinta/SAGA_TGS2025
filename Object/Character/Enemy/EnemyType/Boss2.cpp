@@ -41,7 +41,7 @@ void Boss2::Initialize()
 	location = generate_base_position;
 
 	ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
-	image = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_01/Boss01.png")[0];
+	image = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_02/boss03.png")[0];
 }
 
 /// <summary>
