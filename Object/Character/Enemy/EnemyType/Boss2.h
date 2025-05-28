@@ -27,12 +27,18 @@ private:
 
 	float image_size = 1.0f;
 
+	int boss2_image[7] = { 0 };
+
+	// 部品の位置（左右それぞれ2個ずつ）
+	Vector2D part_positions[6]; // 0:左奥, 1:左手前, 2:右手前, 3:右奥
+
 	// クラス Boss2 に以下の変数を追加
 
 	bool has_initialized_swing_x = false;
 	float swing_center_x = 0.0f;
 	int swing_direction = 1;           // 1 = 右, -1 = 左
 	float swing_wait_timer = 0.0f;     // 停止中のタイマー
+
 public:
 	Boss2();
 	~Boss2();
@@ -64,6 +70,9 @@ protected:
 	void Movement(float delta_second) override;
 
 	void Shot(float delta_second) override;
+
+private:
+	void DrawBoss2(const Vector2D position) const;
 
 public:
 	int GetAttackPattrn() const;

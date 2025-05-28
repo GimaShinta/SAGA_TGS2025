@@ -41,7 +41,19 @@ void Boss2::Initialize()
 	location = generate_base_position;
 
 	ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
-	image = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_02/boss03.png")[0];
+	boss2_image[0] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_02/boss03_a1.png")[0];
+	boss2_image[1] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_02/boss03_a2.png")[0];
+	boss2_image[2] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_02/boss03_b1.png")[0];
+	boss2_image[3] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_02/boss03_b2.png")[0];
+	boss2_image[4] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_02/boss03_b3.png")[0];
+	boss2_image[5] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_02/boss03_b4.png")[0];
+	boss2_image[6] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_02/boss03_b5.png")[0];
+
+	// 最初は本体の位置に固定
+	for (int i = 0; i < 6; ++i)
+	{
+		part_positions[i] = location;
+	}
 }
 
 /// <summary>
@@ -74,6 +86,38 @@ void Boss2::Update(float delta_second)
 	//	prev_attack_pattrn = attack_pattrn;
 	//}
 
+	// 部品を遅れて追従させる処理
+	const float follow_speed = 5.0f; // 追従速度（大きいと早くついてくる）
+
+	// 部品の相対オフセット（左右に2個ずつ）
+	Vector2D offsets[6] = {
+		Vector2D(-180, 0), // 左奥
+		Vector2D(-100,  0), // 左手前
+		Vector2D(100,  0), // 右手前
+		Vector2D(180, 0),  // 右奥
+
+		Vector2D(-100, -100),  // 砲
+		Vector2D(100, -100)  // 砲
+	};
+
+	// 追従の速さ
+	float individual_follow_speeds[6] = {
+	7.0f,  // 左奥（ゆっくり）
+	12.0f,  // 左手前
+	12.0f,  // 右手前
+	7.0f,   // 右奥（ゆっくり）
+
+	10.0f,   // 砲（ゆっくり）
+	10.0f   // 砲（ゆっくり）
+	};
+
+	// 追従処理
+	for (int i = 0; i < 6; ++i)
+	{
+		Vector2D target = location + offsets[i];
+		part_positions[i] += (target - part_positions[i]) * individual_follow_speeds[i] * delta_second;
+	}
+
 	// 親クラスの更新処理を呼び出す
 	__super::Update(delta_second);
 }
@@ -84,15 +128,15 @@ void Boss2::Update(float delta_second)
 /// <param name="screen_offset"></param>
 void Boss2::Draw(const Vector2D& screen_offset) const
 {
-	// 雑魚１を描画する
-	DrawBox(location.x - box_size.x, location.y - box_size.y,
-		location.x + box_size.x, location.y + box_size.y, GetColor(0, 255, 0), TRUE);
+	//// 雑魚１を描画する
+	//DrawBox(location.x - box_size.x, location.y - box_size.y,
+	//	location.x + box_size.x, location.y + box_size.y, GetColor(0, 255, 0), TRUE);
 
 	// 体力の表示
 	DrawFormatString(location.x - 8, location.y - 8, GetColor(0, 0, 0), "%.0f", hp);
 
-	DrawRotaGraph(location.x, location.y, image_size, 0.0f, image, TRUE);
-
+	// ボスの描画
+	DrawBoss2(Vector2D(location.x,location.y));
 }
 
 // 終了時処理
@@ -255,6 +299,31 @@ void Boss2::Shot(float delta_second)
 			shot_timer = 0;
 		}
 	}
+}
+
+void Boss2::DrawBoss2(const Vector2D position) const
+{
+	//DrawRotaGraph(position[0].x, position[0].y, image_size, 0.0f, boss2_image[0], TRUE);
+	//DrawRotaGraph(position[0].x, position[0].y, image_size, 0.0f, boss2_image[1], TRUE);
+	
+	//DrawRotaGraph(position[0].x, position[0].y, image_size, 0.0f, boss2_image[2], TRUE);
+	//DrawRotaGraph(position[0].x + 50, position[0].y, image_size, 0.0f, boss2_image[3], TRUE);
+	//DrawRotaGraph(position[0].x - 50, position[0].y, image_size, 0.0f, boss2_image[4], TRUE);
+	//DrawRotaGraph(position[0].x - 100, position[0].y, image_size, 0.0f, boss2_image[5], TRUE);
+	//DrawRotaGraph(position[0].x + 100, position[0].y, image_size, 0.0f, boss2_image[6], TRUE);
+	
+
+
+	// 本体
+	DrawRotaGraph(position.x, position.y, image_size, 0.0f, boss2_image[2], TRUE);
+	// 部品
+	DrawRotaGraph(part_positions[1].x, part_positions[1].y, image_size, 0.0f, boss2_image[3], TRUE); // 左手前
+	DrawRotaGraph(part_positions[0].x, part_positions[0].y, image_size, 0.0f, boss2_image[5], TRUE); // 左奥
+	DrawRotaGraph(part_positions[2].x, part_positions[2].y, image_size, 0.0f, boss2_image[4], TRUE); // 右手前
+	DrawRotaGraph(part_positions[3].x, part_positions[3].y, image_size, 0.0f, boss2_image[6], TRUE); // 右奥
+	DrawRotaGraph(part_positions[4].x, part_positions[4].y, image_size, 0.0f, boss2_image[1], TRUE);
+	DrawRotaGraph(part_positions[5].x, part_positions[5].y, image_size, 0.0f, boss2_image[1], TRUE);
+
 }
 
 int Boss2::GetAttackPattrn() const

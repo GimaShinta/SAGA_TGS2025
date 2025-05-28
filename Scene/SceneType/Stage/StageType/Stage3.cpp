@@ -1220,7 +1220,7 @@ void Stage3::Pattrn11(float offsets_x)
         b = objm->CreateObject<EnemyBeam1>(
             Vector2D(
                 boss2->GetLocation().x + offsets_x,
-                (boss2->GetLocation().y - D_OBJECT_SIZE) - boss2->GetBoxSize().y
+                (boss2->GetLocation().y + 150.0f) - boss2->GetBoxSize().y
             ));
         b->SetBoss2(boss2);
         beam_on = true;
@@ -1232,7 +1232,7 @@ void Stage3::Pattrn11(float offsets_x)
         b->SetLocation(
             Vector2D(
                 boss2->GetLocation().x + offsets_x,
-                (boss2->GetLocation().y - D_OBJECT_SIZE) + b->GetBoxSize().y
+                (boss2->GetLocation().y + 150.0f) + b->GetBoxSize().y
             ));
     }
 
@@ -1262,7 +1262,7 @@ void Stage3::Pattrn12()
             EnemyBeam1* b = objm->CreateObject<EnemyBeam1>(
                 Vector2D(
                     boss2->GetLocation().x + OFFSETS_X[i],
-                    (boss2->GetLocation().y - D_OBJECT_SIZE) - boss2->GetBoxSize().y
+                    (boss2->GetLocation().y + 50.0f) - boss2->GetBoxSize().y
                 ));
             b->SetBoss2(boss2);
             beams.push_back(b);
@@ -1278,7 +1278,7 @@ void Stage3::Pattrn12()
         beams[i]->SetLocation(
             Vector2D(
                 boss2->GetLocation().x + OFFSETS_X[i],
-                (boss2->GetLocation().y - D_OBJECT_SIZE) + beams[i]->GetBoxSize().y
+                (boss2->GetLocation().y + 50.0f) + beams[i]->GetBoxSize().y
             ));
     }
 

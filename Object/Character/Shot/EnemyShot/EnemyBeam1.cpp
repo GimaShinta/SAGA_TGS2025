@@ -34,7 +34,7 @@ void EnemyBeam1::Initialize()
 /// <param name="delata_second">1フレーム当たりの時間</param>
 void EnemyBeam1::Update(float delta_second)
 {
-#if 1
+#if 0
     beam_time += delta_second;
     alpha_timer += delta_second;
 
@@ -104,7 +104,7 @@ void EnemyBeam1::Update(float delta_second)
 /// <param name="screen_offset"></param>
 void EnemyBeam1::Draw(const Vector2D& screen_offset) const
 {
-#if 1
+#if 0
     // アルファ（透明度）をサイン波で変化 → 点滅
     float alpha = 255.0f;
     if (beam_time < growth_duration)
