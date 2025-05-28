@@ -15,6 +15,7 @@ private:
 	class Zako* zako;             // 雑魚敵その1
 	class Zako2* zako2;             // 雑魚敵その2
 	class Zako4* zako4;             // 雑魚敵その4（1回のみ出現）
+	class Stage1Boss* boss1;
 	class Boss* boss;               // ボスキャラ1
 	class Boss2* boss2;             // ボスキャラ2
 	class EnemyShot3* e_shot3;      // 敵のショットタイプ3
@@ -44,8 +45,10 @@ private:
 	bool is_brend = false;     // ブレンド演出中かどうか
 	int bs_attack_pattrn = 0;  // ボスの攻撃パターン制御用インデックス
 	float shot_timer;          // ショット発射の間隔制御タイマー
-	float stage_timer = 0.0f;  // ステージの経過時間（秒単位）
+	float stage_timer = 70.0f;  // ステージの経過時間（秒単位）
 	float scene_timer = 0.0f;  // 演出や状態遷移用タイマー
+	bool boss_spawned = false;
+
 
 	static const int TILE_COLS = 8;
 	static const int TILE_ROWS = 6;

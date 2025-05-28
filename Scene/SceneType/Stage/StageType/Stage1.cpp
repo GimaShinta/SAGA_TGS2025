@@ -18,6 +18,7 @@
 #include "../../../../Object/Character/Enemy/EnemyType/Zako4.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Boss.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Boss2.h"
+#include "../../../../Object/Character/Enemy/EnemyType/Stage1BOSS.h"
 #include "../../../../Scene/SceneType/Stage/StageType/Stage1.h"
 
 #include"../../../../Object/Item/Exp/Exp.h"
@@ -31,6 +32,7 @@ Stage1::Stage1(Player* player)
     zako2(nullptr),
     zako4(nullptr),
     boss(nullptr),
+    boss1(nullptr),
     e_shot1(nullptr),
     e_shot2(nullptr),
     enemy_spawn_timer(0.0f)
@@ -149,7 +151,7 @@ void Stage1::Update(float delta)
     }
 
     /*遷移時間*/
-    if (stage_timer >= 65.0f)
+    if (stage_timer >= 130.0f)
     {
         is_clear = true;
     }
@@ -171,18 +173,14 @@ void Stage1::Update(float delta)
         }
     }
 
-    // ゲームクリア・オーバー判定
-    if (boss && !boss->GetIsAlive() && !is_over)
+    // ボスが倒れたらクリア
+    if (boss1 != nullptr && boss1->GetIsAlive() == false && is_over == false)
     {
-        boss->SetDestroy();
+        boss1->SetDestroy();
         is_clear = true;
     }
 
-    if (boss2 && !boss2->GetIsAlive() && !is_over)
-    {
-        boss2->SetDestroy();
-        is_clear = true;
-    }
+    if(boss1 != nullptr )
 
     if (player && !player->GetIsAlive() && !is_clear)
     {
@@ -205,6 +203,7 @@ void Stage1::Update(float delta)
             finished = true;
         }
     }
+
 
 
     // 仮の条件：N押したらステージ終了
@@ -320,10 +319,16 @@ void Stage1::EnemyAppearance(float delta)
             float x = static_cast<float>(lane_x[lane_index]);
             Vector2D spawn_pos(x, 0.0f);
             Zako* zako = objm->CreateObject<Zako>(spawn_pos);
-            zako->SetPattern(ZakoPattern::Formation);
+            zako->SetPattern(ZakoPattern::MoveStraight);
             zako->SetPlayer(player);
             enemy_list.push_back(zako);
+
+
         }
+
+        else if(stage_timer < 29.0f)
+        {} //インターバル
+
         else if (stage_timer < 48.0f)
         {
             // ランダムなY位置で左右からZako1が来る + 一定条件でZako4も出現
@@ -333,7 +338,7 @@ void Stage1::EnemyAppearance(float delta)
             float y = static_cast<float>(lane_y[lane_index_y]);
 
             bool from_left = fmod(stage_timer, 20.0f) < 10.0f;
-            Vector2D spawn_pos = from_left ? Vector2D(0.0f, y) : Vector2D(1000.0f, y);
+            Vector2D spawn_pos = from_left ? Vector2D(200.0f, y) : Vector2D(1000.0f, y);
             ZakoPattern pattern = from_left ? ZakoPattern::RightMove : ZakoPattern::LeftMove;
 
             Zako* zako = objm->CreateObject<Zako>(spawn_pos);
@@ -351,60 +356,46 @@ void Stage1::EnemyAppearance(float delta)
             }
 
         }
-        else if (stage_timer < 60.0f)
+
+        else if(stage_timer < 56.0f)
+        {} //インターバル
+
+        else if (stage_timer < 72.0f)
         {
-            static bool zakoFormationSpawned = false;
-            if (!zakoFormationSpawned)
+            // ランダムレーンにZako1を1体出現
+            const int num_lanes = 7;
+            const int lane_x[num_lanes] = { 250, 350, 450, 550, 650, 750, 850 };
+            int lane_index = GetRand(num_lanes);
+            float x = static_cast<float>(lane_x[lane_index]);
+            Vector2D spawn_pos(x, 0.0f);
+            Zako* zako = objm->CreateObject<Zako>(spawn_pos);
+
+            // ランダムにパターンを選ぶ
+            int r = GetRand(2); // 0か1をランダムで取得
+            if (r == 0)
+                zako->SetPattern(ZakoPattern::MoveAndStopShoot);
+            else
+                zako->SetPattern(ZakoPattern::DiveOnce);
+
+            zako->SetPlayer(player);
+            enemy_list.push_back(zako);
+        }
+
+        else if (stage_timer < 77.0)
+        {
+        }
+
+        else 
+        {
+            if (!boss_spawned)
             {
-                const int cols = 3;
-                const int rows = 3;
-                const int startX = 400; // X座標の基準
-                const int startY = 0;   // Y座標の基準
-                const int spacingX = 60;
-                const int spacingY = 60;
-
-                for (int row = 0; row < rows; ++row)
-                {
-                    for (int col = 0; col < cols; ++col)
-                    {
-                        float x = startX + col * spacingX;
-                        float y = startY + row * spacingY;
-
-                        Zako* zako = objm->CreateObject<Zako>(Vector2D(x, y));
-                        zako->SetPattern(ZakoPattern::RightMove); // 横移動パターン
-                        zako->SetPlayer(player);
-                        enemy_list.push_back(zako);
-                    }
-                }
-
-                zakoFormationSpawned = true; // これで一度だけ出す
+                boss1 = objm->CreateObject<Stage1Boss>(Vector2D(670, -200));
+                boss1->SetPattern(BossPattern::Entrance);
+                enemy_list.push_back(boss1); 
+                boss_spawned = true;
             }
         }
 
-
-        else
-        {
-
-
-            // Zigzagパターンで3体同時に出現
-            struct SpawnData
-            {
-                Vector2D pos;
-                ZakoPattern pattern;
-            };
-
-            std::vector<SpawnData> spawns = {
-                { Vector2D(450, 0), ZakoPattern::MoveAndStopShoot }
-            };
-
-            for (const auto& s : spawns)
-            {
-                Zako* z = objm->CreateObject<Zako>(s.pos);
-                z->SetPattern(s.pattern);
-                z->SetPlayer(player);
-                enemy_list.push_back(z);
-            }
-        }
 
         enemy_spawn_timer = 0.0f;
     }

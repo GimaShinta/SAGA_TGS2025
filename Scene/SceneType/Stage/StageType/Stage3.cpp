@@ -1,5 +1,5 @@
 #include "Stage3.h"
-#include "Stage2.h" // 次のステージがある場合
+#include "Stage2.h" 
 #include "../../../../Scene/SceneType/TitleScene.h"
 
 #include "../../../../Object/GameObjectManager.h"

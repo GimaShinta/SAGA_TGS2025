@@ -124,7 +124,38 @@ void Zako::Update(float delta_second)
             break;
         }
 
-        // 他のパターンは未実装（Homing, Circular）ならスルー
+        case ZakoPattern::DiveOnce:
+        {
+            const float approach_time = 3.0f;   // まっすぐ進む時間（秒）
+            const float stop_time = 1.0f;       // 停止する時間（秒）
+
+            if (pattern_timer < approach_time)
+            {
+                // まっすぐ下方向へ進む（速度100）
+                velocity = { 0, 100 };
+            }
+            else if (pattern_timer < approach_time + stop_time)
+            {
+                // 一度停止
+                velocity = { 0, 0 };
+            }
+            else
+            {
+                // 突進開始（1回だけ方向決定）
+                if (!has_shot && player)
+                {
+                    Vector2D dir = player->GetLocation() - location;
+                    float len = dir.Length();
+                    if (len > 0) dir /= len;
+
+                    velocity = dir * 600.0f; // 突進速度調整可
+                    has_shot = true;
+                }
+                // velocityは突進方向のまま維持
+            }
+            break;
+        }
+      
     }
 
     location += velocity * delta_second;
@@ -207,6 +238,11 @@ void Zako::SetPattern(ZakoPattern new_pattern)
 
         case ZakoPattern::MoveAndStopShoot:
         case ZakoPattern::Formation:
+            hp = 30;
+            images = images_a;
+            anim_indices = { 0, 1, 2, 3 };
+            break;
+        case ZakoPattern::DiveOnce:
             hp = 30;
             images = images_a;
             anim_indices = { 0, 1, 2, 3 };
