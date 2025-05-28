@@ -5,25 +5,16 @@
 #include "../../../../Object/Character/Shot/EnemyShot/EnemyShot2.h"
 
 // ザコ敵の行動パターン定義
-enum class ZakoPattern
+enum class BossPattern
 {
-    MoveStraight,
-    RightMove,
-    LeftMove,
-    ZIgzag,
-    MoveAndStopShoot,
-    MoveThenDiagonal,
-    Formation,
-    Homing,
-    DiveOnce, 
+    Entrance
 };
 
-
-class Zako : public EnemyBase
+class Stage1Boss : public EnemyBase
 {
 public:
-    Zako();
-    ~Zako();
+    Stage1Boss();
+    ~Stage1Boss();
 
     // 初期化・更新・描画・終了処理
     void Initialize() override;
@@ -32,7 +23,7 @@ public:
     void Finalize() override;
 
     // 外部からパターン設定
-    void SetPattern(ZakoPattern new_pattern);
+    void SetPattern(BossPattern new_pattern);
 
 protected:
     // 敵ショットの発射処理（Override）
@@ -40,8 +31,14 @@ protected:
 
 private:
     // 現在の行動パターンとタイマー
-    ZakoPattern pattern = ZakoPattern::MoveStraight;
+    BossPattern pattern = BossPattern::Entrance;
     float pattern_timer = 0.0f;
+    bool is_alive = true;
+
+    // 浮遊フェーズの基準座標
+    bool floating_center_initialized = false;
+    float floating_center_x = 0.0f;
+    float floating_center_y = 0.0f;
 
     // 動作補助変数
     Vector2D start_location;
@@ -58,5 +55,9 @@ private:
 
     // パターンをランダムに変更
     void ChangePatternRandomly();
+
+
+public:
+    bool GetIsAlive() const;
 
 };
