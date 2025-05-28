@@ -76,7 +76,7 @@ void Zako::Update(float delta_second)
             {
                 if (location.y < 300)
                 {
-                    velocity = { 0, 100 };
+                    velocity = { 0, 300 };
                 }
                 else
                 {
@@ -126,13 +126,13 @@ void Zako::Update(float delta_second)
 
         case ZakoPattern::DiveOnce:
         {
-            const float approach_time = 3.0f;   // まっすぐ進む時間（秒）
+            const float approach_time = 1.0f;   // まっすぐ進む時間（秒）
             const float stop_time = 1.0f;       // 停止する時間（秒）
 
             if (pattern_timer < approach_time)
             {
                 // まっすぐ下方向へ進む（速度100）
-                velocity = { 0, 100 };
+                velocity = { 0, 300 };
             }
             else if (pattern_timer < approach_time + stop_time)
             {

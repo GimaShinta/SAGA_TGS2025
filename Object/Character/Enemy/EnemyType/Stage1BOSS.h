@@ -42,10 +42,46 @@ private:
 
     // 動作補助変数
     Vector2D start_location;
-    bool is_returning = false;
     bool has_shot = false;
     float after_shot_timer = 0.0f;
     float spawn_delay_timer = 0.0f;
+
+    // 変身演出関連フラグ・タイマー
+    bool is_transforming = false;
+    float transform_timer = 0.0f;
+    float transform_duration = 2.0f;
+    bool is_transformed = false;
+
+    bool is_flashing = false;
+    float flash_timer = 0.0f;
+    float flash_interval = 0.2f;
+    bool visible = true;
+
+    bool is_screen_flash = false;
+    float screen_flash_timer = 0.0f;
+    float screen_flash_duration = 0.3f;
+
+    // 中央に戻って上へ退場する処理用
+    float life_timer = 0.0f;
+    bool is_returning = false;         // 中央へ戻るフェーズ
+    bool is_leaving = false;           // 上へ移動するフェーズ
+    Vector2D return_target;            // 中央の座標
+    float stop_timer = 0.0f;           // 中央での停止タイマー
+    float stop_duration = 2.0f;        // 停止時間
+
+    bool is_dying = false;           // 爆発演出中フラグ
+    float dying_timer = 0.0f;        // 演出経過時間
+    int flash_count = 0;             // 点滅カウント
+    const int max_flash_count = 6;   // 点滅回数（3回点滅なら6）
+    const float flash_interval = 0.2f; // 点滅の間隔（秒）
+    float flash_timer = 0.0f;        // 点滅タイマー
+    bool is_dying;
+    float dying_timer;
+    int flash_count;
+    float flash_timer;
+    int max_flash_count;
+    float flash_interval;
+
 
     // アニメーション関連
     std::vector<int> images;
@@ -56,8 +92,6 @@ private:
     // パターンをランダムに変更
     void ChangePatternRandomly();
 
-
 public:
     bool GetIsAlive() const;
-
 };

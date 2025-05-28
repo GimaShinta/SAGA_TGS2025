@@ -7,13 +7,11 @@
 #include <cmath>
 #include <vector>
 
-// コンストラクタ（ランダム初期化）
 Stage1Boss::Stage1Boss()
 {
     srand(static_cast<unsigned int>(time(nullptr)));
 }
 
-// デストラクタ
 Stage1Boss::~Stage1Boss()
 {}
 
@@ -21,8 +19,8 @@ void Stage1Boss::Initialize()
 {
     enemy_type = ENE_ZAKO1;
     z_layer = 2;
-    box_size = 12;
-    hp = 2000;
+    box_size = 24;
+    hp = 1100;
 
     collision.is_blocking = true;
     collision.object_type = eObjectType::eEnemy;
@@ -35,19 +33,130 @@ void Stage1Boss::Initialize()
     has_shot = false;
 
     ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
-    images_a = rm->GetImages("Resource/Image/Object/Enemy/Zako1/anime_enemy30_a.png", 4, 4, 1, 32, 32);
-    images_b = rm->GetImages("Resource/Image/Object/Enemy/Zako1/anime_enemy30_b.png", 12, 12, 1, 24, 24);
-
-    images = images_a;
+    images_a = rm->GetImages("Resource/Image/Object/Enemy/Boss/s1_Boss/anime_enemy75_a_swapped.png", 6, 6, 1, 40, 40);
+    images_b = rm->GetImages("Resource/Image/Object/Enemy/Boss/s1_Boss/anime_enemy75_b.png", 6, 6, 1, 40, 40);
+    images = images_b;
     image = images[0];
 
     ChangePatternRandomly();
 
-    floating_center_initialized = false; // 初期化フラグOFF
+    floating_center_initialized = false;
+
+    is_transforming = false;
+    transform_timer = 0.0f;
+    flash_timer = 0.0f;
+    visible = true;
+
+    life_timer = 0.0f;
 }
 
 void Stage1Boss::Update(float delta_second)
 {
+    life_timer += delta_second;
+
+    // 10秒経過で中央に戻る処理開始
+    if (!is_returning && life_timer >= 50.0f) // 50秒から10秒に変更
+    {
+        is_returning = true;
+        is_leaving = false;
+
+        // 中央の座標（画面中心など）
+        return_target = { 640.0f, 240.0f };
+
+        stop_timer = 0.0f; // 停止時間リセット
+    }
+
+    if (is_returning)
+    {
+        const float speed = 200.0f;
+
+        if (!is_leaving)
+        {
+            // 中央へ向かうフェーズ
+            Vector2D dir = return_target - location;
+            float dist = dir.Length();
+
+            if (dist > 5.0f)
+            {
+                dir.Normalize();
+                velocity = dir * speed;
+            }
+            else
+            {
+                // 中央に到着
+                location = return_target;
+                velocity = { 0.0f, 0.0f };
+
+                // 停止タイマー進行
+                stop_timer += delta_second;
+
+                // 停止時間経過したら上へ移動開始
+                if (stop_timer >= stop_duration)
+                {
+                    is_leaving = true;
+                }
+            }
+        }
+        else
+        {
+            // 上方向へ移動（退場フェーズ）
+            velocity = { 0.0f, -speed };
+            location += velocity * delta_second;
+
+            // 画面外へ行ったら削除
+            if (location.y < -100.0f)
+            {
+                is_alive = false;
+                is_destroy = true;
+            }
+
+            return; // 他の処理は不要なのでここで抜ける
+        }
+
+        location += velocity * delta_second;
+        return; // 他の処理はこのフレーム行わない
+    }
+
+    // ↓ 以下は既存の Update 処理
+    if (!is_transformed && hp < 1000)
+    {
+        is_transforming = true;
+        is_transformed = true;
+        transform_timer = 0.0f;
+        flash_timer = 0.0f;
+        visible = true;
+
+        is_flashing = true;
+        flash_timer = 0.3f;
+
+        is_screen_flash = true;
+        screen_flash_timer = screen_flash_duration;
+    }
+
+    if (is_transforming)
+    {
+        transform_timer += delta_second;
+        flash_timer += delta_second;
+
+        if (flash_timer >= flash_interval)
+        {
+            flash_timer = 0.0f;
+            visible = !visible;
+        }
+
+        velocity = { 0, 0 };
+
+        if (transform_timer >= transform_duration)
+        {
+            is_transforming = false;
+            visible = true;
+            images = images_a;
+            image = images[0];
+        }
+
+        return;
+    }
+
     spawn_delay_timer -= delta_second;
     pattern_timer += delta_second;
 
@@ -57,20 +166,17 @@ void Stage1Boss::Update(float delta_second)
     {
         case BossPattern::Entrance:
         {
-            const float move_down_duration = 3.0f;   // 降りてくる時間（秒）
-            const float target_y = 150.0f;            // 降り終わるY位置
-            const float amplitude_x = 250.0f;         // 横振り幅
-            const float frequency_x = 1.0f;           // 横振り速さ
-            const float amplitude_y = 50.0f;          // 縦ゆらぎ幅
-            const float frequency_y = 2.0f;           // 縦ゆらぎ速さ
+            const float move_down_duration = 3.0f;
+            const float target_y = 150.0f;
+            const float amplitude_x = 250.0f;
+            const float frequency_x = 1.0f;
+            const float amplitude_y = 50.0f;
+            const float frequency_y = 2.0f;
 
             if (pattern_timer < move_down_duration && location.y < target_y)
             {
-                // 下に降りるフェーズ
                 velocity = { 0, 100 };
                 location += velocity * delta_second;
-
-                // 降りすぎ防止
                 if (location.y > target_y)
                 {
                     location.y = target_y;
@@ -78,38 +184,46 @@ void Stage1Boss::Update(float delta_second)
             }
             else
             {
-                // 浮遊フェーズ
-
-                // 浮遊基準座標を一度だけ初期化
                 if (!floating_center_initialized)
                 {
-                    floating_center_x = location.x; // 降り終わり時のX座標を基準にする
-                    floating_center_y = target_y;   // 固定のY座標を基準にする（必要なら location.y でも可）
+                    floating_center_x = location.x;
+                    floating_center_y = target_y;
                     floating_center_initialized = true;
                 }
 
                 float t = pattern_timer - move_down_duration;
-
-                // 横はサイン波で左右にゆらゆら（左スタート）
                 location.x = floating_center_x + amplitude_x * sinf(t * frequency_x + 3.14f);
-
-                // 縦はゆらゆら上下に浮遊
                 location.y = floating_center_y + amplitude_y * sinf(t * frequency_y);
-
                 velocity = { 0, 0 };
             }
-
             break;
         }
     }
 
     location += velocity * delta_second;
 
+    if (is_flashing)
+    {
+        flash_timer -= delta_second;
+        if (flash_timer <= 0.0f)
+        {
+            is_flashing = false;
+        }
+    }
+
+    if (is_screen_flash)
+    {
+        screen_flash_timer -= delta_second;
+        if (screen_flash_timer <= 0.0f)
+        {
+            is_screen_flash = false;
+        }
+    }
+
     if (hp <= 0)
-    { 
+    {
         is_alive = false;
         is_destroy = true;
-      
 
         AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
         anim_id = manager->PlayerAnimation(EffectName::eExprotion, location, 0.05f, false);
@@ -119,15 +233,27 @@ void Stage1Boss::Update(float delta_second)
     }
 
     __super::Update(delta_second);
-
-
 }
+
 
 void Stage1Boss::Draw(const Vector2D& screen_offset) const
 {
     DrawFormatString(location.x - 8, location.y - 8, GetColor(0, 0, 0), "%.0f", hp);
-    DrawRotaGraph(location.x, location.y, 5.0f, 0.0f, image, TRUE);
     DrawFormatString(location.x - 10, location.y - 40, GetColor(255, 255, 255), "%.0f", hp);
+
+    if (is_transforming)
+    {
+        if (visible)
+        {
+            SetDrawBlendMode(DX_BLENDMODE_ADD, 255);
+            DrawRotaGraph(location.x, location.y, 4.0f, 0.0f, image, TRUE);
+            SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+        }
+    }
+    else
+    {
+        DrawRotaGraph(location.x, location.y, 4.0f, 0.0f, image, TRUE);
+    }
 }
 
 void Stage1Boss::Finalize()
@@ -151,8 +277,7 @@ void Stage1Boss::Shot(float delta_second)
 }
 
 void Stage1Boss::ChangePatternRandomly()
-{
-}
+{}
 
 bool Stage1Boss::GetIsAlive() const
 {
@@ -165,16 +290,15 @@ void Stage1Boss::SetPattern(BossPattern new_pattern)
     pattern_timer = 0.0f;
     has_shot = false;
     after_shot_timer = 0.0f;
-    floating_center_initialized = false; // パターン切替時に基準リセット
+    floating_center_initialized = false;
 
     switch (pattern)
     {
         case BossPattern::Entrance:
             images = images_b;
-            anim_indices = { 0,1,2,3,4,5,6,7,8,9,10,11 };
+            anim_indices = { 0,1,2,3,4,5 };
             break;
     }
 
     image = images[0];
 }
-

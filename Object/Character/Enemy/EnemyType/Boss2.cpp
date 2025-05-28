@@ -15,10 +15,10 @@ void Boss2::Initialize()
 	enemy_type = ENE_BOSS2;
 	z_layer = 1;
 	box_size = 30;
-	hp = 100;
+	hp = 3000;
 
 	// 攻撃パターンの設定
-	attack_pattrn_num = { 12, 11 };
+	attack_pattrn_num = { 9 };
 
 	// 当たり判定のオブジェクト設定
 	collision.is_blocking = true;
