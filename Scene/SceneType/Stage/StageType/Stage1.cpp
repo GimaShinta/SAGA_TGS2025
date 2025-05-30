@@ -393,6 +393,8 @@ void Stage1::EnemyAppearance(float delta)
                 boss1->SetPattern(BossPattern::Entrance);
                 enemy_list.push_back(boss1); 
                 boss_spawned = true;
+                boss1->SetPlayer(player);
+
             }
         }
 

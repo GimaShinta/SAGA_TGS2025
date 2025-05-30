@@ -54,16 +54,12 @@ void Stage1Boss::Update(float delta_second)
 {
     life_timer += delta_second;
 
-    // 10秒経過で中央に戻る処理開始
-    if (!is_returning && life_timer >= 50.0f) // 50秒から10秒に変更
+    if (!is_returning && life_timer >= 50.0f)
     {
         is_returning = true;
         is_leaving = false;
-
-        // 中央の座標（画面中心など）
         return_target = { 640.0f, 240.0f };
-
-        stop_timer = 0.0f; // 停止時間リセット
+        stop_timer = 0.0f;
     }
 
     if (is_returning)
@@ -72,7 +68,6 @@ void Stage1Boss::Update(float delta_second)
 
         if (!is_leaving)
         {
-            // 中央へ向かうフェーズ
             Vector2D dir = return_target - location;
             float dist = dir.Length();
 
@@ -83,14 +78,10 @@ void Stage1Boss::Update(float delta_second)
             }
             else
             {
-                // 中央に到着
                 location = return_target;
                 velocity = { 0.0f, 0.0f };
-
-                // 停止タイマー進行
                 stop_timer += delta_second;
 
-                // 停止時間経過したら上へ移動開始
                 if (stop_timer >= stop_duration)
                 {
                     is_leaving = true;
@@ -99,25 +90,22 @@ void Stage1Boss::Update(float delta_second)
         }
         else
         {
-            // 上方向へ移動（退場フェーズ）
             velocity = { 0.0f, -speed };
             location += velocity * delta_second;
 
-            // 画面外へ行ったら削除
             if (location.y < -100.0f)
             {
                 is_alive = false;
                 is_destroy = true;
             }
 
-            return; // 他の処理は不要なのでここで抜ける
+            return;
         }
 
         location += velocity * delta_second;
-        return; // 他の処理はこのフレーム行わない
+        return;
     }
 
-    // ↓ 以下は既存の Update 処理
     if (!is_transformed && hp < 1000)
     {
         is_transforming = true;
@@ -125,10 +113,8 @@ void Stage1Boss::Update(float delta_second)
         transform_timer = 0.0f;
         flash_timer = 0.0f;
         visible = true;
-
         is_flashing = true;
         flash_timer = 0.3f;
-
         is_screen_flash = true;
         screen_flash_timer = screen_flash_duration;
     }
@@ -232,9 +218,9 @@ void Stage1Boss::Update(float delta_second)
         Singleton<ScoreData>::GetInstance()->SetScoreData(100);
     }
 
+    Shot(delta_second);
     __super::Update(delta_second);
 }
-
 
 void Stage1Boss::Draw(const Vector2D& screen_offset) const
 {
@@ -261,9 +247,11 @@ void Stage1Boss::Finalize()
 
 void Stage1Boss::Shot(float delta_second)
 {
+    if (!player) return;
+
     shot_timer += delta_second;
 
-    if (shot_timer >= 2.0f && player)
+    if (shot_timer >= 2.0f)
     {
         Vector2D dir = player->GetLocation() - location;
         float len = dir.Length();
