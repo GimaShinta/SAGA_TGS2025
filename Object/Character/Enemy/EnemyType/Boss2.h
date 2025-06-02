@@ -1,5 +1,8 @@
 #pragma once
 #include "../EnemyBase.h"
+#include "../../Shot/EnemyShot/EnemyShot3.h"
+#include "../../Shot/EnemyShot/EnemyShot4.h"
+#include "../../Shot/EnemyShot/EnemyShot5.h"
 
 const int MAX_ATTACK_PATTRN = 8;
 
@@ -38,6 +41,10 @@ private:
 	float swing_center_x = 0.0f;
 	int swing_direction = 1;           // 1 = 右, -1 = 左
 	float swing_wait_timer = 0.0f;     // 停止中のタイマー
+
+	class EnemyShot3* e_shot3;
+	class EnemyShot4* e_shot4;
+	class EnemyShot5* e_shot5;
 
 public:
 	Boss2();
@@ -88,5 +95,19 @@ public:
 	{
 		return (a > b) ? a : b;
 	}
+
+private:
+	void Attack(float delta_second);
+
+	void Pattrn4(int bullet_num, float speed, float spiral_interval, float spiral_duration_limit, const Vector2D& generate_location, float delta_second);
+	void Pattrn5(float spiral_interval, float spiral_duration_limit, float spiral_speed, const Vector2D& generate_location, float delta_second);
+	void Pattrn6(float fan_angle_range, float bullet_speed, float fan_interval, float fan_duration_limit, const Vector2D& generate_location, float delta_second);
+	void Pattrn7(float fan_angle_range, float bullet_speed, float fan_interval, float fan_duration_limit, const Vector2D& generate_location, float delta_second);
+	void Pattrn8(float wave_interval, float wave_duration_limit, const Vector2D& generate_location, float delta_second);
+	void Pattrn9(int shot_count, float radius, float angular_speed, float bullet_speed, const Vector2D& generate_location, float delta_second);
+	void Pattrn10(int shot_count, float radius, float angular_speed, float center_speed, float duration_limit, const Vector2D& center_location, float delta_second);
+	void Pattrn11(float offsets_x);
+	void Pattrn12();
+	void Pattrn13(float delta_second);
 };
 
