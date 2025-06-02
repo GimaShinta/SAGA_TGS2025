@@ -105,7 +105,7 @@ void Stage2::Update(float delta)
     }
 
     /*遷移時間*/
-    if (stage_timer >= 30.0f)
+    if (stage_timer >= 25.0f)
     {
         is_clear = true;
     }
@@ -145,7 +145,8 @@ void Stage2::Draw()
     // 右の黒帯
     DrawBox((D_WIN_MAX_X / 2) + 350, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
 
-    DrawString(0, 0, "ステージ2", GetColor(255, 255, 255));
+    DrawString(0, 0, "STAGE2", GetColor(255, 255, 255));
+    DrawFormatString(0, 50, GetColor(255, 255, 0), "Enemy: %d", enemy_list.size());
     // 右側操作説明パネル
     int panel_x = D_WIN_MAX_X - 270;
     int panel_y = 60;
