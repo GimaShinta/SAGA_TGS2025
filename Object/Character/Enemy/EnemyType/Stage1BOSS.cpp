@@ -19,8 +19,8 @@ void Stage1Boss::Initialize()
 {
     enemy_type = ENE_ZAKO1;
     z_layer = 2;
-    box_size = 24;
-    hp = 1100;
+    box_size = 35;
+    hp = 1500;
 
     collision.is_blocking = true;
     collision.object_type = eObjectType::eEnemy;
@@ -212,7 +212,7 @@ void Stage1Boss::Update(float delta_second)
         is_destroy = true;
 
         AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
-        anim_id = manager->PlayerAnimation(EffectName::eExprotion, location, 0.05f, false);
+        anim_id = manager->PlayerAnimation(EffectName::eExprotion2, location, 0.1f, false);
         manager->SetScale(anim_id, 0.5f);
 
         Singleton<ScoreData>::GetInstance()->SetScoreData(100);
@@ -251,7 +251,7 @@ void Stage1Boss::Shot(float delta_second)
 
     shot_timer += delta_second;
 
-    if (shot_timer >= 2.0f)
+    if (shot_timer >= 0.3f)
     {
         Vector2D dir = player->GetLocation() - location;
         float len = dir.Length();

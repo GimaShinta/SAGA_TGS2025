@@ -231,7 +231,8 @@ void Stage1::Draw()
     // 右の黒帯
     DrawBox((D_WIN_MAX_X / 2) + 350, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
 
-    DrawString(0, 0, "ステージ1", GetColor(255, 255, 255));
+    DrawString(0, 0, "STAGE1", GetColor(255, 255, 255));
+    DrawFormatString(0, 50, GetColor(255, 255, 0), "Enemy: %d", enemy_list.size());
     // 右側操作説明パネル
     int panel_x = D_WIN_MAX_X - 270;
     int panel_y = 60;
@@ -241,8 +242,7 @@ void Stage1::Draw()
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
     DrawBox(panel_x, panel_y, panel_x + panel_w, panel_y + panel_h, GetColor(0, 0, 0), TRUE);
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
-    // ステージタイマーの表示（右上）
-    DrawFormatString(0, 20, GetColor(255, 255, 255), "Time: %.1f", stage_timer);
+
 
 
     AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
@@ -271,6 +271,9 @@ void Stage1::Draw()
     {
         DrawString((D_WIN_MAX_X / 2) - 60, (D_WIN_MAX_Y / 2) - 100, "ゲームオーバー", GetColor(255, 255, 255));
     }
+
+    // ステージタイマーの表示（右上）
+    DrawFormatString(0, 20, GetColor(255, 255, 255), "Time: %.1f", stage_timer);
 
     DrawFadeOverlay();
 }
@@ -326,7 +329,7 @@ void Stage1::EnemyAppearance(float delta)
 
         }
 
-        else if(stage_timer < 29.0f)
+        else if(stage_timer < 25.0f)
         {} //インターバル
 
         else if (stage_timer < 48.0f)
@@ -357,10 +360,10 @@ void Stage1::EnemyAppearance(float delta)
 
         }
 
-        else if(stage_timer < 56.0f)
+        else if(stage_timer < 49.0f)
         {} //インターバル
 
-        else if (stage_timer < 72.0f)
+        else if (stage_timer < 74.0f)
         {
             // ランダムレーンにZako1を1体出現
             const int num_lanes = 7;
@@ -443,4 +446,6 @@ void Stage1::DrawScrollBackground() const
 
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 }
+
+
 

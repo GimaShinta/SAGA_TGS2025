@@ -165,7 +165,7 @@ void Zako::Update(float delta_second)
         is_destroy = true;
 
         AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
-        anim_id = manager->PlayerAnimation(EffectName::eExprotion, location, 0.05f, false);
+        anim_id = manager->PlayerAnimation(EffectName::eExprotion2, location, 0.035f, false);
         manager->SetScale(anim_id, 0.5f);
 
         Singleton<ScoreData>::GetInstance()->SetScoreData(100);
@@ -217,14 +217,14 @@ void Zako::SetPattern(ZakoPattern new_pattern)
     switch (pattern)
     {
         case ZakoPattern::MoveStraight:
-            hp = 10;
+            hp = 20;
             images = images_b;
             anim_indices = { 0,1,2,3,4,5,6,7,8,9,10,11 };
             break;
 
         case ZakoPattern::RightMove:
         case ZakoPattern::LeftMove:
-            hp = 15;
+            hp = 30;
             images = images_a;
             anim_indices = { 0, 1, 2, 3 };
             break;

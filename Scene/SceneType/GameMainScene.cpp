@@ -94,6 +94,7 @@ eSceneType GameMainScene::Update(float delta_second)
 
     }
 
+
     // ======= スコアログのスライド演出更新 =======
     for (auto& log : score_logs)
     {
@@ -138,6 +139,7 @@ eSceneType GameMainScene::Update(float delta_second)
         previous_score_count += 1.0f;
     }
 
+
 	return GetNowSceneType();
 }
 
@@ -155,7 +157,92 @@ void GameMainScene::Draw()
         current_stage->Draw();
     }
 
-    DrawFormatString(D_WIN_MAX_X - 150, 0, GetColor(255, 255, 255), "プレイヤーライフ : %d", player->life);
+    //// 左の黒帯
+    //DrawBox(0, 0, (D_WIN_MAX_X / 2) - 350, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
+
+    //// 右の黒帯
+    //DrawBox((D_WIN_MAX_X / 2) + 350, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
+
+    // === 左のサイドパネル（サイバー風） ===
+    {
+        int left_x1 = 0;
+        int left_x2 = (D_WIN_MAX_X / 2) - 350;
+        int panel_color = GetColor(10, 10, 30);
+        int neon_color = GetColor(0, 255, 255);
+
+        // 背景
+      /*  SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
+        DrawBox(left_x1, 0, left_x2, D_WIN_MAX_Y, panel_color, TRUE);
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);*/
+
+        // 上下ネオンライン
+        DrawLine(left_x1, 0, left_x2, 0, neon_color);
+        DrawLine(left_x1, D_WIN_MAX_Y - 1, left_x2, D_WIN_MAX_Y - 1, neon_color);
+
+        // スキャンライン風アニメ
+        int scan_y = (GetNowCount() / 5) % D_WIN_MAX_Y;
+        DrawLine(left_x1, scan_y, left_x2, scan_y, GetColor(0, 150, 255));
+    }
+
+    // === 右のサイドパネル（サイバー風） ===
+    {
+        int right_x1 = (D_WIN_MAX_X / 2) + 350;
+        int right_x2 = D_WIN_MAX_X;
+        int panel_color = GetColor(10, 10, 30);
+        int neon_color = GetColor(0, 255, 255);
+
+        // 背景
+       /* SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
+        DrawBox(right_x1, 0, right_x2, D_WIN_MAX_Y, panel_color, TRUE);
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);*/
+
+        // 上下ネオンライン
+        DrawLine(right_x1, 0, right_x2, 0, neon_color);
+        DrawLine(right_x1, D_WIN_MAX_Y - 1, right_x2, D_WIN_MAX_Y - 1, neon_color);
+
+        // スキャンライン風アニメ
+        int scan_y = (GetNowCount() / 5) % D_WIN_MAX_Y;
+        DrawLine(right_x1, scan_y, right_x2, scan_y, GetColor(0, 150, 255));
+    }
+
+
+
+    DrawFormatString(D_WIN_MAX_X - 140, 0, GetColor(255, 255, 255), "Life:%d", player->life);
+
+    // ==== 合計スコア（キルログの上） ====
+{
+    ScoreData* score = Singleton<ScoreData>::GetInstance();
+    const auto& all_scores = score->GetScoreData();
+
+    float total_score = 0.0f;
+    for (float s : all_scores)
+    {
+        total_score += s;
+    }
+
+    // 表示位置とサイズ
+    int score_box_x = 30;
+    int score_box_y = D_WIN_MAX_Y - 640;
+    int score_box_w = 220;
+    int score_box_h = 32;
+
+    // 点滅フレームカラー
+    int pulse = static_cast<int>(GetNowCount() % 100) > 50 ? 255 : 100;
+    int frame_color = GetColor(pulse, 255, pulse);
+
+    // 背景と枠
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
+    DrawBox(score_box_x, score_box_y, score_box_x + score_box_w, score_box_y + score_box_h, GetColor(10, 10, 30), TRUE);
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+    DrawBox(score_box_x, score_box_y, score_box_x + score_box_w, score_box_y + score_box_h, frame_color, FALSE);
+
+    // スコアテキスト
+    DrawFormatString(score_box_x + 10, score_box_y + 8, frame_color, "TOTAL SCORE : %.0f", total_score);
+
+    // 通常描画に戻す（念のため）
+    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+}
+
 
     // ==== スコアログ（左下） ====
     int log_base_x = 30;
@@ -222,8 +309,8 @@ void GameMainScene::Draw()
     DrawBox(panel_x, panel_y, panel_x + panel_w, panel_y + panel_h, GetColor(0, 255, 255), FALSE); // 枠線
 
     DrawString(panel_x + 10, panel_y + 10, "【Manual】", GetColor(0, 255, 255));
-    DrawString(panel_x + 10, panel_y + 40, "Move : WASD / R-Stick", GetColor(255, 255, 255));
-    DrawString(panel_x + 10, panel_y + 60, "Shot : Space", GetColor(255, 255, 255));
+    DrawString(panel_x + 10, panel_y + 40, "Move : WASD / L-Stick", GetColor(255, 255, 255));
+    DrawString(panel_x + 10, panel_y + 60, "Shot : Space / A", GetColor(255, 255, 255));
     DrawString(panel_x + 10, panel_y + 80, "Beam : B", GetColor(255, 255, 255));
     DrawString(panel_x + 10, panel_y + 100,"Flip : RB / L", GetColor(255, 255, 255));
 }
