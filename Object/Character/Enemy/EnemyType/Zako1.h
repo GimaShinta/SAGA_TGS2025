@@ -16,6 +16,8 @@ enum class ZakoPattern
     Formation,
     Homing,
     DiveOnce, 
+    SideAppearAndShoot
+
 };
 
 
@@ -23,6 +25,7 @@ class Zako : public EnemyBase
 {
 public:
     Zako();
+    Zako(const Vector2D& pos);
     ~Zako();
 
     // 初期化・更新・描画・終了処理

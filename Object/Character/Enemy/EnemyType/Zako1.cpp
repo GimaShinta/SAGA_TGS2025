@@ -71,6 +71,27 @@ void Zako::Update(float delta_second)
             Shot(delta_second);
             break;
 
+        case ZakoPattern::SideAppearAndShoot:
+        {
+            const float appear_duration = 1.0f;
+            const float stop_and_shoot_interval = 2.0f;
+
+            if (pattern_timer < appear_duration)
+            {
+                // 横から移動してくる（左 or 右の画面外から入ってくる）
+                if (location.x > 400) velocity = { -200, 0 };
+                else velocity = { 200, 0 };
+            }
+            else
+            {
+                // 停止しながら定期的に攻撃
+                velocity = { 0, 0 };
+                Shot(delta_second);  // Shot()内でshot_timerチェックしてるのでOK
+            }
+            break;
+        }
+
+
         case ZakoPattern::MoveAndStopShoot:
             if (!has_shot)
             {
@@ -247,6 +268,12 @@ void Zako::SetPattern(ZakoPattern new_pattern)
             images = images_a;
             anim_indices = { 0, 1, 2, 3 };
             break;
+        case ZakoPattern::SideAppearAndShoot:
+            hp = 25;
+            images = images_b;
+            anim_indices = { 0,1,2,3,4,5,6,7,8,9,10,11 };
+            break;
+
     }
 
     image = images[0];

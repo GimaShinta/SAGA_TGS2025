@@ -10,7 +10,7 @@ private:
     class Shot* shot;
     class Beam* beam;
     class Zako4* zako4;
-    class Zako1* zako1;
+    class Zako* zako;
     std::vector<EnemyBase*> enemy_list;
     float stage_timer = 0.0f; // Œo‰ßŠÔi•bj
     bool zako4_spawned = false;
