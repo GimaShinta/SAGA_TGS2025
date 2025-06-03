@@ -31,7 +31,9 @@ void Player::Initialize()
 	is_mobility = true;
 
 	ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
-	image = rm->GetImages("Resource/Image/Object/Player/Player_01/transparent/player01.png")[0];
+	image = rm->GetImages("Resource/Image/Object/Player/Player_03/player03.png")[0];
+	player_image_left = rm->GetImages("Resource/Image/Object/Player/Player_03/anime_player03_L01.png", 2, 2, 1, 56, 64);
+	player_image_right = rm->GetImages("Resource/Image/Object/Player/Player_03/anime_player03_R01.png", 2, 2, 1, 56, 64);
 }
 
 /// <summary>
@@ -67,6 +69,17 @@ void Player::Update(float delta_second)
 		powerd = 3;
 	}
 
+
+	// アニメーション更新処理
+	anim_timer += delta_second;
+
+	if (anim_timer >= anim_interval)
+	{
+		anim_timer = 0.0f;
+		anim_index++;
+		if (anim_index >= 2) anim_index = 1;
+	}
+
 	// 親クラスの更新処理を呼び出す
 	__super::Update(delta_second);
 }
@@ -79,30 +92,21 @@ void Player::Draw(const Vector2D& screen_offset) const
 {
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, brend);
 
-	DrawRotaGraph(location.x, location.y, 1.0f, 0.0f, image, TRUE);
-
-	int color;
-	// プレイヤーを描画する
-	if (powerd <= 1)
+	switch (anim_state)
 	{
-		color = GetColor(255, 0, 0);
-	}
-	else if (powerd == 2)
-	{
-		color = GetColor(0, 255, 0);
-	}
-	else
-	{
-		color = GetColor(0, 0, 255);
+	case PlayerAnimState::Neutral:
+		DrawRotaGraph(location.x, location.y, 1.0f, 0.0f, image, TRUE);
+		break;
+	case PlayerAnimState::TiltLeft:
+		DrawRotaGraph(location.x, location.y, 1.0f, 0.0f, player_image_left[anim_index], TRUE);
+		break;
+	case PlayerAnimState::TiltRight:
+		DrawRotaGraph(location.x, location.y, 1.0f, 0.0f, player_image_right[anim_index], TRUE);
+		break;
 	}
 
-	//当たり判定の可視化
-	//DrawBox(location.x - box_size.x, location.y - box_size.y,
-	//	location.x + box_size.x, location.y + box_size.y, color, FALSE);
-
+	// ライフ表示などはそのまま
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
-
-	// ライフの表示
 	DrawFormatString(D_WIN_MAX_X - 150, 0, GetColor(255, 255, 255), "残りライフ : %d", life);
 }
 
@@ -198,6 +202,20 @@ void Player::Movement(float delta_second)
 	{
 		location.y = D_WIN_MAX_Y - 10;
 		velocity.y = 0.0f; // 位置制限後に速度もゼロにする
+	}
+
+	// アニメーション状態決定
+	if (velocity.x > 10.0f)
+	{
+		anim_state = PlayerAnimState::TiltRight;
+	}
+	else if (velocity.x < -10.0f)
+	{
+		anim_state = PlayerAnimState::TiltLeft;
+	}
+	else
+	{
+		anim_state = PlayerAnimState::Neutral;
 	}
 
 	// 位置更新

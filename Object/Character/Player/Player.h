@@ -19,6 +19,19 @@ enum
 
 class Player : public CharacterBase
 {
+private:
+	enum class PlayerAnimState
+	{
+		Neutral,   // ³–Ê
+		TiltLeft,  // ¶ŒX‚«
+		TiltRight  // ‰EŒX‚«
+	};
+
+	PlayerAnimState anim_state = PlayerAnimState::Neutral;
+	float anim_timer = 0.0f;
+	int anim_index = 0;
+	float anim_interval = 0.1f;
+
 public:
 	int life;
 private:
@@ -43,6 +56,12 @@ private:
 	float charge = 0.0f;
 	const float charge_max = 100.0f;
 	bool charge_ready = false;
+
+	// ‰æ‘œŒn
+	std::vector<int> player_image_right;
+	std::vector<int> player_image_left;
+	std::vector<int> player_jet;
+
 
 
 public:
