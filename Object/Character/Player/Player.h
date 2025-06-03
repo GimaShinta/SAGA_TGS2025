@@ -61,6 +61,7 @@ private:
 	std::vector<int> player_image_right;
 	std::vector<int> player_image_left;
 	std::vector<int> player_jet;
+	int jet;
 
 
 

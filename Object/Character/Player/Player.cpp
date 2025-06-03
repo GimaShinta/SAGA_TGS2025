@@ -34,6 +34,8 @@ void Player::Initialize()
 	image = rm->GetImages("Resource/Image/Object/Player/Player_03/player03.png")[0];
 	player_image_left = rm->GetImages("Resource/Image/Object/Player/Player_03/anime_player03_L01.png", 2, 2, 1, 56, 64);
 	player_image_right = rm->GetImages("Resource/Image/Object/Player/Player_03/anime_player03_R01.png", 2, 2, 1, 56, 64);
+	player_jet = rm->GetImages("Resource/Image/Object/Player/Shot/anime_effect17.png", 6, 6, 1, 8, 88);
+	jet = player_jet[2];
 }
 
 /// <summary>
@@ -80,6 +82,27 @@ void Player::Update(float delta_second)
 		if (anim_index >= 2) anim_index = 1;
 	}
 
+	std::vector<int> animation_num = { 3, 4, 5, 4 };
+	//フレームレートで時間を計測
+	animation_time += delta_second;
+	//8秒経ったら画像を切り替える
+	if (animation_time >= 0.02f)
+	{
+		//計測時間の初期化
+		animation_time = 0.0f;
+		//時間経過カウントの増加
+		animation_count++;
+		//カウントがアニメーション画像の要素数以上になったら
+		if (animation_count >= animation_num.size())
+		{
+			//カウントの初期化
+			animation_count = 0;
+		}
+		// アニメーションが順番に代入される
+		jet = player_jet[animation_num[animation_count]];
+	}
+
+
 	// 親クラスの更新処理を呼び出す
 	__super::Update(delta_second);
 }
@@ -91,6 +114,9 @@ void Player::Update(float delta_second)
 void Player::Draw(const Vector2D& screen_offset) const
 {
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, brend);
+
+	DrawRotaGraph(location.x - 10.0f, location.y + 70.0f, 1.0f, 0.0f, jet, TRUE);
+	DrawRotaGraph(location.x + 10.0f, location.y + 70.0f, 1.0f, 0.0f, jet, TRUE);
 
 	switch (anim_state)
 	{
