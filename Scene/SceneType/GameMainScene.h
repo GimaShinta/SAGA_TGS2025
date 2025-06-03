@@ -13,6 +13,10 @@ private:
 	float next_scene_timer;
 
 private:
+	int font_digital;
+	int font_orbitron;
+
+private:
 	int current_bgm_handle = -1;
 	int stage_bgm1 = -1; // ステージ1,2の共通BGM
 	int stage_bgm3 = -1; // ステージ3用BGM

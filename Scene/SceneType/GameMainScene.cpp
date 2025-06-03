@@ -29,6 +29,12 @@ void GameMainScene::Initialize()
     stage_bgm1 = rm->GetSounds("Resource/sound/bgm/stage/Magical World.mp3");
     stage_bgm3 = rm->GetSounds("Resource/sound/bgm/stage/Cryonic Pulse.mp3");
 
+    font_digital = CreateFontToHandle("DS-DIGI.TTF", 28, 6, DX_FONTTYPE_ANTIALIASING);
+    font_orbitron = CreateFontToHandle("Resource/font/Orbitron/Orbitron-VariableFont_wght.ttf", 22, 6, DX_FONTTYPE_ANTIALIASING);
+    int font_rajdhani = CreateFontToHandle("rajdhani", 18, 4, DX_FONTTYPE_ANTIALIASING);
+
+
+
     AnimationManager* anim = Singleton<AnimationManager>::GetInstance();
     anim->LoadAllEffects();
 
@@ -237,7 +243,7 @@ void GameMainScene::Draw()
     DrawBox(score_box_x, score_box_y, score_box_x + score_box_w, score_box_y + score_box_h, frame_color, FALSE);
 
     // スコアテキスト
-    DrawFormatString(score_box_x + 10, score_box_y + 8, frame_color, "TOTAL SCORE : %.0f", total_score);
+    DrawFormatStringToHandle(score_box_x + 10, score_box_y + 8, frame_color,font_digital, "TOTAL SCORE : %.0f", total_score);
 
     // 通常描画に戻す（念のため）
     SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
