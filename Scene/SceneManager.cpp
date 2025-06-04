@@ -7,6 +7,7 @@
 #include "SceneType/HelpScene.h"
 #include "SceneType/GameMainScene.h"
 #include "SceneType/ResultScene.h"
+#include "SceneType/ExitScene.h"
 
 // Singleton継承クラスのインクルード
 #include "../Utility/InputManager.h"
@@ -154,7 +155,7 @@ SceneBase* SceneManager::CreateScene(eSceneType type)
 	case eSceneType::eResult:
 		return dynamic_cast<SceneBase*>(new GameMainScene());
 	case eSceneType::eXit:
-		return nullptr;  // 正常終了なのでthrowさせない
+		return dynamic_cast<SceneBase*>(new ExitScene());
 	default:
 		return nullptr;
 	}

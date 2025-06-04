@@ -29,11 +29,13 @@ void GameMainScene::Initialize()
     stage_bgm1 = rm->GetSounds("Resource/sound/bgm/stage/Magical World.mp3");
     stage_bgm3 = rm->GetSounds("Resource/sound/bgm/stage/Cryonic Pulse.mp3");
 
-    font_digital = CreateFontToHandle("DS-DIGI.TTF", 28, 6, DX_FONTTYPE_ANTIALIASING);
-    font_orbitron = CreateFontToHandle("Resource/font/Orbitron/Orbitron-VariableFont_wght.ttf", 22, 6, DX_FONTTYPE_ANTIALIASING);
-    int font_rajdhani = CreateFontToHandle("rajdhani", 18, 4, DX_FONTTYPE_ANTIALIASING);
+    //サイドパネル画像
+    obi_handle = rm->GetImages("Resource/Image/BackGround/Main/Obi_1.png")[0];
 
-
+    //フォント
+   // font_digital = CreateFontToHandle("DS-Digital", 28, 6, DX_FONTTYPE_ANTIALIASING);
+    font_digital = CreateFontToHandle("Orbitron", 28, 6, DX_FONTTYPE_ANTIALIASING);
+    font_orbitron = CreateFontToHandle("Orbitron", 22, 6, DX_FONTTYPE_ANTIALIASING);
 
     AnimationManager* anim = Singleton<AnimationManager>::GetInstance();
     anim->LoadAllEffects();
@@ -169,6 +171,13 @@ void GameMainScene::Draw()
     //// 右の黒帯
     //DrawBox((D_WIN_MAX_X / 2) + 350, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
 
+    // === 左の黒帯 ===
+    DrawGraph(0, 0, obi_handle, TRUE);
+
+    // === 右の黒帯（左右反転）===
+    DrawTurnGraph(D_WIN_MAX_X - 290, 0, obi_handle, TRUE);
+
+
     // === 左のサイドパネル（サイバー風） ===
     {
         int left_x1 = 0;
@@ -177,9 +186,9 @@ void GameMainScene::Draw()
         int neon_color = GetColor(0, 255, 255);
 
         // 背景
-      /*  SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
         DrawBox(left_x1, 0, left_x2, D_WIN_MAX_Y, panel_color, TRUE);
-        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);*/
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 
         // 上下ネオンライン
         DrawLine(left_x1, 0, left_x2, 0, neon_color);
@@ -198,9 +207,9 @@ void GameMainScene::Draw()
         int neon_color = GetColor(0, 255, 255);
 
         // 背景
-       /* SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
         DrawBox(right_x1, 0, right_x2, D_WIN_MAX_Y, panel_color, TRUE);
-        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);*/
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 
         // 上下ネオンライン
         DrawLine(right_x1, 0, right_x2, 0, neon_color);
@@ -237,13 +246,14 @@ void GameMainScene::Draw()
     int frame_color = GetColor(pulse, 255, pulse);
 
     // 背景と枠
-    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
-    DrawBox(score_box_x, score_box_y, score_box_x + score_box_w, score_box_y + score_box_h, GetColor(10, 10, 30), TRUE);
-    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
-    DrawBox(score_box_x, score_box_y, score_box_x + score_box_w, score_box_y + score_box_h, frame_color, FALSE);
+    //SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
+    //DrawBox(score_box_x, score_box_y, score_box_x + score_box_w, score_box_y + score_box_h, GetColor(10, 10, 30), TRUE);
+    //SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+    //DrawBox(score_box_x, score_box_y, score_box_x + score_box_w, score_box_y + score_box_h, frame_color, FALSE);
 
     // スコアテキスト
-    DrawFormatStringToHandle(score_box_x + 10, score_box_y + 8, frame_color,font_digital, "TOTAL SCORE : %.0f", total_score);
+    DrawFormatStringToHandle(score_box_x - 20, score_box_y + 8, frame_color, font_digital, "TOTAL SCORE");
+    DrawFormatStringToHandle(score_box_x, score_box_y + 40, frame_color, font_digital, "%.0f", total_score);
 
     // 通常描画に戻す（念のため）
     SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
@@ -252,8 +262,8 @@ void GameMainScene::Draw()
 
     // ==== スコアログ（左下） ====
     int log_base_x = 30;
-    int log_base_y = D_WIN_MAX_Y - 220;
-    int line_height = 20;
+    int log_base_y = D_WIN_MAX_Y - 400;
+    int line_height = 40;
 
     int count = static_cast<int>(score_logs.size());
     for (int i = 0; i < count; ++i)
@@ -261,9 +271,10 @@ void GameMainScene::Draw()
         const auto& log = score_logs[count - 1 - i];
         int draw_y = log_base_y + static_cast<int>(i * line_height + log.y_offset);
 
-        DrawBox(log_base_x - 10, draw_y - 2, log_base_x + 200, draw_y + 18, GetColor(10, 10, 30), TRUE);
+       // DrawBox(log_base_x - 10, draw_y - 2, log_base_x + 200, draw_y + 18, GetColor(10, 10, 30), TRUE);
         DrawLine(log_base_x - 10, draw_y - 2, log_base_x + 200, draw_y - 2, GetColor(0, 255, 255)); // 上ライン
-        DrawFormatString(log_base_x, draw_y, GetColor(0, 255, 255), "%s", log.text.c_str());
+        DrawFormatStringToHandle(log_base_x, draw_y, GetColor(0, 255, 255), font_digital, "%s", log.text.c_str());
+
     }
 
 // ==== 必殺技ゲージ（右上テキストボックス形式） ====
@@ -283,7 +294,8 @@ void GameMainScene::Draw()
         DrawBox(gauge_x, gauge_y, gauge_x + gauge_w, gauge_y + gauge_h, GetColor(0, 255, 255), FALSE);
 
         // ラベル
-        DrawString(gauge_x + 10, gauge_y + 4, "CHARGE", GetColor(0, 255, 255));
+        DrawStringToHandle(gauge_x + 10, gauge_y + 4, "CHARGE", GetColor(0, 255, 255), font_orbitron);
+
 
         // ゲージ本体
         int bar_x = gauge_x + 80;
@@ -298,7 +310,8 @@ void GameMainScene::Draw()
         if (player->CanUseSpecial())
         {
             int pulse = static_cast<int>(GetNowCount() % 100) > 50 ? 255 : 100;
-            DrawFormatString(bar_x + 10, bar_y - 20, GetColor(255, pulse, pulse), "READY!");
+            DrawFormatStringToHandle(bar_x + 10, bar_y - 20, GetColor(255, pulse, pulse), font_orbitron, "READY!");
+
         }
     }
 
@@ -314,11 +327,13 @@ void GameMainScene::Draw()
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
     DrawBox(panel_x, panel_y, panel_x + panel_w, panel_y + panel_h, GetColor(0, 255, 255), FALSE); // 枠線
 
-    DrawString(panel_x + 10, panel_y + 10, "【Manual】", GetColor(0, 255, 255));
-    DrawString(panel_x + 10, panel_y + 40, "Move : WASD / L-Stick", GetColor(255, 255, 255));
-    DrawString(panel_x + 10, panel_y + 60, "Shot : Space / A", GetColor(255, 255, 255));
-    DrawString(panel_x + 10, panel_y + 80, "Beam : B", GetColor(255, 255, 255));
-    DrawString(panel_x + 10, panel_y + 100,"Flip : RB / L", GetColor(255, 255, 255));
+    DrawStringToHandle(panel_x + 10, panel_y + 10, "Manual", GetColor(0, 255, 255), font_orbitron);
+
+    DrawStringToHandle(panel_x + 10, panel_y + 35, "Move : L-Stick", GetColor(255, 255, 255), font_orbitron);
+    DrawStringToHandle(panel_x + 10, panel_y + 55, "Shot : Space / A", GetColor(255, 255, 255), font_orbitron);
+    DrawStringToHandle(panel_x + 10, panel_y + 75, "Beam : B", GetColor(255, 255, 255), font_orbitron);
+    DrawStringToHandle(panel_x + 10, panel_y + 95, "Flip : RB / L", GetColor(255, 255, 255), font_orbitron);
+
 }
 
 
@@ -336,6 +351,15 @@ void GameMainScene::Finalize()
         StopSoundMem(current_bgm_handle);
         current_bgm_handle = -1;
     }
+    if (font_digital != -1) {
+        DeleteFontToHandle(font_digital);
+        font_digital = -1;
+    }
+    if (font_orbitron != -1) {
+        DeleteFontToHandle(font_orbitron);
+        font_orbitron = -1;
+    }
+
 }
 
 /// <summary>

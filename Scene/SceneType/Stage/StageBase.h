@@ -9,6 +9,7 @@ protected:
     bool is_over = false;
     int se;
 
+
 public:
     StageBase(Player* player) : player(player) {}
     virtual ~StageBase() {}

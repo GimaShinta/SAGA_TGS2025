@@ -29,7 +29,7 @@ Application::~Application()
 void Application::WakeUp()
 {
 	// ウィンドウモードで起動する
-	ChangeWindowMode(TRUE);
+	ChangeWindowMode(FALSE);
 
 	// ウィンドウサイズの設定
 	SetGraphMode(D_WIN_MAX_X, D_WIN_MAX_Y, D_COLOR_BIT);

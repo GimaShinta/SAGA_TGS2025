@@ -48,6 +48,9 @@ void Stage1::Initialize()
 
     // 乱数初期化（1回だけ行う）
     srand(static_cast<unsigned int>(time(NULL)));
+
+    ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
+    bg_image = rm->GetImages("Resource/Image/BackGround/Main/Stage1/bg_01.png")[0];
 }
 
 void Stage1::Finalize()
@@ -137,6 +140,9 @@ void Stage1::Update(float delta)
     stage_timer += delta;          // 10秒判定用
     distance_timer += delta;       // スクロール用
 
+    //スクロール
+    scroll_y += 400.0f * delta;
+
     if (distance_timer >= 0.01f)
     {
         if (distance > 0)
@@ -204,13 +210,12 @@ void Stage1::Update(float delta)
         }
     }
 
-
-
     // 仮の条件：N押したらステージ終了
     if (CheckHitKey(KEY_INPUT_N))
     {
         finished = true;
     }
+
 
     UpdateFade(delta);
 }
@@ -322,7 +327,7 @@ void Stage1::EnemyAppearance(float delta)
             float x = static_cast<float>(lane_x[lane_index]);
             Vector2D spawn_pos(x, 0.0f);
             Zako* zako = objm->CreateObject<Zako>(spawn_pos);
-            zako->SetPattern(ZakoPattern::MoveStraight);
+            zako->SetPattern(ZakoPattern::ZIgzag);
             zako->SetPlayer(player);
             enemy_list.push_back(zako);
 
@@ -410,42 +415,91 @@ void Stage1::EnemyAppearance(float delta)
 
 void Stage1::DrawScrollBackground() const
 {
-    // 背景色（濃い緑系）
-    DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(10, 30, 10), TRUE);
+    // 背景画像のスクロール
+    int bg_height;
+    GetGraphSize(bg_image, nullptr, &bg_height);
 
-    const int grid_back = 80;
-    const int grid_front = 40;
+    float offset_f = fmod(scroll_y, static_cast<float>(bg_height));
+    int offset = static_cast<int>(offset_f);
 
-    // 背面グリッド
-    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 60);
-    for (int x = 0; x < D_WIN_MAX_X; x += grid_back)
-        DrawLine(x, 0, x, D_WIN_MAX_Y, GetColor(0, 200, 100));
-    for (int y = -grid_back; y < D_WIN_MAX_Y + grid_back; y += grid_back)
+    DrawGraph(0, offset - bg_height, bg_image, TRUE);
+    DrawGraph(0, offset, bg_image, TRUE);
+
+    // === 背面グリッド（深めの緑・アニメ効果）===
+    const int grid_back = 160;  // 背景奥のグリッド（縦横）
+    const int grid_front = 80; // 前景グリッド（強調）
+
+// === 背面グリッド（深めの緑・アニメ効果）===
+SetDrawBlendMode(DX_BLENDMODE_ALPHA, 60);
+for (int x = 0; x < D_WIN_MAX_X; x += grid_back)
+{
+    int color = GetColor(0, 160 + (x % 3) * 20, 100);
+    DrawLine(x, 0, x, D_WIN_MAX_Y, color);
+}
+for (int y = -grid_back; y < D_WIN_MAX_Y + grid_back; y += grid_back)
+{
+    int sy = y - static_cast<int>(bg_scroll_offset_layer1) % grid_back;
+    int color = GetColor(0, 200, 100);
+    DrawLine(0, sy, D_WIN_MAX_X, sy, color);
+}
+
+// === ランダムに流れるハイライトライン（横）===
+if (GetNowCount() % 120 < 60)
+{
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
+    int flash_y = 40 + (GetNowCount() / 2) % (D_WIN_MAX_Y - 80);
+    DrawLine(0, flash_y, D_WIN_MAX_X, flash_y, GetColor(0, 255, 255));
+}
+
+// === 前面グリッド（ネオン＋多色風）===
+SetDrawBlendMode(DX_BLENDMODE_ALPHA, 120);
+for (int x = 0; x < D_WIN_MAX_X; x += grid_front)
+{
+    int intensity = 200 + (x % 3) * 20;
+    DrawBox(x - 1, 0, x + 1, D_WIN_MAX_Y, GetColor(0, intensity, 255), TRUE);
+}
+
+for (int y = -grid_front; y < D_WIN_MAX_Y + grid_front; y += grid_front)
+{
+    int sy = y - static_cast<int>(bg_scroll_offset_layer2) % grid_front;
+    int blue_shift = 150 + ((sy / 20) % 3) * 30;
+    DrawBox(0, sy - 1, D_WIN_MAX_X, sy + 1, GetColor(0, blue_shift, 180), TRUE);
+}
+
+
+
+const int total_lines = D_WIN_MAX_Y / grid_front;
+
+SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+
+// 横線にグラデーション＆太さ＋透明度変化
+for (int i = 0; i < total_lines + 2; ++i)
+{
+    int y = i * grid_front;
+    int sy = y - static_cast<int>(bg_scroll_offset_layer2) % grid_front;
+
+    // 遠近感を演出：上ほど薄く・細く、下ほど濃く・太く
+    float depth_ratio = static_cast<float>(i) / static_cast<float>(total_lines);
+    int alpha = static_cast<int>(depth_ratio * 255);                  // 透明度：遠→薄い
+    int thickness = static_cast<int>(1 + depth_ratio * 3);            // 線の太さ：遠→細い
+    int r = static_cast<int>(50 + depth_ratio * 150);                 // R: 紫寄りへ
+    int g = static_cast<int>(150 - depth_ratio * 100);                // G: 減らす
+    int b = static_cast<int>(200 + depth_ratio * 55);                 // B: 青強めへ
+
+    int color = GetColor(r, g, b);
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+
+    for (int t = -thickness / 2; t <= thickness / 2; ++t)
     {
-        int sy = y - static_cast<int>(bg_scroll_offset_layer1) % grid_back;
-        DrawLine(0, sy, D_WIN_MAX_X, sy, GetColor(0, 200, 100));
+        DrawLine(0, sy + t, D_WIN_MAX_X, sy + t, color);
     }
+}
 
-    // ランダムに点滅するライン（デジタル演出）
-    if (GetNowCount() % 120 < 60)
-    {
-        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
-        DrawLine(600, 0, 600, D_WIN_MAX_Y, GetColor(0, 255, 255));
-        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
-    }
-
-    // 前面グリッド
-    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 120);
-    for (int x = 0; x < D_WIN_MAX_X; x += grid_front)
-        DrawBox(x - 1, 0, x + 1, D_WIN_MAX_Y, GetColor(0, 255, 150), TRUE);
-    for (int y = -grid_front; y < D_WIN_MAX_Y + grid_front; y += grid_front)
-    {
-        int sy = y - static_cast<int>(bg_scroll_offset_layer2) % grid_front;
-        DrawBox(0, sy - 1, D_WIN_MAX_X, sy + 1, GetColor(0, 255, 150), TRUE);
-    }
 
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 }
+
+
 
 
 

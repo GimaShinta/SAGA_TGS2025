@@ -15,6 +15,8 @@ private:
 private:
 	int font_digital;
 	int font_orbitron;
+	int obi_handle; 
+
 
 private:
 	int current_bgm_handle = -1;

@@ -19,6 +19,10 @@ private:
 	static const int LINE_COUNT = 2;
 	const char* m_introText[LINE_COUNT]; // 2s•ª‚Ì•¶š—ñ
 
+	int m_fontDigital = -1;
+	int m_fontJP = -1;
+
+
 public:
 	StartScene();
 	virtual ~StartScene();

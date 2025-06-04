@@ -80,6 +80,21 @@ private:
 private:
 	bool finished = false;                   // ステージ終了フラグ
 
+private:
+	int bg_image;	//背景画像
+	float scroll_y = 0.0f;
+
+	struct StarParticle {
+		Vector2D pos;
+		Vector2D velocity;
+		float alpha;
+		float length;   // 尾の長さ
+		float life;
+	};
+
+	mutable std::vector<StarParticle> star_particles;
+
+
 	void DrawScrollBackground() const override; // 背景のスクロール描画
 
 	mutable std::vector<std::pair<Vector2D, float>> ripple_list; // 位置と時間

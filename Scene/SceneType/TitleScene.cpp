@@ -15,7 +15,7 @@ TitleScene::~TitleScene()
 void TitleScene::Initialize()
 {
     m_selectedIndex = 0;
-    m_menuFontHandle = CreateFontToHandle("メイリオ", 36, 6); // メニュー専用フォント
+    m_menuFontHandle = CreateFontToHandle("Orbitron", 36, 6); // メニュー専用フォント
 
 
     // ロゴ画像読み込み（透過PNG）
