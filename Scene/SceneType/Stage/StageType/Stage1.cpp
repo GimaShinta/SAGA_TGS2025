@@ -363,8 +363,8 @@ void Stage1::EnemyAppearance(float delta)
         else if (stage_timer < 72.0f)
         {
             // ƒ‰ƒ“ƒ_ƒ€ƒŒ[ƒ“‚ÉZako1‚ð1‘ÌoŒ»
-            const int num_lanes = 7;
-            const int lane_x[num_lanes] = { 250, 350, 450, 550, 650, 750, 850 };
+            const int num_lanes = 6;
+            const int lane_x[num_lanes] = {350, 450, 550, 650, 750, 850 };
             int lane_index = GetRand(num_lanes);
             float x = static_cast<float>(lane_x[lane_index]);
             Vector2D spawn_pos(x, 0.0f);

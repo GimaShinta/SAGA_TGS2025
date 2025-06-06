@@ -11,14 +11,15 @@ enum class ZakoPattern
     RightMove,
     LeftMove,
     ZIgzag,
+    SideAppearAndShoot,
     MoveAndStopShoot,
     MoveThenDiagonal,
     Formation,
-    Homing,
-    DiveOnce, 
-    SideAppearAndShoot
-
+    DiveOnce,
+    ArcMoveAndStop,  // Å© í«â¡
+    Count
 };
+
 
 
 class Zako : public EnemyBase

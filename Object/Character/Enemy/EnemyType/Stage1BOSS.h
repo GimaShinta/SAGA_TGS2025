@@ -26,7 +26,7 @@ public:
     void SetPlayer(Player* p)
     {
         player = p;
-    } // ← プレイヤーを外部からセット
+    }
 
 protected:
     void Shot(float delta_second) override;
@@ -63,20 +63,18 @@ private:
     bool is_returning = false;
     bool is_leaving = false;
     Vector2D return_target;
+    Vector2D original_location_before_return;
+    float return_timer = 0.0f;
+    const float return_duration = 2.0f;
     float stop_timer = 0.0f;
     float stop_duration = 2.0f;
-
-    bool is_dying = false;
-    float dying_timer = 0.0f;
-    int flash_count = 0;
-    const int max_flash_count = 6;
 
     std::vector<int> images;
     std::vector<int> images_a;
     std::vector<int> images_b;
     std::vector<int> anim_indices;
 
-    Player* player = nullptr; // ← 追加：プレイヤー参照
+    Player* player = nullptr;
 
     void ChangePatternRandomly();
 };

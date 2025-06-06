@@ -176,6 +176,28 @@ void Zako::Update(float delta_second)
             }
             break;
         }
+        case ZakoPattern::ArcMoveAndStop:
+        {
+            const float arc_duration = 5.0f;  // ŒÊ‚ð•`‚­ŽžŠÔ
+            const float stop_y = 100.0f;      // ’âŽ~ˆÊ’uY
+
+            if (pattern_timer < arc_duration)
+            {
+                // ‰~ŒÊ‰^“®F•ú•¨ü‚â‰~ŒÊ‚ð–Í•í
+                float t = pattern_timer / arc_duration; // 0`1
+                float angle = t * 3.1415f; // 0`ƒÎ
+
+                // ”¼‰~‹O“¹i‰EŒü‚«‚É”ò‚Ño‚µ‚Ä¶‚É–ß‚Á‚Ä‚­‚éŠ´‚¶j
+                velocity.x = cosf(angle) * 150.0f; // ‰¡‘¬“xi‰‚ß‘¬‚­AÅŒã‚Íƒ[ƒj
+                velocity.y = -sinf(angle) * 150.0f; // ã•ûŒü‚Ö‚ÌŒÊ
+            }
+            else
+            {
+                velocity = { 0, 0 }; // ã‚É’…‚¢‚½‚çŽ~‚Ü‚é
+            }
+            break;
+        }
+
       
     }
 
@@ -273,6 +295,12 @@ void Zako::SetPattern(ZakoPattern new_pattern)
             images = images_b;
             anim_indices = { 0,1,2,3,4,5,6,7,8,9,10,11 };
             break;
+        case ZakoPattern::ArcMoveAndStop:
+            hp = 20;
+            images = images_b;
+            anim_indices = { 0,1,2,3,4,5,6,7,8,9,10,11 };
+            break;
+
 
     }
 

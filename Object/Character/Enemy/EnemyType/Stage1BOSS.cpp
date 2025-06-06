@@ -6,6 +6,8 @@
 #include <ctime>
 #include <cmath>
 #include <vector>
+#include <algorithm>
+
 
 Stage1Boss::Stage1Boss()
 {
@@ -50,38 +52,40 @@ void Stage1Boss::Initialize()
     life_timer = 0.0f;
 }
 
+// ...（インクルードは省略）
+
 void Stage1Boss::Update(float delta_second)
 {
     life_timer += delta_second;
 
-    if (!is_returning && life_timer >= 50.0f)
+    // 中央へ戻るトリガー
+    if (!is_returning && life_timer >= 40.0f)
     {
         is_returning = true;
         is_leaving = false;
         return_target = { 640.0f, 240.0f };
+        original_location_before_return = location;
+        return_timer = 0.0f;
         stop_timer = 0.0f;
     }
 
+    // スムーズに中央に戻る & 上に去る処理
     if (is_returning)
     {
         const float speed = 200.0f;
 
         if (!is_leaving)
         {
-            Vector2D dir = return_target - location;
-            float dist = dir.Length();
+            return_timer += delta_second;
+            float t = (return_timer / return_duration < 1.0f) ? (return_timer / return_duration) : 1.0f;
 
-            if (dist > 5.0f)
+
+            location = original_location_before_return + (return_target - original_location_before_return) * t;
+            velocity = { 0.0f, 0.0f };
+
+            if (t >= 1.0f)
             {
-                dir.Normalize();
-                velocity = dir * speed;
-            }
-            else
-            {
-                location = return_target;
-                velocity = { 0.0f, 0.0f };
                 stop_timer += delta_second;
-
                 if (stop_timer >= stop_duration)
                 {
                     is_leaving = true;
@@ -98,13 +102,12 @@ void Stage1Boss::Update(float delta_second)
                 is_alive = false;
                 is_destroy = true;
             }
-
-            return;
         }
 
-        location += velocity * delta_second;
         return;
     }
+
+    // 以下変身処理などは変更なし（略）
 
     if (!is_transformed && hp < 1000)
     {
@@ -211,7 +214,7 @@ void Stage1Boss::Update(float delta_second)
         is_alive = false;
         is_destroy = true;
 
-        AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+        auto* manager = Singleton<AnimationManager>::GetInstance();
         anim_id = manager->PlayerAnimation(EffectName::eExprotion, location, 0.05f, false);
         manager->SetScale(anim_id, 0.5f);
 
@@ -221,6 +224,7 @@ void Stage1Boss::Update(float delta_second)
     Shot(delta_second);
     __super::Update(delta_second);
 }
+
 
 void Stage1Boss::Draw(const Vector2D& screen_offset) const
 {
