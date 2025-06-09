@@ -146,11 +146,6 @@ void Stage2::Draw()
         DrawString((D_WIN_MAX_X / 2) - 60, (D_WIN_MAX_Y / 2) - 100, "ゲームオーバー", GetColor(255, 255, 255));
     }
 
-    // 操作説明パネル
-    int panel_x = D_WIN_MAX_X - 270;
-    int panel_y = 60;
-    int panel_w = 250;
-    int panel_h = 180;
 
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
     DrawBox(panel_x, panel_y, panel_x + panel_w, panel_y + panel_h, GetColor(0, 0, 0), TRUE);
