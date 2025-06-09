@@ -19,6 +19,7 @@
 #include "../../../../Object/Character/Enemy/EnemyType/Boss2.h"
 #include "../../../../Object/Item/PowerUp/PowerUp.h"
 #include "../../../../Scene/SceneType/Stage/StageType/Stage3.h"
+#include "../../../../Scene/SceneType/Stage/StageType/Stage4.h"
 #include "../../../../Utility/AnimationManager.h"
 #include "../../../../Utility/ResourceManager.h"
 #include "../../../../Utility/InputManager.h"
@@ -65,13 +66,23 @@ void Stage3::Initialize()
     manager->SetAlpha(anim_id, 255);       // 半透明
     manager->SetScale(anim_id, 5.0f);      // 1.5倍拡大
     manager->SetZLayer(anim_id, 1);        // 描画順指定
+
+    //フォント
+    // font_digital = CreateFontToHandle("DS-Digital", 28, 6, DX_FONTTYPE_ANTIALIASING);
+    font_digital = CreateFontToHandle("Orbitron", 28, 6, DX_FONTTYPE_ANTIALIASING);
+    font_orbitron = CreateFontToHandle("Orbitron", 22, 6, DX_FONTTYPE_ANTIALIASING);
+
 }
 
 void Stage3::Finalize()
 {
     // 終了処理
-    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
-    objm->Finalize();
+    // 敵リストをすべて削除
+    for (auto& enemy : enemy_list)
+    {
+        enemy->SetDestroy();
+    }
+    enemy_list.clear();
     AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
     manager->RemoveAnimation(anim_id);
 }
@@ -186,11 +197,23 @@ void Stage3::Draw()
 
     if (is_clear == true)
     {
-        DrawString((D_WIN_MAX_X / 2) - 40, (D_WIN_MAX_Y / 2) - 100, "ゲームクリア", GetColor(0, 0, 0));
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, transparent);
+        DrawBox((D_WIN_MAX_X / 2) - 350, 0, (D_WIN_MAX_X / 2) + 350, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
+
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+        DrawFormatStringToHandle((D_WIN_MAX_X / 2) - 100.0f, (D_WIN_MAX_Y / 2), GetColor(255, 255, 255), font_digital, "NEXT STAGE...");
+
+        //DrawString((D_WIN_MAX_X / 2) - 40, (D_WIN_MAX_Y / 2) - 100, "ゲームクリア", GetColor(0, 0, 0));
     }
     else if (is_over == true)
     {
-        DrawString((D_WIN_MAX_X / 2) - 60, (D_WIN_MAX_Y / 2) - 100, "ゲームオーバー", GetColor(0, 0, 0));
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, transparent);
+        DrawBox((D_WIN_MAX_X / 2) - 350, 0, (D_WIN_MAX_X / 2) + 350, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
+
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+        DrawFormatStringToHandle((D_WIN_MAX_X / 2) - 100.0f, (D_WIN_MAX_Y / 2), GetColor(255, 255, 255), font_digital, "GAME OVER");
+
+        //DrawString((D_WIN_MAX_X / 2) - 60, (D_WIN_MAX_Y / 2) - 100, "ゲームオーバー", GetColor(0, 0, 0));
     }
 
     AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
@@ -214,7 +237,7 @@ bool Stage3::IsOver()
 
 StageBase* Stage3::GetNextStage(Player* player)
 {
-    return nullptr; // 次のステージへ
+    return new Stage4(player); // 次のステージへ
 }
 
 void Stage3::DisplayWarning(float delta_second)
@@ -278,8 +301,29 @@ void Stage3::PlayerShot()
         // 上下反転していなかったら下方向に生成
         if (player->GetShotFlip() == false)
         {
-            shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 10, p_location.y - D_OBJECT_SIZE));
-            shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 10, p_location.y - D_OBJECT_SIZE));
+            if (player->GetPowerd() <= 1)
+            {
+                shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 10, p_location.y - D_OBJECT_SIZE));
+                shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 10, p_location.y - D_OBJECT_SIZE));
+
+            }
+            else if (player->GetPowerd() == 2)
+            {
+                shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 30, p_location.y));
+                shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 10, p_location.y - D_OBJECT_SIZE));
+                shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 10, p_location.y - D_OBJECT_SIZE));
+                shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 30, p_location.y));
+            }
+            else
+            {
+                shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 50, p_location.y + D_OBJECT_SIZE));
+                shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 30, p_location.y));
+                shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 10, p_location.y - D_OBJECT_SIZE));
+                shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 10, p_location.y - D_OBJECT_SIZE));
+                shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 30, p_location.y));
+                shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 50, p_location.y + D_OBJECT_SIZE));
+
+            }
             shot->SetShotFlip(false);
         }
         // 反転していたら上方向に生成
@@ -516,7 +560,15 @@ void Stage3::UpdateGameStatus(float delta)
     if (is_clear == true || is_over == true)
     {
         scene_timer += delta;
-        if (scene_timer >= 5.0f)
+        gameover_timer += delta;
+
+        if (gameover_timer >= 0.005f)
+        {
+            transparent++;
+            gameover_timer = 0.0f;
+        }
+        
+        if (scene_timer >= 4.0f)
         {
             finished = true;
         }

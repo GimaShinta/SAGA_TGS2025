@@ -139,6 +139,7 @@
     <ClCompile Include="Object\Character\Enemy\EnemyType\Zako5.cpp" />
     <ClCompile Include="Object\Character\Enemy\EnemyType\Stage1BOSS.cpp" />
     <ClCompile Include="Scene\SceneType\ExitScene.cpp" />
+    <ClCompile Include="Scene\SceneType\Stage\StageType\Stage4.cpp" />
     <ClCompile Include="Utility\AnimationManager.cpp" />
     <ClCompile Include="Application\Application.cpp" />
     <ClCompile Include="AppMain.cpp" />
@@ -183,6 +184,7 @@
     <ClInclude Include="Object\Character\Enemy\EnemyType\Zako5.h" />
     <ClInclude Include="Object\Character\Enemy\EnemyType\Stage1BOSS.h" />
     <ClInclude Include="Scene\SceneType\ExitScene.h" />
+    <ClInclude Include="Scene\SceneType\Stage\StageType\Stage4.h" />
     <ClInclude Include="Utility\AnimationManager.h" />
     <ClInclude Include="Application\Application.h" />
     <ClInclude Include="Object\Item\Exp\Exp.h" />

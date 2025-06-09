@@ -1,6 +1,7 @@
 #include "Shot.h"
 #include "../../GameObjectManager.h"
 #include "../../../Utility/ProjectConfig.h"
+#include "../../../Utility/AnimationManager.h"
 
 Shot::Shot()
 {
@@ -31,6 +32,13 @@ void Shot::Initialize()
 	ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
 	se = rm->GetSounds("Resource/sound/se/shot/shot_01.mp3");
 	image = rm->GetImages("Resource/Image/Object/Player/Shot/anime_effect16.png", 6, 6, 1, 8, 88)[0];
+
+	AnimationManager* am = Singleton<AnimationManager>::GetInstance();
+	int anim_id = 0;
+	anim_id = am->PlayerAnimation(EffectName::eExprotion, location, 0.05f, false);
+	// ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì’Ç‰ÁÝ’è
+	am->SetAlpha(anim_id, 122);       // ”¼“§–¾
+	am->SetScale(anim_id, 0.1f);      // 1.5”{Šg‘å
 
 	ChangeVolumeSoundMem(255 * 30 / 100, se);
 	PlaySoundMem(se, DX_PLAYTYPE_BACK);
@@ -87,6 +95,8 @@ void Shot::Finalize()
 /// <param name="hit_object">“–‚½‚Á‚½‘ŠŽè</param>
 void Shot::OnHitCollision(GameObjectBase* hit_object)
 {
+	AnimationManager* am = Singleton<AnimationManager>::GetInstance();
+	int anim_id = 0;
 	// “–‚½‚Á‚½‘ŠŽè‚ª’e‚¾‚Á‚½‚ç
 	if (hit_object->GetCollision().object_type == eObjectType::eEnemy)
 	{
@@ -100,6 +110,14 @@ void Shot::OnHitCollision(GameObjectBase* hit_object)
 	{
 		is_destroy = true;
 	}
+	float random_x = static_cast<float>(GetRand(100));
+
+	anim_id = am->PlayerAnimation(EffectName::eExprotion2, Vector2D(location.x, location.y - random_x), 0.01f, false);
+
+
+	// ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì’Ç‰ÁÝ’è
+	am->SetAlpha(anim_id, 255);       // ”¼“§–¾
+	am->SetScale(anim_id, 0.2f);      // 1.5”{Šg‘å
 }
 
 void Shot::SetShotFlip(bool flip)

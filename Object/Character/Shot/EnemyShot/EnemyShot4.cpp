@@ -27,8 +27,12 @@ void EnemyShot4::Initialize()
 	is_mobility = true;
 
 	ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
-	images = rm->GetImages("Resource/Image/Effect/anime_explosion03_01.png", 72, 12, 6, 112, 112);
-	image = images[36];
+	//images = rm->GetImages("Resource/Image/Effect/anime_explosion03_01.png", 72, 12, 6, 112, 112);
+	//image = images[36];
+
+	bullet_1 = rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime81.png", 6, 6, 1, 24, 24);
+	bullet_2 = rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime89.png", 4, 4, 1, 16, 32);
+
 }
 
 /// <summary>
@@ -37,14 +41,15 @@ void EnemyShot4::Initialize()
 /// <param name="delata_second">1フレーム当たりの時間</param>
 void EnemyShot4::Update(float delta_second)
 {
-	GameObjectBase::AnimationControl(delta_second, images, {36, 37, 38, 39, 40, 41, 42, 43, 42, 41, 40, 39, 38, 37}, 10.0f);
+	//GameObjectBase::AnimationControl(delta_second, images, {36, 37, 38, 39, 40, 41, 42, 43, 42, 41, 40, 39, 38, 37}, 10.0f);
+	//GameObjectBase::AnimationControl(delta_second, images, {0, 1, 2, 3, 2, 1}, 10.0f);
 	move_time += delta_second;
 
 	// 弾が画面外に出たら削除（移動方向によって判定を変える）
-	if (location.y < -300.0f || // 上方向
-		location.y > D_WIN_MAX_Y + 300.0f ||
-		location.x > (D_WIN_MAX_X / 2) + 350.0f ||
-		location.x < (D_WIN_MAX_X / 2) - 350.0f) // 下方向
+	if (location.y < -100.0f || // 上方向
+		location.y > D_WIN_MAX_Y + 100.0f ||
+		location.x > D_WIN_MAX_X - 100.0f ||
+		location.x < 0 + 100.0f) // 下方向
 	{
 		is_destroy = true;
 	}
@@ -83,13 +88,31 @@ void EnemyShot4::Draw(const Vector2D& screen_offset) const
 	p4 = rotate(p4);
 
 	int color = GetColor(255, 255, 0);
-	DrawTriangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, color, TRUE);
-	DrawTriangle(p1.x, p1.y, p3.x, p3.y, p4.x, p4.y, color, TRUE);
+	//DrawTriangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, color, TRUE);
+	//DrawTriangle(p1.x, p1.y, p3.x, p3.y, p4.x, p4.y, color, TRUE);
 
-	DrawRotaGraph(location.x, location.y, 0.5f, angle, image, TRUE);
+	DrawRotaGraph(location.x, location.y, 1.9f, angle, image, TRUE);
 }
 
 // 終了時処理
 void EnemyShot4::Finalize()
 {
+}
+
+void EnemyShot4::SetAttackPattrn(int pattrn)
+{
+	attack_pattrn = pattrn;
+	if (pattrn <= 1)
+	{
+		image = bullet_1[0];
+	}
+	else if (pattrn == 2)
+	{
+		image = bullet_2[0];
+	}
+	else
+	{
+
+	}
+
 }

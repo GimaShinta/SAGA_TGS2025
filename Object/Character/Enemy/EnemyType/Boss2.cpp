@@ -16,10 +16,10 @@ void Boss2::Initialize()
 	enemy_type = ENE_BOSS2;
 	z_layer = 1;
 	box_size = 30;
-	hp = 100;
+	hp = 10000;
 
 	// 攻撃パターンの設定
-	attack_pattrn_num = { 9, 12 };
+	attack_pattrn_num = { 4, 5, 6,12 };
 
 	// 当たり判定のオブジェクト設定
 	collision.is_blocking = true;
@@ -33,7 +33,7 @@ void Boss2::Initialize()
 	is_mobility = true;
 
 	// 戦闘中の中心座標
-	base_position = Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) - 200);
+	base_position = Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) - 225);
 
 	// 登場時の中心座標
 	generate_base_position = Vector2D(D_WIN_MAX_X / 2 + 150, D_WIN_MAX_Y + 200);
@@ -49,6 +49,9 @@ void Boss2::Initialize()
 	boss2_image[4] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_02/boss03_b3.png")[0];
 	boss2_image[5] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_02/boss03_b4.png")[0];
 	boss2_image[6] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_02/boss03_b5.png")[0];
+
+	boss2_anim = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_02/anime01.png", 6, 6, 1, 80, 40);
+	boss2_image[7] = boss2_anim[0];
 
 	// 最初は本体の位置に固定
 	for (int i = 0; i < 6; ++i)
@@ -92,6 +95,17 @@ void Boss2::Update(float delta_second)
 
 	// 部品の相対オフセット（左右に2個ずつ）
 	Vector2D offsets[6] = {
+		Vector2D(110, 0), // 左奥
+		Vector2D(60,  0), // 左手前
+		Vector2D(-60,  0), // 右手前
+		Vector2D(-110, 0),  // 右奥
+
+		Vector2D(60, 30),  // 砲
+		Vector2D(-60, 30)  // 砲
+	};
+
+	// 部品の相対オフセット（左右に2個ずつ）
+	Vector2D offsets_2[6] = {
 		Vector2D(-180, 0), // 左奥
 		Vector2D(-100,  0), // 左手前
 		Vector2D(100,  0), // 右手前
@@ -112,12 +126,66 @@ void Boss2::Update(float delta_second)
 	10.0f   // 砲（ゆっくり）
 	};
 
+	// 追従の速さ
+	float individual_follow_speeds_2[6] = {
+	100.0f,  // 左奥（ゆっくり）
+	100.0f,  // 左手前
+	100.0f,  // 右手前
+	100.0f,   // 右奥（ゆっくり）
+
+	100.0f,   // 砲（ゆっくり）
+	100.0f   // 砲（ゆっくり）
+	};
+
 	// 追従処理
 	for (int i = 0; i < 6; ++i)
 	{
-		Vector2D target = location + offsets[i];
-		part_positions[i] += (target - part_positions[i]) * individual_follow_speeds[i] * delta_second;
+		Vector2D target;
+		if (generate == false)
+		{
+			target = location + offsets[i];
+			part_positions[i] += (target - part_positions[i]) * individual_follow_speeds_2[i] * delta_second;
+			angle = 3.14 / 1.0f;
+
+		}
+		else
+		{
+			target = location + offsets_2[i];
+			part_positions[i] += (target - part_positions[i]) * individual_follow_speeds[i] * delta_second;
+			angle = 0.0f;
+		}
 	}
+
+
+	std::vector<int> animation_num = { 0, 1, 2, 3, 4, 5 };
+	//フレームレートで時間を計測
+	animation_time += delta_second;
+	//8秒経ったら画像を切り替える
+	if (animation_time >= anim_speed)
+	{
+		//計測時間の初期化
+		animation_time = 0.0f;
+		//時間経過カウントの増加
+		animation_count++;
+		//カウントがアニメーション画像の要素数以上になったら
+		if (animation_count >= animation_num.size())
+		{
+			//カウントの初期化
+			animation_count = 0;
+		}
+		// アニメーションが順番に代入される
+		boss2_image[7] = boss2_anim[animation_num[animation_count]];
+	}
+
+	if (attack_pattrn == 12)
+	{
+		anim_speed = 0.01;
+	}
+	else
+	{
+		anim_speed = 0.1f;
+	}
+
 
 	// 親クラスの更新処理を呼び出す
 	__super::Update(delta_second);
@@ -183,7 +251,7 @@ void Boss2::Movement(float delta_second)
 			velocity.y = distance_y;
 			if (velocity.y > max_speed) velocity.y = max_speed;
 			if (velocity.y < -max_speed) velocity.y = -max_speed;
-			box_size = 60;
+			box_size = Vector2D(190, 80);
 			image_size = 2.0f;
 		}
 		else
@@ -319,14 +387,25 @@ void Boss2::DrawBoss2(const Vector2D position) const
 
 
 	// 本体
-	DrawRotaGraph(position.x, position.y, image_size, 0.0f, boss2_image[2], TRUE);
+	DrawRotaGraph(position.x, position.y, image_size, angle, boss2_image[2], TRUE);
 	// 部品
-	DrawRotaGraph(part_positions[1].x, part_positions[1].y, image_size, 0.0f, boss2_image[3], TRUE); // 左手前
-	DrawRotaGraph(part_positions[0].x, part_positions[0].y, image_size, 0.0f, boss2_image[5], TRUE); // 左奥
-	DrawRotaGraph(part_positions[2].x, part_positions[2].y, image_size, 0.0f, boss2_image[4], TRUE); // 右手前
-	DrawRotaGraph(part_positions[3].x, part_positions[3].y, image_size, 0.0f, boss2_image[6], TRUE); // 右奥
-	DrawRotaGraph(part_positions[4].x, part_positions[4].y, image_size, 0.0f, boss2_image[1], TRUE);
-	DrawRotaGraph(part_positions[5].x, part_positions[5].y, image_size, 0.0f, boss2_image[1], TRUE);
+	DrawRotaGraph(part_positions[1].x, part_positions[1].y, image_size, angle, boss2_image[3], TRUE); // 左手前
+	DrawRotaGraph(part_positions[0].x, part_positions[0].y, image_size, angle, boss2_image[5], TRUE); // 左奥
+	DrawRotaGraph(part_positions[2].x, part_positions[2].y, image_size, angle, boss2_image[4], TRUE); // 右手前
+	DrawRotaGraph(part_positions[3].x, part_positions[3].y, image_size, angle, boss2_image[6], TRUE); // 右奥
+	DrawRotaGraph(part_positions[4].x, part_positions[4].y, image_size, angle, boss2_image[1], TRUE);
+	DrawRotaGraph(part_positions[5].x, part_positions[5].y, image_size, angle, boss2_image[1], TRUE);
+
+	if (generate == false)
+	{
+		DrawRotaGraph(part_positions[4].x, part_positions[4].y - 50.0f, image_size, angle, boss2_image[7], TRUE);
+		DrawRotaGraph(part_positions[5].x, part_positions[5].y - 50.0f, image_size, angle, boss2_image[7], TRUE);
+	}
+	else
+	{
+		DrawRotaGraph(part_positions[4].x, part_positions[4].y + 110.0f, image_size, angle, boss2_image[7], TRUE);
+		DrawRotaGraph(part_positions[5].x, part_positions[5].y + 110.0f, image_size, angle, boss2_image[7], TRUE);
+	}
 
 }
 
@@ -430,7 +509,7 @@ void Boss2::Attack(float delta_second)
 			/// <param name="spiral_duration_limit">攻撃する時間</param>
 			/// <param name="generate_location">生成する位置</param>
 			/// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
-			Pattrn4(24, 150.0f, 3.0f, 10.0f, location, delta_second);
+			Pattrn4(20, 300.0f, 1.0f, 5.0f, location, delta_second);
 			break;
 		case 5:
 #if 0
@@ -471,7 +550,7 @@ void Boss2::Attack(float delta_second)
 			/// <param name="spiral_speed">弾の速度</param>
 			/// <param name="generate_location">生成する位置</param>
 			/// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
-			Pattrn5(0.3f, 10.0f, 160.0f, location, delta_second);
+			Pattrn5(0.1f, 5.0f, 300.0f, location, delta_second);
 #endif
 			break;
 		case 6:
@@ -484,7 +563,7 @@ void Boss2::Attack(float delta_second)
 			/// <param name="fan_duration_limit">攻撃する時間</param>
 			/// <param name="generate_location">生成する位置</param>
 			/// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
-			Pattrn6(60.0f, 180.0f, 0.2f, 3.0f, location, delta_second);
+			Pattrn6(100.0f, 300.0f, 0.15f, 10.0f, location, delta_second);
 
 			break;
 		case 7:
@@ -497,7 +576,7 @@ void Boss2::Attack(float delta_second)
 			/// <param name="fan_duration_limit">攻撃時間</param>
 			/// <param name="generate_location">生成する位置</param>
 			/// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
-			Pattrn7(60.0f, 180.0f, 0.4f, 3.0f, location, delta_second);
+			Pattrn7(150.0f, 300.0f, 0.5f, 10.0f, Vector2D(location.x, location.y + 100.0f), delta_second);
 
 			break;
 		case 8:
@@ -508,7 +587,7 @@ void Boss2::Attack(float delta_second)
 			/// <param name="wave_duration_limit">発車時間の上限</param>
 			/// <param name="generate_location">生成する位置</param>
 			/// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
-			Pattrn8(0.1f, 1.0f, location, delta_second);
+			Pattrn8(0.1f, 1.0f, Vector2D(location.x, location.y + 150.0f), delta_second);
 
 			break;
 		case 9:
@@ -543,7 +622,7 @@ void Boss2::Attack(float delta_second)
 			/// <param name="center_location">生成する場所</param>
 			/// <param name="generate_location">生成する場所</param>
 			/// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
-			Pattrn10(8, 120.0f, 90.0f, 150.0f, 5.0f, location, delta_second);
+			Pattrn10(8, 120.0f, 350.0f, 300.0f, 5.0f, location, delta_second);
 
 			break;
 		case 11:
@@ -604,6 +683,7 @@ void Boss2::Pattrn4(int bullet_num, float speed, float spiral_interval, float sp
 
 			EnemyShot4* e_shot4 = objm->CreateObject<EnemyShot4>(generate_location);
 			e_shot4->SetVelocity(velocity);
+			e_shot4->SetAttackPattrn(1);
 		}
 	}
 
@@ -649,9 +729,10 @@ void Boss2::Pattrn5(float spiral_interval, float spiral_duration_limit, float sp
 
 			EnemyShot4* shot = objm->CreateObject<EnemyShot4>(generate_location);
 			shot->SetVelocity(velocity);
+			shot->SetAttackPattrn(2);
 		}
 
-		spiral_angle += 10.0f;
+		spiral_angle += 40.0f;
 		if (spiral_angle >= 360.0f) spiral_angle -= 360.0f;
 	}
 
@@ -700,6 +781,8 @@ void Boss2::Pattrn6(float fan_angle_range, float bullet_speed, float fan_interva
 
 		e_shot4 = objm->CreateObject<EnemyShot4>(generate_location);
 		e_shot4->SetVelocity(velocity);
+		e_shot4->SetAttackPattrn(1);
+		
 	}
 
 	// 時間制限を超えたら終了（発射しない）
@@ -734,7 +817,7 @@ void Boss2::Pattrn7(float fan_angle_range, float bullet_speed, float fan_interva
 	{
 		fan_timer = 0.0f;
 
-		int bullet_count = 3;
+		int bullet_count = 6;
 		float base_angle = 90.0f; // 中心下方向
 
 		for (int i = 0; i < bullet_count; ++i)
@@ -747,6 +830,7 @@ void Boss2::Pattrn7(float fan_angle_range, float bullet_speed, float fan_interva
 
 			e_shot4 = objm->CreateObject<EnemyShot4>(generate_location);
 			e_shot4->SetVelocity(velocity);
+			e_shot4->SetAttackPattrn(2);
 		}
 	}
 
@@ -786,13 +870,13 @@ void Boss2::Pattrn8(float wave_interval, float wave_duration_limit, const Vector
 		e_shot5 = objm->CreateObject<EnemyShot5>(Vector2D(e_lo.x + 50, e_lo.y));
 		e_shot5->SetWaveReflected(false);
 		e_shot5->SetVelocity(Vector2D(0, 200));
-		e_shot5->SetWaveParameters(400.0f, 0.7f);
+		e_shot5->SetWaveParameters(600.0f, 0.7f);
 
 		// 左側
 		e_shot5 = objm->CreateObject<EnemyShot5>(Vector2D(e_lo.x - 50, e_lo.y));
 		e_shot5->SetWaveReflected(true);
 		e_shot5->SetVelocity(Vector2D(0, 200));
-		e_shot5->SetWaveParameters(400.0f, 0.7f);
+		e_shot5->SetWaveParameters(600.0f, 0.7f);
 	}
 
 	// 一定時間経過したら終了
@@ -860,6 +944,7 @@ void Boss2::Pattrn9(int shot_count, float radius, float angular_speed, float bul
 			{
 				rotating_shots.push_back(e_shot4);  // 正しく生成されたら弾を保存
 				e_shot4->SetVelocity(Vector2D(0, 0)); // 回転だけなので弾速は0
+				e_shot4->SetAttackPattrn(1);
 			}
 		}
 	}
@@ -950,6 +1035,7 @@ void Boss2::Pattrn10(int shot_count, float radius, float angular_speed, float ce
 				{
 					shot->SetVelocity(Vector2D(0, 0));
 					rotating_shots.push_back(shot);
+					e_shot4->SetAttackPattrn(1);
 				}
 			}
 

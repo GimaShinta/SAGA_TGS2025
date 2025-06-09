@@ -1,6 +1,7 @@
 #include "Beam.h"
 #include "../../GameObjectManager.h"
 #include "../../../Utility/ProjectConfig.h"
+#include "../../../Utility/AnimationManager.h"
 #include "../Player/Player.h"
 
 Beam::Beam() : player(nullptr)
@@ -15,7 +16,7 @@ Beam::~Beam()
 void Beam::Initialize()
 {
 	z_layer = 4;
-	box_size = Vector2D(36.0f, 800.0f);
+	box_size = Vector2D(60.0f, 800.0f);
 
 	// 当たり判定のオブジェクト設定
 	collision.is_blocking = true;
@@ -27,6 +28,12 @@ void Beam::Initialize()
 
 	// 動くかどうか（trueなら動く、falseなら止まる）
 	is_mobility = true;
+
+	ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
+	beam_ts = rm->GetImages("Resource/Image/Object/Player/Beam/anime_sp_weapon03_1.png", 12, 2, 6, 88, 128);
+	beam_t = beam_ts[10];
+	beam_bs = rm->GetImages("Resource/Image/Object/Player/Beam/anime_sp_weapon03_2.png", 12, 2, 6, 88, 80);
+	beam_b = beam_bs[10];
 }
 
 /// <summary>
@@ -40,7 +47,7 @@ void Beam::Update(float delta_second)
 		location.x = player->GetLocation().x;
 		if (Beam_flip == false)
 		{
-			location.y = (player->GetLocation().y - D_OBJECT_SIZE) - box_size.y;
+			location.y = (player->GetLocation().y - (D_OBJECT_SIZE + 12.0f)) - box_size.y;
 		}
 		else
 		{
@@ -55,6 +62,28 @@ void Beam::Update(float delta_second)
 		is_destroy = true;
 	}
 
+	std::vector<int> animation_num = { 10,11 };
+	//フレームレートで時間を計測
+	animation_time += delta_second;
+	//8秒経ったら画像を切り替える
+	if (animation_time >= 0.1f)
+	{
+		//計測時間の初期化
+		animation_time = 0.0f;
+		//時間経過カウントの増加
+		animation_count++;
+		//カウントがアニメーション画像の要素数以上になったら
+		if (animation_count >= animation_num.size())
+		{
+			//カウントの初期化
+			animation_count = 0;
+		}
+		// アニメーションが順番に代入される
+		beam_t = beam_ts[animation_num[animation_count]];
+		beam_b = beam_bs[animation_num[animation_count]];
+	}
+
+
 	location += velocity * delta_second;
 }
 
@@ -64,9 +93,17 @@ void Beam::Update(float delta_second)
 /// <param name="screen_offset"></param>
 void Beam::Draw(const Vector2D& screen_offset) const
 {
-	// 弾を描画する
-	DrawBox(location.x - box_size.x, location.y - box_size.y,
-		location.x + box_size.x, location.y + box_size.y, GetColor(255, 15, 192), TRUE);
+	//// 弾を描画する
+	//DrawBox(location.x - box_size.x, location.y - box_size.y,
+	//	location.x + box_size.x, location.y + box_size.y, GetColor(255, 15, 192), TRUE);
+
+	DrawRotaGraph(location.x, (location.y + box_size.y) - 600.0f, 1.5f, 0.0f, beam_t, TRUE); // トップ
+	DrawRotaGraph(location.x, (location.y + box_size.y) - 500.0f, 1.5f, 0.0f, beam_t, TRUE); // トップ
+	DrawRotaGraph(location.x, (location.y + box_size.y) - 400.0f, 1.5f, 0.0f, beam_t, TRUE); // トップ
+	DrawRotaGraph(location.x, (location.y + box_size.y) - 300.0f, 1.5f, 0.0f, beam_t, TRUE); // トップ
+	DrawRotaGraph(location.x, (location.y + box_size.y) - 200.0f, 1.5f, 0.0f, beam_t, TRUE); // トップ
+	DrawRotaGraph(location.x, (location.y + box_size.y) - 50.0f, 1.5f, 0.0f, beam_b, TRUE); // ボトム
+
 }
 
 // 終了時処理
@@ -80,6 +117,29 @@ void Beam::Finalize()
 /// <param name="hit_object">当たった相手</param>
 void Beam::OnHitCollision(GameObjectBase* hit_object)
 {
+	// 0.5秒未満なら爆発生成しない
+	if (destroy_time - last_explosion_time < 0.1f) 
+	{
+		return;
+	}
+	last_explosion_time = destroy_time;
+
+	AnimationManager* am = Singleton<AnimationManager>::GetInstance();
+	int anim_id = 0;
+
+	float random_x = static_cast<float>(GetRand(70));
+	if (GetRand(2) == 1)
+	{
+		random_x *= -1;
+	}
+	Vector2D t_location = hit_object->GetLocation();
+
+	float random_y = static_cast<float>(GetRand(150));
+
+	anim_id = am->PlayerAnimation(EffectName::eExprotion2, Vector2D(location.x + random_x, (t_location.y + 48.0f) - random_y), 0.03f, false);
+	// アニメーションの追加設定
+	am->SetAlpha(anim_id, 255);       // 半透明
+	am->SetScale(anim_id, 0.8f);      // 1.5倍拡大
 }
 
 void Beam::SetBeamFlip(bool flip)

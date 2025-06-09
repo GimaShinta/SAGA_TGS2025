@@ -7,7 +7,16 @@ private:
 	bool Beam_flip = false;
 	class Player* player;
 	float destroy_time = 0.0f;
+	float anim_time = 0.0f;
+	bool anim_on = false;
+private:
+	float last_explosion_time = 0.0f; // ’¼‹ß‚Ì”š”­¶¬ŠÔ
 
+private:
+	std::vector<int> beam_ts;
+	std::vector<int> beam_bs;
+	int beam_t = NULL;
+	int beam_b = NULL;
 
 public:
 	Beam();

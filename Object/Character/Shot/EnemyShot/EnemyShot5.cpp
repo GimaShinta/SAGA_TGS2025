@@ -88,8 +88,8 @@ void EnemyShot5::Update(float delta_second)
 	// 弾が画面外に出たら削除（移動方向によって判定を変える）
 	if (location.y < -300.0f || // 上方向
 		location.y > D_WIN_MAX_Y + 300.0f ||
-		location.x > (D_WIN_MAX_X / 2) + 350.0f ||
-		location.x < (D_WIN_MAX_X / 2) - 350.0f) // 下方向
+		location.x > D_WIN_MAX_X ||
+		location.x < 0 - 350.0f) // 下方向
 	{
 		is_destroy = true;
 	}

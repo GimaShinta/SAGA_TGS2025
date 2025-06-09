@@ -119,6 +119,7 @@ public:
 	bool CanUseSpecial() const;
 	void UseSpecial();
 	float GetChargeRate() const;
+	int GetPowerd() const;
 
 };
 

@@ -26,6 +26,13 @@ void EnemyBeam1::Initialize()
 
 	// “®‚­‚©‚Ç‚¤‚©itrue‚È‚ç“®‚­Afalse‚È‚ç~‚Ü‚éj
 	is_mobility = true;
+
+    ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
+    beam_ts = rm->GetImages("Resource/Image/Object/Player/Beam/anime_sp_weapon03_1.png", 12, 2, 6, 88, 128);
+    beam_t = beam_ts[10];
+    beam_bs = rm->GetImages("Resource/Image/Object/Player/Beam/anime_sp_weapon03_2.png", 12, 2, 6, 88, 80);
+    beam_b = beam_bs[10];
+
 }
 
 /// <summary>

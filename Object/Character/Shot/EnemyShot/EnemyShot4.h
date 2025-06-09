@@ -1,8 +1,15 @@
 #pragma once
 #include "EnemyShotBase.h"
+#include <vector>
 class EnemyShot4 :
 	public EnemyShotBase
 {
+private:
+	int attack_pattrn = 0;
+	std::vector<int> bullet_1;
+	std::vector<int> bullet_2;
+	std::vector<int> bullet_3;
+
 public:
 	EnemyShot4();
 	~EnemyShot4();
@@ -25,5 +32,8 @@ public:
 
 	// I—¹ˆ—
 	virtual void Finalize() override;
+
+	void SetAttackPattrn(int pattrn);
+
 };
 

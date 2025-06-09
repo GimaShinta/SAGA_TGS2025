@@ -9,6 +9,12 @@ private:
 
 	float alpha_timer = 0.0f;          // 点滅用のタイマー
 	const float growth_duration = 1.0f;  // ビームが完成するまでの時間
+private:
+	std::vector<int> beam_ts;
+	std::vector<int> beam_bs;
+	int beam_t = NULL;
+	int beam_b = NULL;
+
 
 public:
 	EnemyBeam1();

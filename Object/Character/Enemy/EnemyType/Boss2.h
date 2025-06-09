@@ -30,10 +30,13 @@ private:
 
 	float image_size = 1.0f;
 
-	int boss2_image[7] = { 0 };
+	int boss2_image[8] = { 0 };
+	std::vector<int> boss2_anim;
+	float anim_speed = 0.1f;
 
 	// 部品の位置（左右それぞれ2個ずつ）
 	Vector2D part_positions[6]; // 0:左奥, 1:左手前, 2:右手前, 3:右奥
+	float angle = 0.0f;
 
 	// クラス Boss2 に以下の変数を追加
 
