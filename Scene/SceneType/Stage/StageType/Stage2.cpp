@@ -18,7 +18,12 @@ Stage2::~Stage2()
 {}
 
 void Stage2::Initialize()
-{}
+{
+    std::srand(static_cast<unsigned int>(std::time(nullptr)));  // ランダムシード設定
+    stage_timer = 20.0f;
+    enemy_spawn_timer = 0.0f;
+    zako5_spawned = false;
+}
 
 void Stage2::Finalize()
 {
@@ -57,15 +62,16 @@ void Stage2::Update(float delta)
     else if (player->GetBeamOn())
     {
         Vector2D p_location = player->GetLocation();
+        const float beam_offset = 848.0f;
         Beam* beam = nullptr;
         if (!player->GetShotFlip())
         {
-            beam = objm->CreateObject<Beam>(Vector2D(p_location.x, (p_location.y - D_OBJECT_SIZE) - 848));
+            beam = objm->CreateObject<Beam>(Vector2D(p_location.x, (p_location.y - D_OBJECT_SIZE) - beam_offset));
             beam->SetBeamFlip(false);
         }
         else
         {
-            beam = objm->CreateObject<Beam>(Vector2D(p_location.x, (p_location.y + D_OBJECT_SIZE) + 848));
+            beam = objm->CreateObject<Beam>(Vector2D(p_location.x, (p_location.y + D_OBJECT_SIZE) + beam_offset));
             beam->SetBeamFlip(true);
         }
         beam->SetPlayer(player);
@@ -78,7 +84,7 @@ void Stage2::Update(float delta)
     if (CheckHitKey(KEY_INPUT_I)) is_over = true;
 
     // タイムで自動クリア
-    if (stage_timer >= 30.0f)
+    if (stage_timer >= 70.0f)
     {
         is_clear = true;
     }
@@ -166,32 +172,48 @@ void Stage2::EnemyAppearance(float delta)
 
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
 
-    // 通常Zako出現
-    if (stage_timer < 15.0f && enemy_spawn_timer >= spawn_interval && enemy_list.size() < MAX_ENEMIES_ON_SCREEN)
+    if (enemy_list.size() >= MAX_ENEMIES_ON_SCREEN)
+        return;
+
+    if (stage_timer < 15.0f)
     {
-        enemy_spawn_timer = 0.0f;
+        if (enemy_spawn_timer >= spawn_interval)
+        {
+            enemy_spawn_timer = 0.0f;
 
-        float base_x = (std::rand() % 2 == 0) ? 400.0f : 900.0f;
-        float base_y = 0.0f;
+            float base_x = (std::rand() % 2 == 0) ? 400.0f : 900.0f;
+            float base_y = 0.0f;
+            float offset_x = 50.0f;
+            float offset_y = 30.0f;
 
-        float offset_x = 50.0f;
-        float offset_y = 30.0f;
+            Zako* zako_top = objm->CreateObject<Zako>(Vector2D(base_x, base_y - offset_y));
+            zako_top->SetPattern(ZakoPattern::MoveStraight);
+            enemy_list.push_back(zako_top);
 
-        Zako* zako_top = objm->CreateObject<Zako>(Vector2D(base_x, base_y - offset_y));
-        zako_top->SetPattern(ZakoPattern::MoveStraight);
-        enemy_list.push_back(zako_top);
+            Zako* zako_left = objm->CreateObject<Zako>(Vector2D(base_x - offset_x, base_y + offset_y));
+            zako_left->SetPattern(ZakoPattern::MoveStraight);
+            enemy_list.push_back(zako_left);
 
-        Zako* zako_left = objm->CreateObject<Zako>(Vector2D(base_x - offset_x, base_y + offset_y));
-        zako_left->SetPattern(ZakoPattern::MoveStraight);
-        enemy_list.push_back(zako_left);
-
-        Zako* zako_right = objm->CreateObject<Zako>(Vector2D(base_x + offset_x, base_y + offset_y));
-        zako_right->SetPattern(ZakoPattern::MoveStraight);
-        enemy_list.push_back(zako_right);
+            Zako* zako_right = objm->CreateObject<Zako>(Vector2D(base_x + offset_x, base_y + offset_y));
+            zako_right->SetPattern(ZakoPattern::MoveStraight);
+            enemy_list.push_back(zako_right);
+        }
     }
+    else if (stage_timer < 30.0f)
+    {
+        if (enemy_spawn_timer >= spawn_interval)
+        {
+            enemy_spawn_timer = 0.0f;
+            int padding = 100;
+            float random_x = static_cast<float>(padding + (std::rand() % (D_WIN_MAX_X - padding * 2)));
+            float random_y = static_cast<float>((std::rand() % (D_WIN_MAX_Y / 2)) * 0.8f);  // 少し抑えめ
 
-    // Zako5出現（1回だけ）
-    if (stage_timer > 20.0f && !zako5_spawned)
+            Zako* zako = objm->CreateObject<Zako>(Vector2D(random_x, random_y));
+            zako->SetPattern(ZakoPattern::DepthAppear);
+            enemy_list.push_back(zako);
+        }
+    }
+    else if (stage_timer < 60.0f && !zako5_spawned)
     {
         Zako5* left = objm->CreateObject<Zako5>(Vector2D(420, 100));
         Zako5* right = objm->CreateObject<Zako5>(Vector2D(850, 100));
@@ -207,7 +229,6 @@ void Stage2::DrawScrollBackground() const
 {
     DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(20, 20, 40), TRUE);
 
-    // 背面グリッド
     const int grid_size_back = 40;
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
     for (int x = 0; x < D_WIN_MAX_X; x += grid_size_back)
@@ -218,7 +239,6 @@ void Stage2::DrawScrollBackground() const
         DrawLine(0, sy, D_WIN_MAX_X, sy, GetColor(0, 100, 255));
     }
 
-    // 前面グリッド
     const int grid_size_front = 80;
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 120);
     for (int x = 0; x < D_WIN_MAX_X; x += grid_size_front)

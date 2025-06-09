@@ -7,13 +7,17 @@
 #include <cmath>
 #include <vector>
 
-// コンストラクタ（ランダム初期化）
 Zako::Zako()
 {
     srand(static_cast<unsigned int>(time(nullptr)));
 }
 
-// デストラクタ
+Zako::Zako(const Vector2D& pos)
+{
+    location = pos;
+    srand(static_cast<unsigned int>(time(nullptr)));
+}
+
 Zako::~Zako()
 {}
 
@@ -78,29 +82,28 @@ void Zako::Update(float delta_second)
 
             if (pattern_timer < appear_duration)
             {
-                // 横から移動してくる（左 or 右の画面外から入ってくる）
                 if (location.x > 400) velocity = { -200, 0 };
                 else velocity = { 200, 0 };
             }
             else
             {
-                // 停止しながら定期的に攻撃
                 velocity = { 0, 0 };
-                Shot(delta_second);  // Shot()内でshot_timerチェックしてるのでOK
+                Shot(delta_second);
             }
             break;
         }
-
 
         case ZakoPattern::MoveAndStopShoot:
             if (!has_shot)
             {
                 if (location.y < 300)
                 {
+                    scale = 1.5f;  // 移動中は大きく
                     velocity = { 0, 300 };
                 }
                 else
                 {
+                    scale = 1.5f;  // 停止して撃つ前に縮小
                     velocity = { 0, 0 };
                     shot_timer += delta_second;
 
@@ -124,6 +127,7 @@ void Zako::Update(float delta_second)
             }
             break;
 
+
         case ZakoPattern::MoveThenDiagonal:
             if (pattern_timer < 1.0f)
             {
@@ -136,69 +140,74 @@ void Zako::Update(float delta_second)
             break;
 
         case ZakoPattern::Formation:
-        {
-            float amplitude = 80.0f;
-            float frequency = 1.5f;
-
-            velocity.x = sinf((pattern_timer + start_location.y * 0.01f) * frequency) * amplitude;
+            velocity.x = sinf((pattern_timer + start_location.y * 0.01f) * 1.5f) * 80.0f;
             velocity.y = 80.0f;
             break;
-        }
 
         case ZakoPattern::DiveOnce:
-        {
-            const float approach_time = 1.0f;   // まっすぐ進む時間（秒）
-            const float stop_time = 1.0f;       // 停止する時間（秒）
-
-            if (pattern_timer < approach_time)
+            if (pattern_timer < 1.0f)
             {
-                // まっすぐ下方向へ進む（速度100）
+                scale = 1.5f;  // 登場時は大きく
                 velocity = { 0, 300 };
             }
-            else if (pattern_timer < approach_time + stop_time)
+            else if (pattern_timer < 2.0f)
             {
-                // 一度停止
+                scale = 1.5f;  // 一時停止時に縮小
                 velocity = { 0, 0 };
             }
             else
             {
-                // 突進開始（1回だけ方向決定）
                 if (!has_shot && player)
                 {
                     Vector2D dir = player->GetLocation() - location;
                     float len = dir.Length();
                     if (len > 0) dir /= len;
 
-                    velocity = dir * 600.0f; // 突進速度調整可
+                    velocity = dir * 600.0f;
                     has_shot = true;
                 }
-                // velocityは突進方向のまま維持
             }
             break;
-        }
+
+
         case ZakoPattern::ArcMoveAndStop:
         {
-            const float arc_duration = 5.0f;  // 弧を描く時間
-            const float stop_y = 100.0f;      // 停止位置Y
-
+            const float arc_duration = 5.0f;
             if (pattern_timer < arc_duration)
             {
-                // 円弧運動：放物線や円弧を模倣
-                float t = pattern_timer / arc_duration; // 0～1
-                float angle = t * 3.1415f; // 0～π
-
-                // 半円軌道（右向きに飛び出して左に戻ってくる感じ）
-                velocity.x = cosf(angle) * 150.0f; // 横速度（初め速く、最後はゼロ）
-                velocity.y = -sinf(angle) * 150.0f; // 上方向への弧
+                float t = pattern_timer / arc_duration;
+                float angle = t * 3.1415f;
+                velocity.x = cosf(angle) * 150.0f;
+                velocity.y = -sinf(angle) * 150.0f;
             }
             else
             {
-                velocity = { 0, 0 }; // 上に着いたら止まる
+                velocity = { 0, 0 };
             }
             break;
         }
 
-      
+        case ZakoPattern::DepthAppear:
+        {
+            const float appear_time = 1.0f;        // 登場フェードイン時間
+            const float wait_after_appear = 0.0f; // 止まる時間
+
+            if (pattern_timer < appear_time)
+            {
+                float t = pattern_timer / appear_time;
+                scale = 0.2f + t * 1.3f;  // 0.2～1.0
+                //location.y = 150 + (1.0f - t) * 100; // 150に近づける
+                velocity = { 0, 0 };
+            }
+            else if (pattern_timer < appear_time + wait_after_appear)
+            {
+                scale = 1.5f;
+                velocity = { 0, 0 };
+                Shot(delta_second);
+            }
+            break;
+        }
+
     }
 
     location += velocity * delta_second;
@@ -219,9 +228,7 @@ void Zako::Update(float delta_second)
 
 void Zako::Draw(const Vector2D& screen_offset) const
 {
-    DrawFormatString(location.x - 8, location.y - 8, GetColor(0, 0, 0), "%.0f", hp);
-    DrawRotaGraph(location.x, location.y, 1.5f, 0.0f, image, TRUE);
-    DrawFormatString(location.x - 10, location.y - 40, GetColor(255, 255, 255), "%.0f", hp);
+    DrawRotaGraph(location.x, location.y, scale, 0.0f, image, TRUE);
 }
 
 void Zako::Finalize()
@@ -246,7 +253,7 @@ void Zako::Shot(float delta_second)
 
 void Zako::ChangePatternRandomly()
 {
-    int r = rand() % 9; // ← 9種類に拡張
+    int r = rand() % static_cast<int>(ZakoPattern::Count);
     SetPattern(static_cast<ZakoPattern>(r));
 }
 
@@ -263,6 +270,7 @@ void Zako::SetPattern(ZakoPattern new_pattern)
             hp = 10;
             images = images_b;
             anim_indices = { 0,1,2,3,4,5,6,7,8,9,10,11 };
+            scale = 1.5f;
             break;
 
         case ZakoPattern::RightMove:
@@ -270,6 +278,7 @@ void Zako::SetPattern(ZakoPattern new_pattern)
             hp = 15;
             images = images_a;
             anim_indices = { 0, 1, 2, 3 };
+            scale = 1.5f;
             break;
 
         case ZakoPattern::ZIgzag:
@@ -277,31 +286,32 @@ void Zako::SetPattern(ZakoPattern new_pattern)
             hp = 20;
             images = images_b;
             anim_indices = { 0,1,2,3,4,5,6,7,8,9,10,11 };
+            scale = 1.5f;
             break;
 
         case ZakoPattern::MoveAndStopShoot:
         case ZakoPattern::Formation:
-            hp = 30;
-            images = images_a;
-            anim_indices = { 0, 1, 2, 3 };
-            break;
         case ZakoPattern::DiveOnce:
             hp = 30;
             images = images_a;
             anim_indices = { 0, 1, 2, 3 };
+            scale = 1.5f;
             break;
+
         case ZakoPattern::SideAppearAndShoot:
+        case ZakoPattern::ArcMoveAndStop:
             hp = 25;
             images = images_b;
             anim_indices = { 0,1,2,3,4,5,6,7,8,9,10,11 };
+            scale = 1.5f;
             break;
-        case ZakoPattern::ArcMoveAndStop:
+
+        case ZakoPattern::DepthAppear:
             hp = 20;
             images = images_b;
             anim_indices = { 0,1,2,3,4,5,6,7,8,9,10,11 };
+            scale = 0.2f;
             break;
-
-
     }
 
     image = images[0];
