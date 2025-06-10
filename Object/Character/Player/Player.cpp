@@ -1,6 +1,7 @@
 #include "Player.h"
 #include "../../../Utility/InputManager.h"
 #include "../../../Utility/ProjectConfig.h"
+#include "../../../Utility/AnimationManager.h"
 
 Player::Player() : is_shot(false), count_space(1), life(3), on_hit(false), is_damage(false)
 {
@@ -36,6 +37,10 @@ void Player::Initialize()
 	player_image_right = rm->GetImages("Resource/Image/Object/Player/Player_03/anime_player03_R01.png", 2, 2, 1, 56, 64);
 	player_jet = rm->GetImages("Resource/Image/Object/Player/Shot/anime_effect17.png", 6, 6, 1, 8, 88);
 	jet = player_jet[2];
+
+	engens = rm->GetImages("Resource/Image/Effect/293.png", 72, 8, 9, 64, 64);
+	//engens = rm->GetImages("Resource/Image/Effect/E_BigHit_2.png", 27, 9, 3, 516, 516);
+	engen = engens[0];
 }
 
 /// <summary>
@@ -70,6 +75,10 @@ void Player::Update(float delta_second)
 	{
 		powerd = 3;
 	}
+	else if (powerd <= 0)
+	{
+		powerd = 0;
+	}
 
 
 	// アニメーション更新処理
@@ -102,6 +111,26 @@ void Player::Update(float delta_second)
 		jet = player_jet[animation_num[animation_count]];
 	}
 
+	std::vector<int> engen_num = { 17, 18, 19, 20, 21, 22, 23, 24, 25 };
+	//フレームレートで時間を計測
+	engen_time += delta_second;
+	//8秒経ったら画像を切り替える
+	if (engen_time >= 0.0125f)
+	{
+		//計測時間の初期化
+		engen_time = 0.0f;
+		//時間経過カウントの増加
+		engen_count++;
+		//カウントがアニメーション画像の要素数以上になったら
+		if (engen_count >= engen_num.size())
+		{
+			//カウントの初期化
+			engen_count = 0;
+		}
+		// アニメーションが順番に代入される
+		engen = engens[engen_num[engen_count]];
+	}
+
 
 	// 親クラスの更新処理を呼び出す
 	__super::Update(delta_second);
@@ -114,6 +143,61 @@ void Player::Update(float delta_second)
 void Player::Draw(const Vector2D& screen_offset) const
 {
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, brend);
+
+	if (is_shot_anim == true)
+	{
+		float position = location.x - 3.0f;
+
+#if 0
+		if (powerd <= 1)
+		{
+			//DrawRotaGraph(position + 5.0f, location.y - 0.0f, 1.5f, 0.0f, engen, TRUE);
+			//DrawRotaGraph(position - 5.0f, location.y - 0.0f, 1.5f, 0.0f, engen, TRUE);
+			DrawRotaGraph(position, location.y - 0.0f, 1.5f, 0.0f, engen, TRUE);
+
+		}
+		else if (powerd == 2)
+		{
+			DrawRotaGraph(position + 20.0f, location.y + 10.0f, 1.5f, 0.0f, engen, TRUE);
+			DrawRotaGraph(position + 5.0f, location.y - 0.0f, 1.5f, 0.0f, engen, TRUE);
+			DrawRotaGraph(position - 5.0f, location.y - 0.0f, 1.5f, 0.0f, engen, TRUE);
+			DrawRotaGraph(position - 20.0f, location.y + 10.0f, 1.5f, 0.0f, engen, TRUE);
+
+		}
+		else
+		{
+			DrawRotaGraph(position + 35.0f, location.y + 20.0f, 1.5f, 0.0f, engen, TRUE);
+			DrawRotaGraph(position + 20.0f, location.y + 10.0f, 1.5f, 0.0f, engen, TRUE);
+			DrawRotaGraph(position + 5.0f, location.y - 0.0f, 1.5f, 0.0f, engen, TRUE);
+			DrawRotaGraph(position - 5.0f, location.y - 0.0f, 1.5f, 0.0f, engen, TRUE);
+			DrawRotaGraph(position - 20.0f, location.y + 10.0f, 1.5f, 0.0f, engen, TRUE);
+			DrawRotaGraph(position - 35.0f, location.y + 20.0f, 1.5f, 0.0f, engen, TRUE);
+
+		}
+#else
+		if (powerd <= 1)
+		{
+			DrawRotaGraph(position, location.y - 20.0f, 1.0f, 0.0f, engen, TRUE);
+
+		}
+		else if (powerd == 2)
+		{
+			DrawRotaGraph(position + 5.0f, location.y - 0.0f, 1.5f, 0.0f, engen, TRUE);
+			DrawRotaGraph(position - 5.0f, location.y - 0.0f, 1.5f, 0.0f, engen, TRUE);
+
+			//DrawRotaGraph(position - 22.0f, location.y - 0.0f, 1.0f, 0.0f, engen, TRUE);
+			//DrawRotaGraph(position + 22.0f, location.y - 0.0f, 1.0f, 0.0f, engen, TRUE);
+
+		}
+		else
+		{
+			DrawRotaGraph(position - 25.0f, location.y - 0.0f, 1.0f, 0.0f, engen, TRUE);
+			DrawRotaGraph(position, location.y - 20.0f, 1.0f, 0.0f, engen, TRUE);
+			DrawRotaGraph(position + 25.0f, location.y - 0.0f, 1.0f, 0.0f, engen, TRUE);
+
+		}
+#endif
+	}
 
 	DrawRotaGraph(location.x - 10.0f, location.y + 70.0f, 1.0f, 0.0f, jet, TRUE);
 	DrawRotaGraph(location.x + 10.0f, location.y + 70.0f, 1.0f, 0.0f, jet, TRUE);
@@ -280,6 +364,7 @@ void Player::Shot(float delta_second)
 		// 何も打ってなかったら打てるようにする
 		if (stop == false)
 		{
+			is_shot_anim = true;
 			is_shot = true;
 			shot_timer = 0.0f;
 		}
@@ -294,6 +379,7 @@ void Player::Shot(float delta_second)
 			// 発射インターバルを超えたら発射
 			if (shot_timer >= SHOT_INTERVAL)
 			{
+				is_shot_anim = true;
 				is_shot = true;
 				shot_timer = 0.0f;
 			}
@@ -301,6 +387,7 @@ void Player::Shot(float delta_second)
 	}
 	else
 	{
+		is_shot_anim = false;
 		// 押してない間は、即撃てるようにする
 		shot_timer = SHOT_INTERVAL; 
 	}

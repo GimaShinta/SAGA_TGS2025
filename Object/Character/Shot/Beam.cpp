@@ -34,6 +34,9 @@ void Beam::Initialize()
 	beam_t = beam_ts[10];
 	beam_bs = rm->GetImages("Resource/Image/Object/Player/Beam/anime_sp_weapon03_2.png", 12, 2, 6, 88, 80);
 	beam_b = beam_bs[10];
+
+	beam_state = BeamState::Charging;
+	charge_time = 0.0f;
 }
 
 /// <summary>
@@ -42,6 +45,29 @@ void Beam::Initialize()
 /// <param name="delata_second">1フレーム当たりの時間</param>
 void Beam::Update(float delta_second)
 {
+	switch (beam_state)
+	{
+	case BeamState::Charging:
+		charge_time += delta_second;
+
+		if (beam_state == BeamState::Charging && player != nullptr && charge_on == false)
+		{
+			AnimationManager* am = Singleton<AnimationManager>::GetInstance();
+			am->PlayerAnimation(EffectName::eCharge, player->GetLocation(), 0.1f, false);
+			charge_on = true;
+		}
+
+		if (charge_time >= charge_duration)
+		{
+			beam_state = BeamState::Firing;
+		}
+		return; // チャージ中はビームの位置などを更新しない
+	case BeamState::Firing:
+		break; // ↓ 既存の処理へ
+	default:
+		return;
+	}
+
 	if (player != nullptr)
 	{
 		location.x = player->GetLocation().x;
@@ -66,7 +92,7 @@ void Beam::Update(float delta_second)
 	//フレームレートで時間を計測
 	animation_time += delta_second;
 	//8秒経ったら画像を切り替える
-	if (animation_time >= 0.1f)
+	if (animation_time >= 0.03f)
 	{
 		//計測時間の初期化
 		animation_time = 0.0f;
@@ -93,6 +119,15 @@ void Beam::Update(float delta_second)
 /// <param name="screen_offset"></param>
 void Beam::Draw(const Vector2D& screen_offset) const
 {
+	if (beam_state == BeamState::Charging)
+	{
+		// 例: チャージエフェクトを描画（仮）
+		DrawCircle(location.x, location.y, 50 + charge_time * 50, GetColor(255, 255, 100), TRUE);
+		return;
+	}
+
+	if (beam_state != BeamState::Firing) return;
+
 	//// 弾を描画する
 	//DrawBox(location.x - box_size.x, location.y - box_size.y,
 	//	location.x + box_size.x, location.y + box_size.y, GetColor(255, 15, 192), TRUE);

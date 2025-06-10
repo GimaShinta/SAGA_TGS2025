@@ -57,10 +57,17 @@ private:
 	const float charge_max = 100.0f;
 	bool charge_ready = false;
 
+	float engen_time = 0.0f;
+	int engen_count = 0;
+
+	bool is_shot_anim = false;
+
 	// ‰æ‘œŒn
 	std::vector<int> player_image_right;
 	std::vector<int> player_image_left;
 	std::vector<int> player_jet;
+	std::vector<int> engens;
+	int engen;
 	int jet;
 
 

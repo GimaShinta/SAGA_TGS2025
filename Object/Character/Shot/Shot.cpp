@@ -100,6 +100,17 @@ void Shot::OnHitCollision(GameObjectBase* hit_object)
 	// “–‚½‚Á‚½‘ŠŽè‚ª’e‚¾‚Á‚½‚ç
 	if (hit_object->GetCollision().object_type == eObjectType::eEnemy)
 	{
+		float random_x = static_cast<float>(GetRand(25));
+		if (GetRand(2) == 1)
+		{
+			random_x *= -1;
+		}
+
+		anim_id = am->PlayerAnimation(EffectName::eExprotion2, Vector2D(location.x - random_x, location.y), 0.01f, false);
+		// ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì’Ç‰ÁÝ’è
+		am->SetAlpha(anim_id, 255);       // ”¼“§–¾
+		am->SetScale(anim_id, 0.2f);      // 1.5”{Šg‘å
+
 		is_destroy = true;
 	}
 	if (hit_object->GetCollision().object_type == eObjectType::eBoss)
@@ -108,16 +119,15 @@ void Shot::OnHitCollision(GameObjectBase* hit_object)
 	}
 	if (hit_object->GetCollision().object_type == eObjectType::eBoss2)
 	{
+		float random_x = static_cast<float>(GetRand(100));
+
+		anim_id = am->PlayerAnimation(EffectName::eExprotion2, Vector2D(location.x, location.y - random_x), 0.01f, false);
+		// ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì’Ç‰ÁÝ’è
+		am->SetAlpha(anim_id, 255);       // ”¼“§–¾
+		am->SetScale(anim_id, 0.2f);      // 1.5”{Šg‘å
+
 		is_destroy = true;
 	}
-	float random_x = static_cast<float>(GetRand(100));
-
-	anim_id = am->PlayerAnimation(EffectName::eExprotion2, Vector2D(location.x, location.y - random_x), 0.01f, false);
-
-
-	// ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì’Ç‰ÁÝ’è
-	am->SetAlpha(anim_id, 255);       // ”¼“§–¾
-	am->SetScale(anim_id, 0.2f);      // 1.5”{Šg‘å
 }
 
 void Shot::SetShotFlip(bool flip)

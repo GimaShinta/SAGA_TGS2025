@@ -4,6 +4,13 @@
 class Beam : public CharacterBase
 {
 private:
+	enum class BeamState { Idle, Charging, Firing };
+	BeamState beam_state = BeamState::Idle;
+
+	float charge_time = 0.0f;
+	const float charge_duration = 1.0f; // 1•b‚Åƒ`ƒƒ[ƒWŠ®—¹
+	bool charge_on = false;
+private:
 	bool Beam_flip = false;
 	class Player* player;
 	float destroy_time = 0.0f;
