@@ -51,6 +51,7 @@ private:
 	bool powerd_on = false;
 	float powerd_time = 0.0f;
 	bool is_alive = true;
+	bool is_shield = false;
 
 private:
 	float charge = 0.0f;
@@ -62,13 +63,21 @@ private:
 
 	bool is_shot_anim = false;
 
+
+	float shield_time = 0.0f;
+	int shield_count = 0;
+
+
+
 	// ‰æ‘œŒn
 	std::vector<int> player_image_right;
 	std::vector<int> player_image_left;
 	std::vector<int> player_jet;
 	std::vector<int> engens;
+	std::vector<int> shields;
 	int engen;
 	int jet;
+	int shield;
 
 
 
@@ -127,6 +136,7 @@ public:
 	void UseSpecial();
 	float GetChargeRate() const;
 	int GetPowerd() const;
+	bool GetShieldOn() const;
 
 };
 

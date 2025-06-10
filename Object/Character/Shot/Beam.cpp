@@ -53,7 +53,7 @@ void Beam::Update(float delta_second)
 		if (beam_state == BeamState::Charging && player != nullptr && charge_on == false)
 		{
 			AnimationManager* am = Singleton<AnimationManager>::GetInstance();
-			am->PlayerAnimation(EffectName::eCharge, player->GetLocation(), 0.1f, false);
+			am->PlayerAnimation(EffectName::eExprotion2, player->GetLocation(), 0.1f, false);
 			charge_on = true;
 		}
 

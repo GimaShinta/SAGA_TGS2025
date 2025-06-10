@@ -18,6 +18,7 @@
 #include "../../../../Object/Character/Enemy/EnemyType/Boss.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Boss2.h"
 #include "../../../../Object/Item/PowerUp/PowerUp.h"
+#include "../../../../Object/Item/Shield/Shield.h"
 #include "../../../../Scene/SceneType/Stage/StageType/Stage3.h"
 #include "../../../../Scene/SceneType/Stage/StageType/Stage4.h"
 #include "../../../../Utility/AnimationManager.h"
@@ -43,6 +44,7 @@ void Stage3::Initialize()
     objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) - 100.0f));
     objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2 + 100, (D_WIN_MAX_Y / 2) - 100.0f));
     objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2 + 150, (D_WIN_MAX_Y / 2) - 100.0f));
+    objm->CreateObject<Shield>(Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) + 100.0f));
 
 
 #if 0

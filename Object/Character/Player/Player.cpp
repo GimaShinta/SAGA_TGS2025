@@ -41,6 +41,9 @@ void Player::Initialize()
 	engens = rm->GetImages("Resource/Image/Effect/293.png", 72, 8, 9, 64, 64);
 	//engens = rm->GetImages("Resource/Image/Effect/E_BigHit_2.png", 27, 9, 3, 516, 516);
 	engen = engens[0];
+
+
+	shields = rm->GetImages("Resource/Image/Object/Item/Shield/pipo-btleffect206h_480.png", 15, 5, 3, 480, 480);
 }
 
 /// <summary>
@@ -62,6 +65,7 @@ void Player::Update(float delta_second)
 		is_alive = false;
 	}
 
+
 	if (powerd_time > 0.0f)
 	{
 		powerd_time -= delta_second;
@@ -75,9 +79,9 @@ void Player::Update(float delta_second)
 	{
 		powerd = 3;
 	}
-	else if (powerd <= 0)
+	else if (powerd <= 1)
 	{
-		powerd = 0;
+		powerd = 1;
 	}
 
 
@@ -132,6 +136,27 @@ void Player::Update(float delta_second)
 	}
 
 
+	std::vector<int> shield_num = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 };
+	//フレームレートで時間を計測
+	shield_time += delta_second;
+	//8秒経ったら画像を切り替える
+	if (shield_time >= 0.0125f)
+	{
+		//計測時間の初期化
+		shield_time = 0.0f;
+		//時間経過カウントの増加
+		shield_count++;
+		//カウントがアニメーション画像の要素数以上になったら
+		if (shield_count >= shield_num.size())
+		{
+			//カウントの初期化
+			shield_count = 0;
+		}
+		// アニメーションが順番に代入される
+		shield = shields[shield_num[shield_count]];
+	}
+
+
 	// 親クラスの更新処理を呼び出す
 	__super::Update(delta_second);
 }
@@ -182,8 +207,8 @@ void Player::Draw(const Vector2D& screen_offset) const
 		}
 		else if (powerd == 2)
 		{
-			DrawRotaGraph(position + 5.0f, location.y - 0.0f, 1.5f, 0.0f, engen, TRUE);
-			DrawRotaGraph(position - 5.0f, location.y - 0.0f, 1.5f, 0.0f, engen, TRUE);
+			DrawRotaGraph(position + 10.0f, location.y - 0.0f, 1.5f, 0.0f, engen, TRUE);
+			DrawRotaGraph(position - 10.0f, location.y - 0.0f, 1.5f, 0.0f, engen, TRUE);
 
 			//DrawRotaGraph(position - 22.0f, location.y - 0.0f, 1.0f, 0.0f, engen, TRUE);
 			//DrawRotaGraph(position + 22.0f, location.y - 0.0f, 1.0f, 0.0f, engen, TRUE);
@@ -215,6 +240,13 @@ void Player::Draw(const Vector2D& screen_offset) const
 		break;
 	}
 
+	if (is_shield == true)
+	{
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
+		DrawRotaGraph(location.x, location.y, 0.35f, 0.0f, shield, TRUE);
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+	}
+
 	// ライフ表示などはそのまま
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 	DrawFormatString(D_WIN_MAX_X - 150, 0, GetColor(255, 255, 255), "残りライフ : %d", life);
@@ -238,9 +270,16 @@ void Player::OnHitCollision(GameObjectBase* hit_object)
 	{
 		if (on_hit == false)
 		{
-			life--;
-			is_damage = true;
-			on_hit = true;
+			if (is_shield == false)
+			{
+				life--;
+				is_damage = true;
+				on_hit = true;
+			}
+			else
+			{
+				is_shield = false;
+			}
 		}
 	}
 	if (hit_object->GetCollision().object_type == eObjectType::ePowerUp)
@@ -251,6 +290,10 @@ void Player::OnHitCollision(GameObjectBase* hit_object)
 			powerd_on = true;
 			powerd_time = 4.0f;
 		}
+	}
+	if (hit_object->GetCollision().object_type == eObjectType::eShield)
+	{
+		is_shield = true;
 	}
 }
 
@@ -524,4 +567,9 @@ float Player::GetChargeRate() const
 int Player::GetPowerd() const
 {
 	return powerd;
+}
+
+bool Player::GetShieldOn() const
+{
+	return is_shield;
 }

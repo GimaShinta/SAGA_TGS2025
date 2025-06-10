@@ -17,6 +17,7 @@ enum eObjectType
     eBoss2,
     eExp,
     ePowerUp,
+    eShield,
     eItem,
     eNum
 };
