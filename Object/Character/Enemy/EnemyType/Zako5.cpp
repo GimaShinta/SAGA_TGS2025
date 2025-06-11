@@ -1,22 +1,34 @@
-// Zako5.cpp（Stage3 の攻撃パターン4?7を取り込んだ中ボス）
+// Zako5.cpp
 #include "Zako5.h"
 #include "../../../../Object/GameObjectManager.h"
 #include "../../../../Object/Character/Shot/EnemyShot/EnemyShot4.h"
 #include "../../../../Object/Character/Shot/EnemyShot/EnemyShot5.h"
 #include <cmath>
 
-Zako5::Zako5() {}
-Zako5::~Zako5() {}
+Zako5::Zako5()
+{}
+
+// コンストラクタで位置を受け取るように修正（もしまだなら）
+Zako5::Zako5(const Vector2D& pos)
+{
+    location = pos;  // 位置セット
+}
+
+Zako5::~Zako5()
+{}
 
 void Zako5::Initialize()
 {
     enemy_type = ENE_ZAKO5;
     z_layer = 2;
-    velocity = Vector2D(0, 20);
     box_size = Vector2D(40, 40);
     hp = 1000;
-    velocity = Vector2D(0, 30);  // 下にゆっくり移動
 
+    phase = Zako5Phase::Appearing;
+    appear_timer = 0.0f;
+    is_invincible = true;
+
+   
 
     collision.is_blocking = true;
     collision.object_type = eObjectType::eEnemy;
@@ -27,24 +39,65 @@ void Zako5::Initialize()
 
     ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
     image = rm->GetImages("Resource/Image/Object/Enemy/Zako5/enemy53.png")[0];
-
 }
 
-void Zako5::Update(float delta_second)
+void Zako5::Update(float delta)
 {
-    GameObjectBase::AnimationControl(image);
-    location += velocity * delta_second;
+    switch (phase)
+    {
+        case Zako5Phase::Appearing:
+            appear_timer += delta;
 
-    // 画面範囲で上下反転
-    if (location.y < 100 || location.y > 500)
-        velocity.y *= -1;
+            // 横方向速度セット（初回だけ or velocityがゼロなら）
+            if (velocity.x == 0.0f)
+            {
+                if (location.x < 400.0f)
+                    velocity = Vector2D(100.0f, 0.0f);
+                else if (location.x > 900.0f)
+                    velocity = Vector2D(-100.0f, 0.0f);
+            }
 
-    Shot(delta_second);
+            // 横方向に移動
+            location += velocity * delta;
 
-    if (hp <= 0) is_destroy = true;
+            if (velocity.x > 0 && location.x >= 450.0f)  // 右方向の敵は450で止める（元は400）
+            {
+                location.x = 450.0f;
+                velocity = Vector2D(0.0f, 30.0f);
+            }
+            else if (velocity.x < 0 && location.x <= 830.0f)  // 左方向はそのまま
+            {
+                location.x = 830.0f;
+                velocity = Vector2D(0.0f, 30.0f);
+            }
 
-    __super::Update(delta_second);
+            if (appear_timer >= 2.0f)
+            {
+                phase = Zako5Phase::Fighting;
+                is_invincible = false;
+            }
+            break;
+
+        case Zako5Phase::Fighting:
+            // 縦方向の上下反転移動
+            location += velocity * delta;
+            if (location.y < 100.0f || location.y > 500.0f)
+                velocity.y *= -1;
+
+            Shot(delta);
+
+            if (hp <= 0)
+                is_destroy = true;
+            break;
+    }
+
+    // 位置を反映（もしGetLocation()/SetLocation()使うならここで）
+    SetLocation(location);
+
+    __super::Update(delta);
 }
+
+
 
 
 void Zako5::Shot(float delta_second)

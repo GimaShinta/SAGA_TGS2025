@@ -20,7 +20,7 @@ Stage2::~Stage2()
 void Stage2::Initialize()
 {
     std::srand(static_cast<unsigned int>(std::time(nullptr)));  // ランダムシード設定
-    stage_timer = 20.0f;
+    stage_timer = 15.0f;
     enemy_spawn_timer = 0.0f;
     zako5_spawned = false;
 }
@@ -84,10 +84,15 @@ void Stage2::Update(float delta)
     if (CheckHitKey(KEY_INPUT_I)) is_over = true;
 
     // タイムで自動クリア
-    if (stage_timer >= 60.0f)
+    if (stage_timer >= 100.0f)
 
     {
         is_clear = true;
+    }
+
+    if (player->life == -1)
+    {
+        is_over = true;
     }
 
     // ステージ終了処理
@@ -207,29 +212,34 @@ void Stage2::EnemyAppearance(float delta)
             enemy_list.push_back(zako_right);
         }
     }
-    else if (stage_timer < 30.0f)
+    else if (stage_timer < 40.0f && !zako5_spawned)
     {
         if (enemy_spawn_timer >= spawn_interval)
         {
             enemy_spawn_timer = 0.0f;
-            int padding = 100;
-            float random_x = static_cast<float>(padding + (std::rand() % (D_WIN_MAX_X - padding * 2)));
-            float random_y = static_cast<float>((std::rand() % (D_WIN_MAX_Y / 2)) * 0.8f);  // 少し抑えめ
 
-            Zako* zako = objm->CreateObject<Zako>(Vector2D(random_x, random_y));
-            zako->SetPattern(ZakoPattern::DepthAppear);
-            enemy_list.push_back(zako);
+            GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+
+            Zako5* left = objm->CreateObject<Zako5>(Vector2D(250.0f, 200.0f));  // 左側を50右にずらす
+            left->Initialize();
+            left->SetPlayer(player);
+            enemy_list.push_back(left);
+
+            Zako5* right = objm->CreateObject<Zako5>(Vector2D(1030.0f, 200.0f));  // 画面右外
+            right->Initialize();
+            right->SetPlayer(player);
+            enemy_list.push_back(right);
+
+
+            zako5_spawned = true;
         }
     }
+
+
+
     else if (stage_timer < 60.0f && !zako5_spawned)
     {
-        Zako5* left = objm->CreateObject<Zako5>(Vector2D(420, 100));
-        Zako5* right = objm->CreateObject<Zako5>(Vector2D(850, 100));
-        left->SetPlayer(player);
-        right->SetPlayer(player);
-        enemy_list.push_back(left);
-        enemy_list.push_back(right);
-        zako5_spawned = true;
+        
     }
 }
 
