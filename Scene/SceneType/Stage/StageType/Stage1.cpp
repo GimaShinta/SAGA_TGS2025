@@ -65,6 +65,10 @@ void Stage1::Finalize()
         }
         enemy_list.clear();
 
+        if (is_over == true)
+        {
+           player->SetDestroy();
+        }
         //BGM‚ðŽ~‚ß‚é
         //StopSoundMem(bgm);
 }
