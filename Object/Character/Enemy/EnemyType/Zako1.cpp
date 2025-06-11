@@ -58,7 +58,7 @@ void Zako::Update(float delta_second)
     switch (pattern)
     {
         case ZakoPattern::MoveStraight:
-            velocity = { 0, 120 };
+            velocity = { 0, 180 };
             break;
 
         case ZakoPattern::RightMove:
