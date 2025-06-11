@@ -20,7 +20,7 @@ Stage2::~Stage2()
 void Stage2::Initialize()
 {
     std::srand(static_cast<unsigned int>(std::time(nullptr)));  // ランダムシード設定
-    stage_timer = 15.0f;
+    stage_timer = 0.0f;
     enemy_spawn_timer = 0.0f;
     zako5_spawned = false;
 }
