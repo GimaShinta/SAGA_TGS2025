@@ -162,6 +162,10 @@ void Stage1::Update(float delta)
         is_clear = true;
     }
 
+    if (player->life == -1)
+    {
+        is_over = true; 
+    }
 
     // “G‚ÌoŒ»
     EnemyAppearance(delta);

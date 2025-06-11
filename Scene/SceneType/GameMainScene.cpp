@@ -22,7 +22,7 @@ void GameMainScene::Initialize()
     player = objm->CreateObject<Player>(Vector2D(D_WIN_MAX_X / 2, D_WIN_MAX_Y / 2));
 
 
-    current_stage = new Stage1(player);
+    current_stage = new Stage2(player);
 
     current_stage->Initialize();
 
