@@ -84,6 +84,11 @@ private:
 
 private:
 	int bg_image;	//”wŒi‰æ‘œ
+	mutable float grid_scroll_back = 0.0f;
+	mutable float grid_scroll_mid = 0.0f;
+
+	int font_digital;
+
 	float scroll_y = 0.0f;
 
 	struct StarParticle {
