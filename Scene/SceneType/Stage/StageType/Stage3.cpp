@@ -45,6 +45,8 @@ void Stage3::Initialize()
     objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2 + 100, (D_WIN_MAX_Y / 2) - 100.0f));
     objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2 + 150, (D_WIN_MAX_Y / 2) - 100.0f));
     objm->CreateObject<Shield>(Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) + 100.0f));
+    objm->CreateObject<Shield>(Vector2D(D_WIN_MAX_X / 2 - 200.0f, (D_WIN_MAX_Y / 2) + 100.0f));
+    objm->CreateObject<Shield>(Vector2D(D_WIN_MAX_X / 2 - 200.0f, (D_WIN_MAX_Y / 2)));
 
 
 #if 0

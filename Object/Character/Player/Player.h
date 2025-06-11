@@ -47,11 +47,16 @@ private:
 	int brend = 255;
 	float beam_timer = 0;
 	float damage_timer = 0;
+	float shield_damage_timer = 0.0f;
+	bool is_shield_damage = false;
+	// 追加：シールドの切り替え直後1フレームスキップ用フラグ
+	bool just_switched_to_second = false;
 	int powerd = 1;
 	bool powerd_on = false;
 	float powerd_time = 0.0f;
 	bool is_alive = true;
 	bool is_shield = false;
+	bool shield_secand = false;
 
 private:
 	float charge = 0.0f;
@@ -67,7 +72,7 @@ private:
 	float shield_time = 0.0f;
 	int shield_count = 0;
 
-
+	bool shield_anim_on = false;
 
 	// 画像系
 	std::vector<int> player_image_right;
@@ -75,6 +80,7 @@ private:
 	std::vector<int> player_jet;
 	std::vector<int> engens;
 	std::vector<int> shields;
+	std::vector<int> shields2;
 	int engen;
 	int jet;
 	int shield;

@@ -42,7 +42,7 @@ void Player::Initialize()
 	//engens = rm->GetImages("Resource/Image/Effect/E_BigHit_2.png", 27, 9, 3, 516, 516);
 	engen = engens[0];
 
-
+	shields2 = rm->GetImages("Resource/Image/Object/Item/Shield/pipo-btleffect206_480.png", 20, 5, 4, 480, 480);
 	shields = rm->GetImages("Resource/Image/Object/Item/Shield/pipo-btleffect206h_480.png", 15, 5, 3, 480, 480);
 }
 
@@ -135,28 +135,72 @@ void Player::Update(float delta_second)
 		engen = engens[engen_num[engen_count]];
 	}
 
-
-	std::vector<int> shield_num = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 };
-	//フレームレートで時間を計測
-	shield_time += delta_second;
-	//8秒経ったら画像を切り替える
-	if (shield_time >= 0.0125f)
+	if (is_shield == true)
 	{
-		//計測時間の初期化
-		shield_time = 0.0f;
-		//時間経過カウントの増加
-		shield_count++;
-		//カウントがアニメーション画像の要素数以上になったら
-		if (shield_count >= shield_num.size())
+		std::vector<int> shield_num;
+
+		if (shield_anim_on == false)
 		{
-			//カウントの初期化
-			shield_count = 0;
+			shield_num = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
+
+			// フレームレートで時間を計測
+			shield_time += delta_second;
+
+			// 一定時間経ったら画像を切り替える
+			if (shield_time >= 0.05f)
+			{
+				// 計測時間の初期化
+				shield_time = 0.0f;
+
+				// 時間経過カウントの増加
+				shield_count++;
+
+				// カウントがアニメーション画像の要素数以上になったら
+				if (shield_count >= shield_num.size())
+				{
+					// 次の段階へ移行
+					shield_count = 0;  // ← -1にして次フレームで0になるよう調整
+					shield_anim_on = true;
+				}
+				else
+				{
+					// アニメーションが順番に代入される
+					shield = shields2[shield_num[shield_count]];
+				}
+			}
 		}
-		// アニメーションが順番に代入される
-		shield = shields[shield_num[shield_count]];
+		else
+		{
+			shield_secand = true;
+			shield_num = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 };
+
+			// フレームレートで時間を計測
+			shield_time += delta_second;
+
+			// 一定時間経ったら画像を切り替える
+			if (shield_time >= 0.0125f)
+			{
+				// 計測時間の初期化
+				shield_time = 0.0f;
+
+				shield_count++;
+
+				if (shield_count >= shield_num.size())
+				{
+					shield_count = 0;
+				}
+				else
+				{
+					// アニメーションが順番に代入される
+					shield = shields[shield_num[shield_count]];
+				}
+			}
+		}
 	}
-
-
+	else
+	{
+		shield = shields2[0];
+	}
 	// 親クラスの更新処理を呼び出す
 	__super::Update(delta_second);
 }
@@ -274,12 +318,16 @@ void Player::OnHitCollision(GameObjectBase* hit_object)
 			{
 				life--;
 				is_damage = true;
-				on_hit = true;
 			}
 			else
 			{
+				is_shield_damage = true;
 				is_shield = false;
+				shield_anim_on = false;
+				shield_count = 0;
+				shield_time = 0.0f;
 			}
+			on_hit = true;
 		}
 	}
 	if (hit_object->GetCollision().object_type == eObjectType::ePowerUp)
@@ -288,7 +336,7 @@ void Player::OnHitCollision(GameObjectBase* hit_object)
 		{
 			powerd++;
 			powerd_on = true;
-			powerd_time = 4.0f;
+			powerd_time = 0.0f;
 		}
 	}
 	if (hit_object->GetCollision().object_type == eObjectType::eShield)
@@ -499,6 +547,17 @@ void Player::Damage(float delta_second)
 			brend = 255;
 			damage_timer = 0;
 			reach_count = 0;
+		}
+	}
+
+	if (is_shield_damage)
+	{
+		shield_damage_timer += delta_second;
+		if (shield_damage_timer >= 1.0f)
+		{
+			is_shield_damage = true;
+			on_hit = false;
+			shield_damage_timer = 0.0f;
 		}
 	}
 }
