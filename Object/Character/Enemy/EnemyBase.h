@@ -17,6 +17,7 @@ enum
 	ENE_ZAKO5,
 	ENE_BOSS,
 	ENE_BOSS2,
+	ENE_BOSS3,
 };
 
 class EnemyBase : public CharacterBase

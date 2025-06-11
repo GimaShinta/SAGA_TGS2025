@@ -4,6 +4,7 @@ class EnemyBeam1 : public EnemyShotBase
 {
 private:
 	class Boss2* boss2;
+	class Boss3* boss3;
 
 	float beam_time = 0.0f;
 
@@ -46,6 +47,7 @@ public:
 	virtual void OnHitCollision(GameObjectBase* hit_object) override;
 
 	void SetBoss2(class Boss2* p_boss);
+	void SetBoss3(class Boss3* p_boss);
 
 };
 

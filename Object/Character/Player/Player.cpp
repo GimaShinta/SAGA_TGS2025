@@ -509,7 +509,7 @@ void Player::Shot(float delta_second)
 
 
 	// ‚T•bŒo‚Á‚½‚çƒr[ƒ€‚ÌÄ‹N
-	if (beam_timer >= 5.0f)
+	if (beam_timer >= 6.0f)
 	{
 		stop = false;
 	}

@@ -2,6 +2,7 @@
 #include "../../../GameObjectManager.h"
 #include "../../../../Utility/ProjectConfig.h"
 #include "../../Enemy/EnemyType/Boss2.h"
+#include "../../Enemy/EnemyType/Boss3.h"
 
 EnemyBeam1::EnemyBeam1()
 {
@@ -159,4 +160,8 @@ void EnemyBeam1::OnHitCollision(GameObjectBase* hit_object)
 void EnemyBeam1::SetBoss2(Boss2* p_boss)
 {
 	boss2 = p_boss;
+}
+void EnemyBeam1::SetBoss3(Boss3* p_boss)
+{
+	boss3 = p_boss;
 }

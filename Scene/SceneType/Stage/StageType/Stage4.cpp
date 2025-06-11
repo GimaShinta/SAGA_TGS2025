@@ -6,6 +6,7 @@
 #include "../../../../Object/Character/Shot/Shot.h"
 #include "../../../../Object/Character/Shot/Beam.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Boss2.h"
+#include "../../../../Object/Character/Enemy/EnemyType/Boss3.h"
 #include "Stage3.h"
 
 
@@ -297,10 +298,10 @@ void Stage4::EnemyAppearance()
         is_warning = true;
     }
     // ボス出現
-    if (distance == 1 && boss2 == nullptr)
+    if (distance == 1 && boss3 == nullptr)
     {
         //enemy_list.push_back(boss = objm->CreateObject<Boss>(Vector2D(D_WIN_MAX_X / 2 + 200, D_WIN_MAX_Y + 200)));
-        enemy_list.push_back(boss2 = objm->CreateObject<Boss2>(Vector2D(D_WIN_MAX_X / 2, D_WIN_MAX_Y / 2)));
+        enemy_list.push_back(boss3 = objm->CreateObject<Boss3>(Vector2D(D_WIN_MAX_X / 2, D_WIN_MAX_Y / 2)));
 
     }
 }
@@ -319,9 +320,9 @@ void Stage4::UpdateGameStatus(float delta)
     //}
 
     // ボス２が倒れたらクリア
-    if (boss2 != nullptr && boss2->GetIsAlive() == false && is_over == false)
+    if (boss3 != nullptr && boss3->GetIsAlive() == false && is_over == false)
     {
-        boss2->SetDestroy();
+        boss3->SetDestroy();
         is_clear = true;
     }
 

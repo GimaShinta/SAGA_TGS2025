@@ -10,7 +10,7 @@ private:
 	class Beam* beam;
 //	class Zako2* zako2;
 //	class Boss* boss;
-	class Boss2* boss2;
+	class Boss3* boss3;
 //	class EnemyShot5* e_shot5;
 //	class EnemyShot4* e_shot4;
 //	class EnemyShot3* e_shot3;
