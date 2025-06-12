@@ -58,16 +58,117 @@ void Zako::Update(float delta_second)
     switch (pattern)
     {
         case ZakoPattern::MoveStraight:
-            velocity = { 0, 180 };
+        {
+            const float appear_time = 0.8f;  // ägëÂÇ…Ç©ÇØÇÈéûä‘
+
+            if (pattern_timer < appear_time)
+            {
+                float t = pattern_timer / appear_time;
+                scale = 0.5f + t * 1.5f;  // 0.2 Å® 1.5 Ç…ÉXÉPÅ[ÉãÉAÉbÉv
+                velocity = { 0, 180 };     // â∫ï˚å¸Ç…ìÆÇ´ë±ÇØÇÈ
+            }
+            else
+            {
+                scale = 2.0f;
+                velocity = { 0, 180 };     // í èÌÉXÉPÅ[ÉãÅïà⁄ìÆ
+            }
             break;
+        }
+
 
         case ZakoPattern::RightMove:
-            velocity = { 120, 0 };
+        {
+            const float arc_duration = 1.2f;     // å Çï`Ç≠éûä‘
+            const float decel_duration = 1.0f;   // å∏ë¨éûä‘
+            const float accel_duration = 1.0f;   // çƒâ¡ë¨éûä‘
+
+            if (pattern_timer < arc_duration)
+            {
+                // å Çï`Ç≠ìÆÇ´ÅiâEè„Å®íÜâõÇ÷ç~ÇËÇÈÅj
+                float t = pattern_timer / arc_duration;
+                float angle = (1.0f - t) * (3.1415f / 2.0f);  // ÉŒ/2 Å® 0
+
+                velocity.x = cosf(angle) * 250.0f;
+                velocity.y = sinf(angle) * 250.0f;
+
+                scale = 4.0f - 2.0f * t;  // 4.0 Å® 2.0 Ç…èkè¨
+            }
+            else if (pattern_timer < arc_duration + decel_duration)
+            {
+                float t = (pattern_timer - arc_duration) / decel_duration;
+                velocity.x = 250.0f * (1.0f - t);
+                velocity.y = 0.0f;
+
+                scale = 2.0f;
+            }
+            else if (pattern_timer < arc_duration + decel_duration + accel_duration)
+            {
+                float t = (pattern_timer - arc_duration - decel_duration) / accel_duration;
+                velocity.x = 200.0f + 300.0f * t;
+                velocity.y = 0.0f;
+
+                scale = 2.0f;
+            }
+            else
+            {
+                velocity.x = 500.0f;
+                velocity.y = 0.0f;
+
+                scale = 2.0f;
+            }
+
             break;
+        }
+
+
 
         case ZakoPattern::LeftMove:
-            velocity = { -120, 0 };
+        {
+            const float arc_duration = 1.2f;     // å Çï`Ç≠éûä‘
+            const float decel_duration = 1.0f;   // å∏ë¨éûä‘
+            const float accel_duration = 1.0f;   // çƒâ¡ë¨éûä‘
+
+            if (pattern_timer < arc_duration)
+            {
+                // å Çï`Ç≠ìÆÇ´Åiç∂è„Å®íÜâõÇ÷ç~ÇËÇÈÅj
+                float t = pattern_timer / arc_duration;
+                float angle = (1.0f - t) * (3.1415f / 2.0f);  // ÉŒ/2 Å® 0
+
+                velocity.x = -cosf(angle) * 250.0f;
+                velocity.y = sinf(angle) * 250.0f;
+
+                scale = 4.0f - 2.0f * t;  // 4.0 Å® 2.0 Ç…èkè¨
+            }
+            else if (pattern_timer < arc_duration + decel_duration)
+            {
+                float t = (pattern_timer - arc_duration) / decel_duration;
+                velocity.x = -250.0f * (1.0f - t);
+                velocity.y = 0.0f;
+
+                scale = 2.0f;
+            }
+            else if (pattern_timer < arc_duration + decel_duration + accel_duration)
+            {
+                float t = (pattern_timer - arc_duration - decel_duration) / accel_duration;
+                velocity.x = -200.0f - 300.0f * t;
+                velocity.y = 0.0f;
+
+                scale = 2.0f;
+            }
+            else
+            {
+                velocity.x = -500.0f;
+                velocity.y = 0.0f;
+
+                scale = 2.0f;
+            }
+
             break;
+        }
+
+
+
+
 
         case ZakoPattern::ZIgzag:
             velocity.x = sinf(pattern_timer * 1.5f) * 320;
@@ -207,6 +308,40 @@ void Zako::Update(float delta_second)
             }
             break;
         }
+        case ZakoPattern::RetreatUp:
+        {
+            const float decel_duration = 0.5f;   // å∏ë¨éûä‘
+            const float pause_duration = 0.3f;   // í‚ëÿéûä‘
+            const float accel_duration = 0.7f;   // â¡ë¨éûä‘
+
+            if (pattern_timer < decel_duration)
+            {
+                // å∏ë¨ÇµÇƒí‚é~Ç∑ÇÈÇÊÇ§Ç…Åiâ∫ï˚å¸ Å® 0Åj
+                float t = pattern_timer / decel_duration;
+                velocity.y = 200.0f * (1.0f - t); // 200 Å® 0
+            }
+            else if (pattern_timer < decel_duration + pause_duration)
+            {
+                // àÍéûí‚é~
+                velocity.y = 0.0f;
+            }
+            else
+            {
+                // è„ï˚å¸Ç…â¡ë¨
+                float t = (pattern_timer - decel_duration - pause_duration) / accel_duration;
+                if (t > 1.0f) t = 1.0f;
+                velocity.y = -100.0f - 400.0f * t;  // -100 Å® -500 Ç÷â¡ë¨
+            }
+
+            if (location.y < -100)
+            {
+                is_destroy = true;
+            }
+
+            break;
+        }
+
+
 
     }
 
@@ -312,6 +447,13 @@ void Zako::SetPattern(ZakoPattern new_pattern)
             anim_indices = { 0,1,2,3,4,5,6,7,8,9,10,11 };
             scale = 0.2f;
             break;
+        case ZakoPattern::RetreatUp:
+            hp = 10;
+            images = images_a;
+            anim_indices = { 0, 1, 2, 3 };
+            scale = 1.5f;
+            break;
+
     }
 
     image = images[0];

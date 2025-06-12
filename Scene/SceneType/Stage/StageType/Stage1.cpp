@@ -94,6 +94,22 @@ void Stage1::Update(float delta)
     }
 
 
+    // 74?77秒でグリッチ風演出を行う
+    if (stage_timer >= 74.0f && stage_timer < 77.0f)
+    {
+        if (!is_warning)
+        {
+            is_warning = true;
+            warning_timer = 0.0f;
+        }
+        warning_timer += delta;
+    }
+    else
+    {
+        is_warning = false;
+    }
+
+
     // タイマーをカウント
     timer++;
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
@@ -291,6 +307,28 @@ void Stage1::Draw()
     DrawFormatString(0, 20, GetColor(255, 255, 255), "Time: %.1f", stage_timer);
 
     DrawFadeOverlay();
+
+    if (is_warning)
+    {
+        // グリッチ矩形（ノイズ風）
+        for (int i = 0; i < 10; ++i)
+        {
+            int x = GetRand(D_WIN_MAX_X);
+            int y = GetRand(D_WIN_MAX_Y);
+            int w = GetRand(200) + 20;
+            int h = GetRand(30) + 5;
+
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, GetRand(150) + 50);
+            DrawBox(x, y, x + w, y + h, GetColor(GetRand(255), GetRand(255), GetRand(255)), TRUE);
+        }
+
+        // WARNING文字をぶれながら描画
+        int base_x = (D_WIN_MAX_X / 2) - 80;
+        int base_y = D_WIN_MAX_Y / 2 - 40;
+        DrawString(base_x, base_y, "WARNING!!", GetColor(255, 0, 0));
+        DrawString(base_x + GetRand(4) - 2, base_y + GetRand(4) - 2, "WARNING!!", GetColor(255, 255, 255));
+    }
+
 }
 
 bool Stage1::IsFinished()
@@ -351,12 +389,12 @@ void Stage1::EnemyAppearance(float delta)
         {
             // ランダムなY位置で左右からZako1が来る + 一定条件でZako4も出現
             const int num_lanes = 3;
-            const int lane_y[num_lanes] = { 100, 220, 340 };
+            const int lane_y[num_lanes] = { 20, 100, 180 };
             int lane_index_y = GetRand(num_lanes);
             float y = static_cast<float>(lane_y[lane_index_y]);
 
             bool from_left = fmod(stage_timer, 20.0f) < 10.0f;
-            Vector2D spawn_pos = from_left ? Vector2D(200.0f, y) : Vector2D(1000.0f, y);
+            Vector2D spawn_pos = from_left ? Vector2D(270.0f, y) : Vector2D(1000.0f, y);
             ZakoPattern pattern = from_left ? ZakoPattern::RightMove : ZakoPattern::LeftMove;
 
             Zako* zako = objm->CreateObject<Zako>(spawn_pos);
@@ -399,22 +437,38 @@ void Stage1::EnemyAppearance(float delta)
             enemy_list.push_back(zako);
         }
 
-        else if (stage_timer < 77.0)
+        else if (stage_timer < 77.0f)
         {
+            for (auto& enemy : enemy_list)
+            {
+                Zako* zako = dynamic_cast<Zako*>(enemy);
+                if (zako != nullptr)
+                {
+                    // 対象パターンだけ逆行させる
+                    ZakoPattern current = zako->GetPattern(); // ←この関数をZakoに追加（下に説明あり）
+
+                    if (current == ZakoPattern::MoveAndStopShoot || current == ZakoPattern::DiveOnce)
+                    {
+                        zako->SetPattern(ZakoPattern::RetreatUp);
+                    }
+                }
+            }
         }
 
-        else 
+
+        else
         {
             if (!boss_spawned)
             {
                 boss1 = objm->CreateObject<Stage1Boss>(Vector2D(670, -200));
                 boss1->SetPattern(BossPattern::Entrance);
-                enemy_list.push_back(boss1); 
-                boss_spawned = true;
                 boss1->SetPlayer(player);
-
+                enemy_list.push_back(boss1);
+                boss_spawned = true;
+                is_warning = false;  // 警告終了
             }
         }
+
 
 
         enemy_spawn_timer = 0.0f;
