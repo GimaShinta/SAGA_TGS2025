@@ -9,6 +9,15 @@ void AnimationManager::LoadAllEffects()
 
 	effect_images[EffectName::eExprotion] = rm->GetImages("Resource/Image/Effect/E_Explosion.png", 54, 9, 6, 517, 517);
 	effect_images[EffectName::eExprotion2] = rm->GetImages("Resource/Image/Effect/E_Explosion2.png", 54, 9, 6, 355, 365);
+
+	std::vector<int> charge = rm->GetImages("Resource/Image/Effect/E_Charged.png", 80, 10, 8, 357, 295);
+	std::vector<int> charge_2;
+
+	for (int i = 0; i < 20; i++)
+	{
+		charge_2.push_back(charge[i]);
+	}
+	effect_images[EffectName::eChenge] = charge_2;
 }
 
 // アニメーションを再生する

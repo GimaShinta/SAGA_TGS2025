@@ -11,7 +11,8 @@ enum EffectName
 {
 	eExprotion = 0,
 	eExprotion2,
-	eExprotion3
+	eChenge,
+	eExprotion3,
 };
 
 // AnimationID ‚ð intŒ^‚Æ“¯“™‚É‚·‚é

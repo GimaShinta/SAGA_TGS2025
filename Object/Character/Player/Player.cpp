@@ -60,148 +60,58 @@ void Player::Update(float delta_second)
 	// ダメージを受けたら
 	Damage(delta_second);
 
-	// ライフが０になったらゲームオーバー
-	if (life < 0)
+	if (is_dead_animation_playing) 
 	{
-		is_alive = false;
-	}
+		dead_animation_timer += delta_second;
 
-
-	if (powerd_time > 0.0f)
-	{
-		powerd_time -= delta_second;
-	}
-	else
-	{
-		powerd_on = false;
-	}
-
-	if (powerd >= 3)
-	{
-		powerd = 3;
-	}
-	else if (powerd <= 1)
-	{
-		powerd = 1;
-	}
-
-
-	// アニメーション更新処理
-	anim_timer += delta_second;
-
-	if (anim_timer >= anim_interval)
-	{
-		anim_timer = 0.0f;
-		anim_index++;
-		if (anim_index >= 2) anim_index = 1;
-	}
-
-	std::vector<int> animation_num = { 3, 4, 5, 4 };
-	//フレームレートで時間を計測
-	animation_time += delta_second;
-	//8秒経ったら画像を切り替える
-	if (animation_time >= 0.02f)
-	{
-		//計測時間の初期化
-		animation_time = 0.0f;
-		//時間経過カウントの増加
-		animation_count++;
-		//カウントがアニメーション画像の要素数以上になったら
-		if (animation_count >= animation_num.size())
+		// 演出終了判定
+		if (dead_animation_timer >= dead_animation_duration) 
 		{
-			//カウントの初期化
-			animation_count = 0;
-		}
-		// アニメーションが順番に代入される
-		jet = player_jet[animation_num[animation_count]];
-	}
-
-	std::vector<int> engen_num = { 17, 18, 19, 20, 21, 22, 23, 24, 25 };
-	//フレームレートで時間を計測
-	engen_time += delta_second;
-	//8秒経ったら画像を切り替える
-	if (engen_time >= 0.0125f)
-	{
-		//計測時間の初期化
-		engen_time = 0.0f;
-		//時間経過カウントの増加
-		engen_count++;
-		//カウントがアニメーション画像の要素数以上になったら
-		if (engen_count >= engen_num.size())
-		{
-			//カウントの初期化
-			engen_count = 0;
-		}
-		// アニメーションが順番に代入される
-		engen = engens[engen_num[engen_count]];
-	}
-
-	if (is_shield == true)
-	{
-		std::vector<int> shield_num;
-
-		if (shield_anim_on == false)
-		{
-			shield_num = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
-
-			// フレームレートで時間を計測
-			shield_time += delta_second;
-
-			// 一定時間経ったら画像を切り替える
-			if (shield_time >= 0.05f)
-			{
-				// 計測時間の初期化
-				shield_time = 0.0f;
-
-				// 時間経過カウントの増加
-				shield_count++;
-
-				// カウントがアニメーション画像の要素数以上になったら
-				if (shield_count >= shield_num.size())
-				{
-					// 次の段階へ移行
-					shield_count = 0;  // ← -1にして次フレームで0になるよう調整
-					shield_anim_on = true;
-				}
-				else
-				{
-					// アニメーションが順番に代入される
-					shield = shields2[shield_num[shield_count]];
-				}
-			}
+			is_alive = false;  // 演出終わったら消すフラグを立てる
 		}
 		else
 		{
-			shield_secand = true;
-			shield_num = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 };
 
-			// フレームレートで時間を計測
-			shield_time += delta_second;
+			//AnimationManager* am = Singleton<AnimationManager>::GetInstance();
+			//am->PlayerAnimation(EffectName::eExprotion2, location, 0.05f, false);
+			//am->PlayerAnimation(EffectName::eExprotion2, location, 0.05f, false);
+			//am->PlayerAnimation(EffectName::eExprotion2, location, 0.05f, false);
 
-			// 一定時間経ったら画像を切り替える
-			if (shield_time >= 0.0125f)
-			{
-				// 計測時間の初期化
-				shield_time = 0.0f;
-
-				shield_count++;
-
-				if (shield_count >= shield_num.size())
-				{
-					shield_count = 0;
-				}
-				else
-				{
-					// アニメーションが順番に代入される
-					shield = shields[shield_num[shield_count]];
-				}
-			}
 		}
+		// 演出中の処理（アニメーション更新など）もここで行う
 	}
 	else
 	{
-		shield = shields2[0];
+		// ライフが０になったらゲームオーバー
+		if (life < 0)
+		{
+			is_dead_animation_playing = true;
+			dead_animation_timer = 0.0f;
+		}
+
+		if (powerd_time > 0.0f)
+		{
+			powerd_time -= delta_second;
+		}
+		else
+		{
+			powerd_on = false;
+		}
+
+		if (powerd >= 3)
+		{
+			powerd = 3;
+		}
+		else if (powerd <= 1)
+		{
+			powerd = 1;
+		}
+
+		// 部品のアニメーション
+		BuhinAnim(delta_second);
 	}
+
+
 	// 親クラスの更新処理を呼び出す
 	__super::Update(delta_second);
 }
@@ -562,6 +472,127 @@ void Player::Damage(float delta_second)
 			shield_damage_timer = 0.0f;
 		}
 	}
+}
+
+void Player::BuhinAnim(float delta_second)
+{
+	// アニメーション更新処理
+	anim_timer += delta_second;
+
+	if (anim_timer >= anim_interval)
+	{
+		anim_timer = 0.0f;
+		anim_index++;
+		if (anim_index >= 2) anim_index = 1;
+	}
+
+	std::vector<int> animation_num = { 3, 4, 5, 4 };
+	//フレームレートで時間を計測
+	animation_time += delta_second;
+	//8秒経ったら画像を切り替える
+	if (animation_time >= 0.02f)
+	{
+		//計測時間の初期化
+		animation_time = 0.0f;
+		//時間経過カウントの増加
+		animation_count++;
+		//カウントがアニメーション画像の要素数以上になったら
+		if (animation_count >= animation_num.size())
+		{
+			//カウントの初期化
+			animation_count = 0;
+		}
+		// アニメーションが順番に代入される
+		jet = player_jet[animation_num[animation_count]];
+	}
+
+	std::vector<int> engen_num = { 17, 18, 19, 20, 21, 22, 23, 24, 25 };
+	//フレームレートで時間を計測
+	engen_time += delta_second;
+	//8秒経ったら画像を切り替える
+	if (engen_time >= 0.0125f)
+	{
+		//計測時間の初期化
+		engen_time = 0.0f;
+		//時間経過カウントの増加
+		engen_count++;
+		//カウントがアニメーション画像の要素数以上になったら
+		if (engen_count >= engen_num.size())
+		{
+			//カウントの初期化
+			engen_count = 0;
+		}
+		// アニメーションが順番に代入される
+		engen = engens[engen_num[engen_count]];
+	}
+
+	if (is_shield == true)
+	{
+		std::vector<int> shield_num;
+
+		if (shield_anim_on == false)
+		{
+			shield_num = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
+
+			// フレームレートで時間を計測
+			shield_time += delta_second;
+
+			// 一定時間経ったら画像を切り替える
+			if (shield_time >= 0.05f)
+			{
+				// 計測時間の初期化
+				shield_time = 0.0f;
+
+				// 時間経過カウントの増加
+				shield_count++;
+
+				// カウントがアニメーション画像の要素数以上になったら
+				if (shield_count >= shield_num.size())
+				{
+					// 次の段階へ移行
+					shield_count = 0;  // ← -1にして次フレームで0になるよう調整
+					shield_anim_on = true;
+				}
+				else
+				{
+					// アニメーションが順番に代入される
+					shield = shields2[shield_num[shield_count]];
+				}
+			}
+		}
+		else
+		{
+			shield_secand = true;
+			shield_num = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 };
+
+			// フレームレートで時間を計測
+			shield_time += delta_second;
+
+			// 一定時間経ったら画像を切り替える
+			if (shield_time >= 0.0125f)
+			{
+				// 計測時間の初期化
+				shield_time = 0.0f;
+
+				shield_count++;
+
+				if (shield_count >= shield_num.size())
+				{
+					shield_count = 0;
+				}
+				else
+				{
+					// アニメーションが順番に代入される
+					shield = shields[shield_num[shield_count]];
+				}
+			}
+		}
+	}
+	else
+	{
+		shield = shields2[0];
+	}
+
 }
 
 bool Player::GetIsShot() const

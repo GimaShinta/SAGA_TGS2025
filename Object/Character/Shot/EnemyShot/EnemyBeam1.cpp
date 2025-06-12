@@ -1,6 +1,7 @@
 #include "../EnemyBeam1.h"
 #include "../../../GameObjectManager.h"
 #include "../../../../Utility/ProjectConfig.h"
+#include "../../../../Utility/AnimationManager.h"
 #include "../../Enemy/EnemyType/Boss2.h"
 #include "../../Enemy/EnemyType/Boss3.h"
 #include <algorithm>
@@ -34,6 +35,8 @@ void EnemyBeam1::Initialize()
     beam_t = beam_ts[10];
     beam_bs = rm->GetImages("Resource/Image/Object/Player/Beam/anime_sp_weapon03_2.png", 12, 2, 6, 88, 80);
     beam_b = beam_bs[10];
+
+
 }
 
 /// <summary>
@@ -85,15 +88,26 @@ void EnemyBeam1::Update(float delta_second)
             state = BeamState::Firing;
             state_timer = 0.0f;
             beam_time = 0.0f;
-            box_size.x = 8.0f;
-
-            // 当たり判定有効化：ここで追加
+            box_size.x = min_thickness;
             collision.hit_object_type.clear();
             collision.hit_object_type.push_back(eObjectType::ePlayer);
         }
         else
         {
-            // 当たり判定無効化：プレイヤーに当たらなくする
+            if (boss3 != nullptr)
+            {
+                AnimationManager* am = Singleton<AnimationManager>::GetInstance();
+                int anim = am->PlayerAnimation(EffectName::eChenge, Vector2D(location.x, location.y - box_size.y), 0.05f, false);
+                am->SetScale(anim, 1.5f);
+
+            }
+            else if(boss2 != nullptr)
+            {
+                AnimationManager* am = Singleton<AnimationManager>::GetInstance();
+                int anim = am->PlayerAnimation(EffectName::eChenge, Vector2D(location.x, location.y - box_size.y), 0.05f, false);
+                am->SetScale(anim, 0.7f);
+
+            }
             collision.hit_object_type.clear();
         }
         break;
@@ -101,25 +115,82 @@ void EnemyBeam1::Update(float delta_second)
     case BeamState::Firing:
         beam_time += delta_second;
 
-        // 太さの変化処理（既存コード）
-        float max_thickness = 48.0f;
-        float min_thickness = 8.0f;
-        float growth_duration = 0.2f;
-
-        float thickness = (beam_time < growth_duration)
-            ? min_thickness + (max_thickness - min_thickness) * (beam_time / growth_duration)
-            : max_thickness;
-
-        box_size.x = thickness;
-
-        if (beam_time >= 5.0f)
+        // 拡大処理
+        if (beam_time < growth_duration_b)
         {
-            SetDestroy();
+            float t = beam_time / growth_duration_b;
+            box_size.x = min_thickness + (max_thickness - min_thickness) * t;
+        }
+        else
+        {
+            box_size.x = max_thickness;
+            // 成長が終わったら Holding に
+            state = BeamState::Holding;
+            state_timer = 0.0f;
+        }
+
+        location += velocity * delta_second;
+        break;
+
+    case BeamState::Holding:
+        beam_time += delta_second; // ← これを追加！
+
+        state_timer += delta_second;
+        box_size.x = max_thickness;
+
+        if (state_timer >= 4.0f)
+        {
+            state = BeamState::Shrinking;
+            state_timer = 0.0f;
+            beam_time = 0.0f; // ← ここでリセットしておけば縮小にちょうど使える
+        }
+
+        location += velocity * delta_second;
+        break;
+
+    case BeamState::Shrinking:
+        beam_time += delta_second;
+
+        if (beam_time < growth_duration_s)
+        {
+            float t = 1.0f - (beam_time / growth_duration_s);
+            box_size.x = min_thickness + (max_thickness - min_thickness) * t;
+        }
+        else
+        {
+            box_size.x = min_thickness;
+            SetDestroy(); // 終了
         }
 
         location += velocity * delta_second;
         break;
     }
+
+
+    if (!beams_b.empty() && !beams_t.empty())
+    {
+        std::vector<int> animation_num = { 0, 1 };
+        //フレームレートで時間を計測
+        animation_time += delta_second;
+        //8秒経ったら画像を切り替える
+        if (animation_time >= 0.02f)
+        {
+            //計測時間の初期化
+            animation_time = 0.0f;
+            //時間経過カウントの増加
+            animation_count++;
+            //カウントがアニメーション画像の要素数以上になったら
+            if (animation_count >= animation_num.size())
+            {
+                //カウントの初期化
+                animation_count = 0;
+            }
+            // アニメーションが順番に代入される
+            beam_t = beams_t[animation_num[animation_count]];
+            beam_b = beams_b[animation_num[animation_count]];
+        }
+    }
+
 #endif
 }
 
@@ -158,26 +229,36 @@ void EnemyBeam1::Draw(const Vector2D& screen_offset) const
 
     SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);  // 元に戻す
 #else
-    if (state == BeamState::Firing)
+    if (state == BeamState::Firing || state == BeamState::Shrinking || state == BeamState::Holding)
     {
-        float max_half_width = 48.0f;
-        float min_half_width = 4.0f;
-        float growth_duration = 0.2f;
+        float t = 1.0f;
 
-        float t = (beam_time < growth_duration) ? beam_time / growth_duration : 1.0f;
-        float half_width = min_half_width + (max_half_width - min_half_width) * t;
+        if (state == BeamState::Firing)
+        {
+            t = (beam_time < growth_duration_b) ? beam_time / growth_duration_b : 1.0f;
+        }
+        else if (state == BeamState::Shrinking)
+        {
+            t = (beam_time < growth_duration_s) ? (1.0f - beam_time / growth_duration_s) : 0.0f;
+        }
+        else if (state == BeamState::Holding)
+        {
+            t = 1.0f; // 最大サイズ固定
+        }
 
+        float half_width = min_thickness + (max_thickness - min_thickness) * t;
+
+        // 波揺れ + オフセット処理はそのままでOK
         float wave_amplitude = 2.0f;
         float wave_speed = 100.0f;
         float wave_offset = sinf(beam_time * wave_speed) * wave_amplitude;
 
-        int y_offset = 80; // ← これがずらす量
+        int y_offset = 80;
 
         int cx = static_cast<int>(location.x);
         int top_y = static_cast<int>(location.y - box_size.y + wave_offset + y_offset);
         int bottom_y = static_cast<int>(location.y + box_size.y + wave_offset + y_offset);
 
-        // --- 本体描画（beam_t） ---
         DrawModiGraph(
             cx - half_width, top_y,
             cx + half_width, top_y,
@@ -187,15 +268,16 @@ void EnemyBeam1::Draw(const Vector2D& screen_offset) const
             TRUE
         );
 
+        // 下側ビーム装飾（そのままでOK）
         int beam_b_height = 80;
         int base_bottom_y = static_cast<int>(location.y - box_size.y + wave_offset + 80);
         int base_top_y = base_bottom_y - beam_b_height;
 
         DrawModiGraph(
-            cx - half_width, base_bottom_y,  // ← ここを base_bottom_y に
-            cx + half_width, base_bottom_y,  // ← ここも base_bottom_y に
-            cx + half_width, base_top_y,     // ← ここを base_top_y に
-            cx - half_width, base_top_y,     // ← ここも base_top_y に
+            cx - half_width, base_bottom_y,
+            cx + half_width, base_bottom_y,
+            cx + half_width, base_top_y,
+            cx - half_width, base_top_y,
             beam_b,
             TRUE
         );
@@ -230,8 +312,29 @@ void EnemyBeam1::OnHitCollision(GameObjectBase* hit_object)
 void EnemyBeam1::SetBoss2(Boss2* p_boss)
 {
 	boss2 = p_boss;
+
+    max_thickness = 48.0f;
+    min_thickness = 4.0f;
+    growth_duration_b = 1.0f; // 拡大時間
+    growth_duration_s = 0.2f; // 縮小時間
+
+    beams_t.push_back(beam_ts[9]);
+    beams_t.push_back(beam_ts[10]);
+    beams_b.push_back(beam_bs[9]);
+    beams_b.push_back(beam_bs[10]);
 }
 void EnemyBeam1::SetBoss3(Boss3* p_boss)
 {
 	boss3 = p_boss;
+
+    max_thickness = 170.0f;
+    min_thickness = 16.0f;
+    growth_duration_b = 4.0f;
+    growth_duration_s = 0.5f;
+
+    beams_t.push_back(beam_ts[4]);
+    beams_t.push_back(beam_ts[0]);
+    beams_b.push_back(beam_bs[4]);
+    beams_b.push_back(beam_bs[0]);
+
 }

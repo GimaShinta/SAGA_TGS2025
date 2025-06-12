@@ -26,7 +26,7 @@ private:
 	float swing_timer = 0.0f;        // 静止中のタイマー
 	bool is_pausing = false;         // 静止中かどうか
 
-	float image_size = 3.0f;
+	float image_size = 1.0f;
 
 	int boss3_image[11] = { 0 };
 	std::vector<int> boss3_anim1;

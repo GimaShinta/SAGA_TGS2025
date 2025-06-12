@@ -19,7 +19,7 @@ void Boss3::Initialize()
 	hp = 10000;
 
 	// 攻撃パターンの設定
-	attack_pattrn_num = { 4, 5, 6,12 };
+	attack_pattrn_num = { 11 };
 
 	// 当たり判定のオブジェクト設定
 	collision.is_blocking = true;
@@ -296,17 +296,39 @@ void Boss3::Movement(float delta_second)
 			if (velocity.y < -max_speed) velocity.y = -max_speed;
 			static bool check = false;
 
-			if (check == false)
+
+			static int chenge = 1;
+
+			switch (chenge)
 			{
+			case 1:
 				box_size = Vector2D(350, 150);
-				check = true;
-			}
-			else
-			{
+				chenge++;
+				break;
+			case 2:
+				box_size = Vector2D(230, 250);
+				chenge++;
+				break;
+			case 3:
 				box_size = Vector2D(160, 350);
-				check = false;
+				chenge++;
+				break;
+			default:
+				chenge = 1;
+				break;
 			}
-			image_size = 3.5f;
+
+			//if (check == false)
+			//{
+			//	box_size = Vector2D(350, 150);
+			//	check = true;
+			//}
+			//else
+			//{
+			//	box_size = Vector2D(160, 350);
+			//	check = false;
+			//}
+			image_size = 1.0f;
 		}
 		else
 		{
@@ -1089,7 +1111,7 @@ void Boss3::Pattrn11(float offsets_x)
 		b = objm->CreateObject<EnemyBeam1>(
 			Vector2D(
 				location.x + offsets_x,
-				(location.y + 150.0f) - box_size.y
+				(location.y + 350.0f) - box_size.y
 			));
 		b->SetBoss3(this);
 		beam_on = true;
@@ -1101,7 +1123,7 @@ void Boss3::Pattrn11(float offsets_x)
 		b->SetLocation(
 			Vector2D(
 				location.x + offsets_x,
-				(location.y + 150.0f) + b->GetBoxSize().y
+				(location.y + 350.0f) + b->GetBoxSize().y
 			));
 	}
 
