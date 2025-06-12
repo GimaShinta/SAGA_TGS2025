@@ -16,8 +16,9 @@ enum class ZakoPattern
     MoveThenDiagonal,
     Formation,
     DiveOnce,
-    ArcMoveAndStop, 
+    ArcMoveAndStop,
     DepthAppear,
+    RetreatUp,     // Å© í«â¡ÅFè„ï˚å¸Ç…ëﬁèÍ
     Count
 };
 
@@ -34,6 +35,10 @@ public:
     void Finalize() override;
 
     void SetPattern(ZakoPattern new_pattern);
+    ZakoPattern GetPattern() const
+    {
+        return pattern;
+    }  // Å© í«â¡
 
 protected:
     void Shot(float delta_second) override;

@@ -19,7 +19,7 @@ void Zako5::Initialize()
 {
     enemy_type = ENE_ZAKO5;
     z_layer = 2;
-    box_size = Vector2D(40, 40);
+    box_size = Vector2D(120, 40);
     hp = 1000;
 
     phase = Zako5Phase::Appearing;
@@ -192,6 +192,7 @@ void Zako5::Draw(const Vector2D& screen_offset) const
 {
     DrawRotaGraph(location.x, location.y, scale, 3.14, image, TRUE);
     DrawFormatString(location.x - 20, location.y - 30, GetColor(255, 255, 255), "Zako5: %.0f", hp);
+   
 }
 
 void Zako5::Finalize()
