@@ -36,25 +36,32 @@ void Boss3::Initialize()
 	base_position = Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) - 225);
 
 	// 登場時の中心座標
-	generate_base_position = Vector2D(D_WIN_MAX_X / 2 + 150, D_WIN_MAX_Y + 200);
+	generate_base_position = Vector2D(D_WIN_MAX_X / 2 + 150, 0 - 400);
 
 	// 初期座標は登場時のものを使用
 	location = generate_base_position;
 
 	ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
-	boss3_image[0] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_02/boss03_a1.png")[0];
-	boss3_image[1] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_02/boss03_a2.png")[0];
-	boss3_image[2] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_02/boss03_b1.png")[0];
-	boss3_image[3] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_02/boss03_b2.png")[0];
-	boss3_image[4] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_02/boss03_b3.png")[0];
-	boss3_image[5] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_02/boss03_b4.png")[0];
-	boss3_image[6] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_02/boss03_b5.png")[0];
+	boss3_image[0] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_03/transparent/boss01_a2.png")[0];
+	boss3_image[1] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_03/transparent/boss01_a3.png")[0];
+	boss3_image[2] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_03/transparent/boss01_b1.png")[0];
+	boss3_image[3] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_03/transparent/boss01_b2.png")[0];
+	boss3_image[4] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_03/transparent/boss01_c1.png")[0];
+	boss3_image[5] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_03/transparent/boss01_c2.png")[0];
+	boss3_image[6] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_03/transparent/boss01_d1.png")[0];
+	boss3_image[7] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_03/transparent/boss01_d2.png")[0];
+	boss3_image[8] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_03/transparent/boss01_e1.png")[0];
+	boss3_image[9] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_03/transparent/boss01_e2.png")[0];
+	boss3_image[10] = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_03/transparent/boss01_f.png")[0];
 
-	boss3_anim = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_02/anime01.png", 6, 6, 1, 80, 40);
-	boss3_image[7] = boss3_anim[0];
+	//boss3_anim1 = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_03/anime01.png", 8, 8, 1, 32, 24);
+	//boss3_image[10] = boss3_anim1[0];
+
+	boss3_jet = rm->GetImages("Resource/Image/Effect/exhaust_03_spritesheet.png", 24, 8, 3, 128, 200);
+	jet = boss3_jet[0];
 
 	// 最初は本体の位置に固定
-	for (int i = 0; i < 6; ++i)
+	for (int i = 0; i < 11; ++i)
 	{
 		part_positions[i] = location;
 	}
@@ -94,51 +101,66 @@ void Boss3::Update(float delta_second)
 	const float follow_speed = 5.0f; // 追従速度（大きいと早くついてくる）
 
 	// 部品の相対オフセット（左右に2個ずつ）
-	Vector2D offsets[6] = {
-		Vector2D(110, 0), // 左奥
-		Vector2D(60,  0), // 左手前
+	Vector2D offsets[11] = {
+		Vector2D(110, 0), // 中央
+		Vector2D(0,  -100.0f), // 顔
 		Vector2D(-60,  0), // 右手前
 		Vector2D(-110, 0),  // 右奥
 
 		Vector2D(60, 30),  // 砲
+		Vector2D(-60, 30),  // 砲
+		Vector2D(-60, 30),  // 砲
+		Vector2D(-60, 30),  // 砲
+		Vector2D(-60, 30),  // 砲
 		Vector2D(-60, 30)  // 砲
 	};
 
 	// 部品の相対オフセット（左右に2個ずつ）
-	Vector2D offsets_2[6] = {
-		Vector2D(-180, 0), // 左奥
-		Vector2D(-100,  0), // 左手前
-		Vector2D(100,  0), // 右手前
-		Vector2D(180, 0),  // 右奥
-
-		Vector2D(-100, -100),  // 砲
-		Vector2D(100, -100)  // 砲
+	Vector2D offsets_2[11] = {
+		Vector2D(0, -100), // 左奥
+		Vector2D(0, 200), // 左手前
+		Vector2D(-60,  0), // 右手前
+		Vector2D(-120, 250),  // 右奥
+		Vector2D(120, 250),  // 砲
+		Vector2D(-300, 100),  // 砲
+		Vector2D(300, 100),  // 砲
+		Vector2D(-350, -70),  // 砲
+		Vector2D(350, -70),  // 砲
+		Vector2D(-60, 30)  // 砲
 	};
 
 	// 追従の速さ
-	float individual_follow_speeds[6] = {
-	12.0f,  // 左奥（ゆっくり）
-	12.0f,  // 左手前
-	12.0f,  // 右手前
-	12.0f,   // 右奥（ゆっくり）
+	float individual_follow_speeds[11] = {
+	100.0f,  // 左奥（ゆっくり）
+	100.0f,  // 左手前
+	100.0f,  // 右手前
+	15.0f,   // 右奥（ゆっくり）
 
+	15.0f,   // 砲（ゆっくり）
 	10.0f,   // 砲（ゆっくり）
-	10.0f   // 砲（ゆっくり）
+	10.0f ,  // 砲（ゆっくり）
+	10.0f  , // 砲（ゆっくり）
+	10.0f   ,// 砲（ゆっくり）
+	100.0f   ,// 砲（ゆっくり）
 	};
 
 	// 追従の速さ
-	float individual_follow_speeds_2[6] = {
+	float individual_follow_speeds_2[11] = {
 	100.0f,  // 左奥（ゆっくり）
 	100.0f,  // 左手前
 	100.0f,  // 右手前
 	100.0f,   // 右奥（ゆっくり）
 
 	100.0f,   // 砲（ゆっくり）
-	100.0f   // 砲（ゆっくり）
+	100.0f,   // 砲（ゆっくり）
+	100.0f ,  // 砲（ゆっくり）
+	100.0f  , // 砲（ゆっくり）
+	100.0f   ,// 砲（ゆっくり）
+	100.0f   ,// 砲（ゆっくり）
 	};
 
 	// 追従処理
-	for (int i = 0; i < 6; ++i)
+	for (int i = 0; i < 11; ++i)
 	{
 		Vector2D target;
 		if (generate == false)
@@ -157,25 +179,45 @@ void Boss3::Update(float delta_second)
 	}
 
 
-	std::vector<int> animation_num = { 0, 1, 2, 3, 4, 5 };
-	//フレームレートで時間を計測
-	animation_time += delta_second;
-	//8秒経ったら画像を切り替える
-	if (animation_time >= anim_speed)
-	{
-		//計測時間の初期化
-		animation_time = 0.0f;
-		//時間経過カウントの増加
-		animation_count++;
-		//カウントがアニメーション画像の要素数以上になったら
-		if (animation_count >= animation_num.size())
-		{
-			//カウントの初期化
-			animation_count = 0;
-		}
-		// アニメーションが順番に代入される
-		boss3_image[7] = boss3_anim[animation_num[animation_count]];
-	}
+	//std::vector<int> animation_num = { 0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1 };
+	////フレームレートで時間を計測
+	//animation_time += delta_second;
+	////8秒経ったら画像を切り替える
+	//if (animation_time >= anim_speed)
+	//{
+	//	//計測時間の初期化
+	//	animation_time = 0.0f;
+	//	//時間経過カウントの増加
+	//	animation_count++;
+	//	//カウントがアニメーション画像の要素数以上になったら
+	//	if (animation_count >= animation_num.size())
+	//	{
+	//		//カウントの初期化
+	//		animation_count = 0;
+	//	}
+	//	// アニメーションが順番に代入される
+	//	boss3_image[10] = boss3_anim1[animation_num[animation_count]];
+	//}
+
+	//std::vector<int> jet_num = { 2, 3, 4, 8, 9, 10, 11, 12, 16, 17, 16, 12, 11, 10, 9, 8, 4, 3, 2 };
+	////フレームレートで時間を計測
+	//jet_timer += delta_second;
+	////8秒経ったら画像を切り替える
+	//if (jet_timer >= 0.01f)
+	//{
+	//	//計測時間の初期化
+	//	jet_timer = 0.0f;
+	//	//時間経過カウントの増加
+	//	jet_count++;
+	//	//カウントがアニメーション画像の要素数以上になったら
+	//	if (jet_count >= jet_num.size())
+	//	{
+	//		//カウントの初期化
+	//		jet_count = 0;
+	//	}
+	//	// アニメーションが順番に代入される
+	//	jet = boss3_jet[jet_num[jet_count]];
+	//}
 
 	if (attack_pattrn == 12)
 	{
@@ -231,6 +273,7 @@ void Boss3::Movement(float delta_second)
 
 	if (!generate)
 	{
+		generate = true;
 		velocity.y = -900.0f;
 		base_position.x = generate_base_position.x;
 
@@ -247,66 +290,28 @@ void Boss3::Movement(float delta_second)
 
 		if (fabs(distance_y) > 1.0f)
 		{
-			const float max_speed = 200.0f;
+			const float max_speed = 150.0f;
 			velocity.y = distance_y;
 			if (velocity.y > max_speed) velocity.y = max_speed;
 			if (velocity.y < -max_speed) velocity.y = -max_speed;
-			box_size = Vector2D(190, 80);
-			image_size = 2.0f;
+			static bool check = false;
+
+			if (check == false)
+			{
+				box_size = Vector2D(350, 150);
+				check = true;
+			}
+			else
+			{
+				box_size = Vector2D(160, 350);
+				check = false;
+			}
+			image_size = 3.5f;
 		}
 		else
 		{
 			generate2 = true;
 
-			const float swing_range = 100.0f;
-			const float move_speed = 100.0f;
-			// 減速距離
-			const float deceleration_distance = 50.0f;
-			const float min_speed = 10.0f;
-			const float wait_time_max = 0.2f; // 折り返し時の停止時間
-
-			if (!has_initialized_swing_x)
-			{
-				swing_center_x = base_x;
-				has_initialized_swing_x = true;
-				swing_direction = 1;
-				swing_wait_timer = 0.0f;
-			}
-
-			float left_x = swing_center_x - swing_range;
-			float right_x = swing_center_x + swing_range;
-
-			// 停止中の場合
-			if (swing_wait_timer > 0.0f)
-			{
-				swing_wait_timer -= delta_second;
-				if (swing_wait_timer < 0.0f) swing_wait_timer = 0.0f;
-				velocity.x = 0.0f;
-			}
-			else
-			{
-				float distance_to_edge = (swing_direction == 1)
-					? right_x - base_position.x
-					: base_position.x - left_x;
-
-				// 端に到達
-				if (distance_to_edge <= 0.0f)
-				{
-					swing_direction *= -1;
-					swing_wait_timer = wait_time_max;
-					velocity.x = 0.0f;
-				}
-				else
-				{
-					float t = Clamp(distance_to_edge / deceleration_distance, 0.0f, 1.0f);
-					float eased = t * t * (3 - 2 * t); // easeInOut補間
-					float current_speed = Max(move_speed * eased, min_speed);
-					velocity.x = current_speed * swing_direction;
-				}
-			}
-
-			velocity.y = 0.0f;
-			location.y = base_position.y;
 		}
 	}
 
@@ -375,37 +380,36 @@ void Boss3::Shot(float delta_second)
 
 void Boss3::DrawBoss3(const Vector2D position) const
 {
-	//DrawRotaGraph(position[0].x, position[0].y, image_size, 0.0f, Boss3_image[0], TRUE);
-	//DrawRotaGraph(position[0].x, position[0].y, image_size, 0.0f, Boss3_image[1], TRUE);
-
-	//DrawRotaGraph(position[0].x, position[0].y, image_size, 0.0f, Boss3_image[2], TRUE);
-	//DrawRotaGraph(position[0].x + 50, position[0].y, image_size, 0.0f, Boss3_image[3], TRUE);
-	//DrawRotaGraph(position[0].x - 50, position[0].y, image_size, 0.0f, Boss3_image[4], TRUE);
-	//DrawRotaGraph(position[0].x - 100, position[0].y, image_size, 0.0f, Boss3_image[5], TRUE);
-	//DrawRotaGraph(position[0].x + 100, position[0].y, image_size, 0.0f, Boss3_image[6], TRUE);
-
-
-
+	DrawRotaGraph(part_positions[7].x, part_positions[7].y, image_size, angle, boss3_image[8], TRUE);
+	DrawRotaGraph(part_positions[8].x, part_positions[8].y, image_size, angle, boss3_image[9], TRUE);
 	// 本体
-	DrawRotaGraph(position.x, position.y, image_size, angle, boss3_image[2], TRUE);
+	DrawRotaGraph(position.x, position.y, image_size, angle, boss3_image[0], TRUE);
 	// 部品
-	DrawRotaGraph(part_positions[1].x, part_positions[1].y, image_size, angle, boss3_image[3], TRUE); // 左手前
-	DrawRotaGraph(part_positions[0].x, part_positions[0].y, image_size, angle, boss3_image[5], TRUE); // 左奥
-	DrawRotaGraph(part_positions[2].x, part_positions[2].y, image_size, angle, boss3_image[4], TRUE); // 右手前
-	DrawRotaGraph(part_positions[3].x, part_positions[3].y, image_size, angle, boss3_image[6], TRUE); // 右奥
-	DrawRotaGraph(part_positions[4].x, part_positions[4].y, image_size, angle, boss3_image[1], TRUE);
-	DrawRotaGraph(part_positions[5].x, part_positions[5].y, image_size, angle, boss3_image[1], TRUE);
+	DrawRotaGraph(part_positions[0].x, part_positions[0].y, image_size, angle, boss3_image[1], TRUE); // 左手前
+	DrawRotaGraph(part_positions[1].x, part_positions[1].y, image_size, angle, boss3_image[2], TRUE); // 左奥
+	//DrawRotaGraph(part_positions[1].x, part_positions[1].y, image_size, angle, boss3_image[3], TRUE); // 右手前
+	DrawRotaGraph(part_positions[5].x, part_positions[5].y, image_size, angle, boss3_image[6], TRUE);
+	DrawRotaGraph(part_positions[3].x, part_positions[3].y, image_size, angle, boss3_image[4], TRUE); // 右手前
+	DrawRotaGraph(part_positions[4].x, part_positions[4].y, image_size, angle, boss3_image[5], TRUE); // 右奥
+	DrawRotaGraph(part_positions[6].x, part_positions[6].y, image_size, angle, boss3_image[7], TRUE);
+	//DrawRotaGraph(part_positions[1].x, part_positions[1].y, image_size, angle, boss3_image[10], TRUE);
 
-	if (generate == false)
-	{
-		DrawRotaGraph(part_positions[4].x, part_positions[4].y - 50.0f, image_size, angle, boss3_image[7], TRUE);
-		DrawRotaGraph(part_positions[5].x, part_positions[5].y - 50.0f, image_size, angle, boss3_image[7], TRUE);
-	}
-	else
-	{
-		DrawRotaGraph(part_positions[4].x, part_positions[4].y + 110.0f, image_size, angle, boss3_image[7], TRUE);
-		DrawRotaGraph(part_positions[5].x, part_positions[5].y + 110.0f, image_size, angle, boss3_image[7], TRUE);
-	}
+	//if (generate == false)
+	//{
+	//	DrawRotaGraph(part_positions[4].x, part_positions[4].y - 50.0f, image_size, angle, boss3_image[7], TRUE);
+	//	DrawRotaGraph(part_positions[5].x, part_positions[5].y - 50.0f, image_size, angle, boss3_image[7], TRUE);
+	//}
+	//else
+	//{
+	//	DrawRotaGraph(part_positions[4].x, part_positions[4].y + 110.0f, image_size, angle, boss3_image[7], TRUE);
+	//	DrawRotaGraph(part_positions[5].x, part_positions[5].y + 110.0f, image_size, angle, boss3_image[7], TRUE);
+	//}
+	 
+	//DrawBox(location.x - box_size.x, location.y - box_size.y,
+	//	location.x + box_size.x, location.y + box_size.y,
+	//	GetColor(255, 100, 0), TRUE);
+
+	//DrawRotaGraph(D_WIN_MAX_X / 2, D_WIN_MAX_Y / 2, 2.0f, angle, jet, TRUE);
 
 }
 

@@ -49,6 +49,13 @@ private:
 	class EnemyShot4* e_shot4;
 	class EnemyShot5* e_shot5;
 
+	std::vector<int> boss2_jet;
+	int jet;
+
+	float jet_timer = 0.0f;
+	float jet_count = 0;
+
+
 public:
 	Boss2();
 	~Boss2();

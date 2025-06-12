@@ -17,7 +17,6 @@ private:
 	bool generate = false;
 	bool generate2 = false;
 	bool is_alive = true;
-	bool is_collision;
 
 	float move_time = 0.0f; // ∞字用の時間変数
 	Vector2D base_position; // 軌道の中心位置
@@ -27,14 +26,16 @@ private:
 	float swing_timer = 0.0f;        // 静止中のタイマー
 	bool is_pausing = false;         // 静止中かどうか
 
-	float image_size = 1.0f;
+	float image_size = 3.0f;
 
-	int boss3_image[8] = { 0 };
-	std::vector<int> boss3_anim;
-	float anim_speed = 0.1f;
+	int boss3_image[11] = { 0 };
+	std::vector<int> boss3_anim1;
+	std::vector<int> boss3_anim2;
+	std::vector<int> boss3_anim3;
+	float anim_speed = 1.0f;
 
 	// 部品の位置（左右それぞれ2個ずつ）
-	Vector2D part_positions[6]; // 0:左奥, 1:左手前, 2:右手前, 3:右奥
+	Vector2D part_positions[11]; // 0:左奥, 1:左手前, 2:右手前, 3:右奥
 	float angle = 0.0f;
 
 	// クラス Boss2 に以下の変数を追加
@@ -47,6 +48,13 @@ private:
 	class EnemyShot3* e_shot3;
 	class EnemyShot4* e_shot4;
 	class EnemyShot5* e_shot5;
+
+	std::vector<int> boss3_jet;
+	int jet;
+
+	float jet_timer = 0.0f;
+	float jet_count = 0;
+
 
 public:
 	Boss3();
@@ -112,4 +120,3 @@ private:
 	void Pattrn12();
 	void Pattrn13(float delta_second);
 };
-

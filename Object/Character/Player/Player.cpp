@@ -25,6 +25,7 @@ void Player::Initialize()
 	// 当たる相手のオブジェクトタイプ
 	collision.hit_object_type.push_back(eObjectType::eEnemy);
 	collision.hit_object_type.push_back(eObjectType::eBoss2);
+	collision.hit_object_type.push_back(eObjectType::eBoss3);
 	collision.hit_object_type.push_back(eObjectType::eExp);
 	collision.hit_object_type.push_back(eObjectType::ePowerUp);
 
@@ -310,7 +311,8 @@ void Player::OnHitCollision(GameObjectBase* hit_object)
 	if (hit_object->GetCollision().object_type == eObjectType::eEnemy ||
 		hit_object->GetCollision().object_type == eObjectType::eEnemyShot ||
 		hit_object->GetCollision().object_type == eObjectType::eEnemyBeam ||
-		hit_object->GetCollision().object_type == eObjectType::eBoss2)
+		hit_object->GetCollision().object_type == eObjectType::eBoss2 ||
+		hit_object->GetCollision().object_type == eObjectType::eBoss3)
 	{
 		if (on_hit == false)
 		{

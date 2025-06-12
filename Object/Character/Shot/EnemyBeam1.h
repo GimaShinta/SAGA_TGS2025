@@ -17,6 +17,16 @@ private:
 	int beam_b = NULL;
 
 
+	enum class BeamState 
+	{
+		Warning,
+		Firing
+	};
+
+	BeamState state = BeamState::Warning;
+	float warning_time = 1.0f;  // —\’›ü‚Ì•\¦ŠÔ
+	float state_timer = 0.0f;   // ó‘Ô‚ÌŒo‰ßŠÔ
+
 public:
 	EnemyBeam1();
 	~EnemyBeam1();

@@ -19,7 +19,7 @@ void Boss2::Initialize()
 	hp = 10000;
 
 	// 攻撃パターンの設定
-	attack_pattrn_num = { 4, 5, 6,12 };
+	attack_pattrn_num = { 4 };
 
 	// 当たり判定のオブジェクト設定
 	collision.is_blocking = true;
@@ -52,6 +52,10 @@ void Boss2::Initialize()
 
 	boss2_anim = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_02/anime01.png", 6, 6, 1, 80, 40);
 	boss2_image[7] = boss2_anim[0];
+
+	boss2_jet = rm->GetImages("Resource/Image/Effect/exhaust_03_spritesheet.png", 24, 8, 3, 128, 200);
+	jet = boss2_jet[0];
+
 
 	// 最初は本体の位置に固定
 	for (int i = 0; i < 6; ++i)
@@ -184,6 +188,26 @@ void Boss2::Update(float delta_second)
 	else
 	{
 		anim_speed = 0.1f;
+	}
+
+	std::vector<int> jet_num = { 2, 3, 4, 8, 9, 10, 11, 12, 16, 17, 16, 12, 11, 10, 9, 8, 4, 3, 2 };
+	//フレームレートで時間を計測
+	jet_timer += delta_second;
+	//8秒経ったら画像を切り替える
+	if (jet_timer >= 0.01f)
+	{
+		//計測時間の初期化
+		jet_timer = 0.0f;
+		//時間経過カウントの増加
+		jet_count++;
+		//カウントがアニメーション画像の要素数以上になったら
+		if (jet_count >= jet_num.size())
+		{
+			//カウントの初期化
+			jet_count = 0;
+		}
+		// アニメーションが順番に代入される
+		jet = boss2_jet[jet_num[jet_count]];
 	}
 
 
@@ -375,26 +399,28 @@ void Boss2::Shot(float delta_second)
 
 void Boss2::DrawBoss2(const Vector2D position) const
 {
-	//DrawRotaGraph(position[0].x, position[0].y, image_size, 0.0f, boss2_image[0], TRUE);
-	//DrawRotaGraph(position[0].x, position[0].y, image_size, 0.0f, boss2_image[1], TRUE);
-	
-	//DrawRotaGraph(position[0].x, position[0].y, image_size, 0.0f, boss2_image[2], TRUE);
-	//DrawRotaGraph(position[0].x + 50, position[0].y, image_size, 0.0f, boss2_image[3], TRUE);
-	//DrawRotaGraph(position[0].x - 50, position[0].y, image_size, 0.0f, boss2_image[4], TRUE);
-	//DrawRotaGraph(position[0].x - 100, position[0].y, image_size, 0.0f, boss2_image[5], TRUE);
-	//DrawRotaGraph(position[0].x + 100, position[0].y, image_size, 0.0f, boss2_image[6], TRUE);
-	
-
-
 	// 本体
 	DrawRotaGraph(position.x, position.y, image_size, angle, boss2_image[2], TRUE);
+
 	// 部品
 	DrawRotaGraph(part_positions[1].x, part_positions[1].y, image_size, angle, boss2_image[3], TRUE); // 左手前
 	DrawRotaGraph(part_positions[0].x, part_positions[0].y, image_size, angle, boss2_image[5], TRUE); // 左奥
+	if (generate == false)
+	{
+		DrawRotaGraph(position.x - 70, position.y + 150, image_size, 0.0f, jet, TRUE);
+		DrawRotaGraph(position.x + 70, position.y + 150, image_size, 0.0f, jet, TRUE);
+
+	}
+	else
+	{
+		DrawRotaGraph(position.x - 110, position.y - 250, image_size, 3.14 / 1.0f, jet, TRUE);
+		DrawRotaGraph(position.x + 110, position.y - 250, image_size, 3.14 / 1.0f, jet, TRUE);
+	}
 	DrawRotaGraph(part_positions[2].x, part_positions[2].y, image_size, angle, boss2_image[4], TRUE); // 右手前
 	DrawRotaGraph(part_positions[3].x, part_positions[3].y, image_size, angle, boss2_image[6], TRUE); // 右奥
 	DrawRotaGraph(part_positions[4].x, part_positions[4].y, image_size, angle, boss2_image[1], TRUE);
 	DrawRotaGraph(part_positions[5].x, part_positions[5].y, image_size, angle, boss2_image[1], TRUE);
+
 
 	if (generate == false)
 	{
@@ -406,7 +432,6 @@ void Boss2::DrawBoss2(const Vector2D position) const
 		DrawRotaGraph(part_positions[4].x, part_positions[4].y + 110.0f, image_size, angle, boss2_image[7], TRUE);
 		DrawRotaGraph(part_positions[5].x, part_positions[5].y + 110.0f, image_size, angle, boss2_image[7], TRUE);
 	}
-
 }
 
 int Boss2::GetAttackPattrn() const
