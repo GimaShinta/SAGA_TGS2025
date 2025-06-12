@@ -82,4 +82,20 @@ private:
 
 	/*スクロール*/
 	void DrawScrollBackground() const override;
+
+	void ResultDraw(float delta);  // ← 関数プロトタイプ追加
+
+	float result_timer = 0.0f;
+	float total_score = 0.0f;
+	bool result_displayed = false;
+
+	float clear_wait_timer = 0.0f;
+	bool result_started = false;
+
+	float glitch_timer = 0.0f;
+	bool glitch_started = false;
+	bool glitch_done = false;
+	float post_result_wait_timer = 0.0f;  // ←これを追加
+	float delta_draw = 0.0f;
+
 };
