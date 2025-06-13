@@ -351,12 +351,15 @@ void Zako::Update(float delta_second)
     {
         is_destroy = true;
 
+        DropItems(); 
+
         AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
         anim_id = manager->PlayerAnimation(EffectName::eExprotion2, location, 0.035f, false);
         manager->SetScale(anim_id, 0.5f);
 
         Singleton<ScoreData>::GetInstance()->SetScoreData(100);
     }
+
 
     __super::Update(delta_second);
 }

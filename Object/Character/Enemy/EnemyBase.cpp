@@ -1,5 +1,8 @@
 #include "EnemyBase.h"
 #include"../../../Utility/ScoreData.h"
+#include "../../Item/Exp/Exp.h"
+#include "../../Item/PowerUp/PowerUp.h"
+#include "../../Item/Shield/Shield.h"
 
 EnemyBase::EnemyBase() : hp(0.0f), on_hit(false), is_shot(false), shot_timer(0.0f), enemy_type(ENE_NONE)
 {
@@ -103,4 +106,26 @@ void EnemyBase::SetIsShot()
 void EnemyBase::SetPlayer(Player* p)
 {
 	player = p;
+}
+
+
+
+
+void EnemyBase::DropItems()
+{
+	auto& manager = *Singleton<GameObjectManager>::GetInstance();
+
+	// 100%でExpはドロップ
+	auto exp = manager.CreateObject<Exp>(location);
+	exp->SetPlayer(player);
+
+	// 1%でPowerUpドロップ
+	if (rand() % 100 < 1) {
+		manager.CreateObject<PowerUp>(location);
+	}
+
+	// 5%でShieldドロップ
+	if (rand() % 100 < 3) {
+		manager.CreateObject<Shield>(location);
+	}
 }

@@ -36,10 +36,10 @@ void GameMainScene::Initialize()
     obi_handle = rm->GetImages("Resource/Image/BackGround/Main/Obi_1.png")[0];
 
     //フォント
-   // font_digital = CreateFontToHandle("DS-Digital", 28, 6, DX_FONTTYPE_ANTIALIASING);
-    font_digital = CreateFontToHandle("Orbitron", 28, 6, DX_FONTTYPE_ANTIALIASING);
-    font_orbitron = CreateFontToHandle("Orbitron", 22, 6, DX_FONTTYPE_ANTIALIASING);
-
+    font_digital = CreateFontToHandle("DS-Digital", 28, 6, DX_FONTTYPE_ANTIALIASING);
+   // font_digital = CreateFontToHandle("Orbitron", 28, 6, DX_FONTTYPE_ANTIALIASING);
+    //font_orbitron = CreateFontToHandle("Orbitron", 22, 6, DX_FONTTYPE_ANTIALIASING);
+    font_orbitron = CreateFontToHandle("DS-Digital", 28, 6, DX_FONTTYPE_ANTIALIASING);
     AnimationManager* anim = Singleton<AnimationManager>::GetInstance();
     anim->LoadAllEffects();
 
@@ -228,7 +228,7 @@ void GameMainScene::Draw()
     DrawFormatString(D_WIN_MAX_X - 140, 0, GetColor(255, 255, 255), "Life:%d", player->life);
 
     // ==== 合計スコア（キルログの上） ====
-{
+  {
     ScoreData* score = Singleton<ScoreData>::GetInstance();
     const auto& all_scores = score->GetScoreData();
 
@@ -260,7 +260,7 @@ void GameMainScene::Draw()
 
     // 通常描画に戻す（念のため）
     SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-}
+   }
 
 
     // ==== スコアログ（左下） ====
@@ -280,43 +280,85 @@ void GameMainScene::Draw()
 
     }
 
-// ==== 必殺技ゲージ（右上テキストボックス形式） ====
-   // 必殺技ゲージ（右上テキストボックス形式）
+    // ==== LIFE - STOCK 表示（右上、Digital風＋残機アイコン） ====
     if (player)
     {
-        float rate = player->GetChargeRate(); // 0.0?1.0
-        int gauge_x = D_WIN_MAX_X - 260;
-        int gauge_y = 30;
-        int gauge_w = 200;
-        int gauge_h = 60; // ラベル＋ゲージの高さをカバー
+        int life_box_x = D_WIN_MAX_X - 230;  
+        int life_box_y = 80;                 
+        int life_box_w = 200;
+        int life_box_h = 60;
 
-        // テキストボックス風背景
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
+        DrawBox(life_box_x, life_box_y, life_box_x + life_box_w, life_box_y + life_box_h, GetColor(10, 10, 30), TRUE);
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+        DrawBox(life_box_x, life_box_y, life_box_x + life_box_w, life_box_y + life_box_h, GetColor(0, 255, 255), FALSE);
+
+        // ラベル
+        DrawStringToHandle(life_box_x + 10, life_box_y + 4, "LIFE - STOCK", GetColor(0, 255, 255), font_orbitron);
+
+        // 残機表示（△を横に並べる）
+        int icon_base_x = life_box_x + 20;
+        int icon_y = life_box_y + 32;
+        int icon_size = 14;
+        int icon_gap = 20;
+
+        for (int i = 0; i < player->life; ++i)
+        {
+            int x = icon_base_x + i * icon_gap;
+
+            // △ 三角形（小型ドローン風）
+            DrawTriangle(
+                x, icon_y + icon_size,           // 下
+                x + icon_size / 2, icon_y,       // 上
+                x + icon_size, icon_y + icon_size, // 下
+                GetColor(255, 100, 100), TRUE     // 塗りつぶし
+            );
+        }
+    }
+
+
+    // ==== 必殺技ゲージ（LIFEの下、点滅＆レイアウト調整済） ====
+    if (player)
+    {
+        float rate = player->GetChargeRate(); // 0.0 ～ 1.0
+        int gauge_x = D_WIN_MAX_X - 230;
+        int gauge_y = 150; 
+        int gauge_w = 200;
+        int gauge_h = 50;
+
         SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
         DrawBox(gauge_x, gauge_y, gauge_x + gauge_w, gauge_y + gauge_h, GetColor(10, 10, 30), TRUE);
         SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
         DrawBox(gauge_x, gauge_y, gauge_x + gauge_w, gauge_y + gauge_h, GetColor(0, 255, 255), FALSE);
 
-        // ラベル
-        DrawStringToHandle(gauge_x + 10, gauge_y + 4, "CHARGE", GetColor(0, 255, 255), font_orbitron);
+        DrawStringToHandle(gauge_x + 10, gauge_y + 2, "CHARGE", GetColor(0, 255, 255), font_orbitron);
 
+        int bar_x = gauge_x + 10;
+        int bar_y = gauge_y + 25;
+        int bar_w = gauge_w - 20;
+        int bar_h = 12;
 
-        // ゲージ本体
-        int bar_x = gauge_x + 80;
-        int bar_y = gauge_y + 30;
-        int bar_w = gauge_w - 90;
-        int bar_h = 14;
+        int fill_color = player->CanUseSpecial()
+            ? GetColor(0, (GetNowCount() % 100 > 50) ? 255 : 100, 255)  // 点滅
+            : GetColor(0, 255, 255); // 通常色
 
         DrawBox(bar_x, bar_y, bar_x + bar_w, bar_y + bar_h, GetColor(30, 30, 30), TRUE); // 背景
-        DrawBox(bar_x, bar_y, bar_x + static_cast<int>(bar_w * rate), bar_y + bar_h, GetColor(0, 255, 255), TRUE); // 本体
-
-        // READY! 点滅
-        if (player->CanUseSpecial())
-        {
-            int pulse = static_cast<int>(GetNowCount() % 100) > 50 ? 255 : 100;
-            DrawFormatStringToHandle(bar_x + 10, bar_y - 20, GetColor(255, pulse, pulse), font_orbitron, "READY!");
-
-        }
+        DrawBox(bar_x, bar_y, bar_x + static_cast<int>(bar_w * rate), bar_y + bar_h, fill_color, TRUE); // 本体
     }
+
+    // ==== SPECIAL READY UI（プレイヤー下に真ん中表示） ====
+    if (player && player->CanUseSpecial())
+    {
+        Vector2D pos = player->GetLocation();
+        int ui_x = static_cast<int>(pos.x) - 40;  
+        int ui_y = static_cast<int>(pos.y) + 40;
+        int pulse = static_cast<int>(GetNowCount() % 100) > 50 ? 255 : 100;
+
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+        DrawFormatStringToHandle(ui_x, ui_y, GetColor(255, pulse, pulse), font_orbitron, "Press B!!");
+    }
+
+
 
 
     // ==== 操作UI（右下） ====
@@ -336,6 +378,44 @@ void GameMainScene::Draw()
     DrawStringToHandle(panel_x + 10, panel_y + 55, "Shot : Space / A", GetColor(255, 255, 255), font_orbitron);
     DrawStringToHandle(panel_x + 10, panel_y + 75, "Beam : B", GetColor(255, 255, 255), font_orbitron);
     DrawStringToHandle(panel_x + 10, panel_y + 95, "Flip : RB / L", GetColor(255, 255, 255), font_orbitron);
+
+
+    // ==== サイドパネルとの境界に「流れるライン」エフェクト（Stage3は色変更） ====
+    {
+        const int line_width = 4;
+        const int flow_speed = 1;
+        const int gap = 70;
+        int offset = (GetNowCount() * flow_speed) % gap;
+
+        int pulse = (GetNowCount() % 100 > 50) ? 255 : 100;
+
+        // ==== 色切り替え：Stage3かどうかで分岐 ====
+        int line_color = GetColor(0, pulse, 255); // 通常：ネオンブルー
+
+        if (dynamic_cast<Stage3*>(current_stage) != nullptr)
+        {
+            // Stage3：ボス戦中 → ネオンレッド系に切り替え
+            //line_color = GetColor(255, 100, 150);
+        }
+
+        // ==== 左サイドライン ====
+        int left_x = (D_WIN_MAX_X / 2) - 350;
+        for (int y = -gap; y < D_WIN_MAX_Y + gap; y += gap)
+        {
+            int y0 = y + offset;
+            DrawBox(left_x, y0, left_x + line_width, y0 + 20, line_color, TRUE);
+        }
+
+        // ==== 右サイドライン ====
+        int right_x = (D_WIN_MAX_X / 2) + 350 - line_width;
+        for (int y = -gap; y < D_WIN_MAX_Y + gap; y += gap)
+        {
+            int y0 = y + offset;
+            DrawBox(right_x, y0, right_x + line_width, y0 + 20, line_color, TRUE);
+        }
+    }
+
+
 
 }
 

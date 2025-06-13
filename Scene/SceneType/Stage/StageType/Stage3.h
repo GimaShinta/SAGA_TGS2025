@@ -82,6 +82,26 @@ private:
 
 	/*スクロール*/
 	void DrawScrollBackground() const override;
+	void ScrollEffectUpdate(float delta);
+
+	//グリッド
+	mutable float scroll_back = 0.0f;
+	mutable float scroll_front = 0.0f;
+	mutable float time = 0.0f;
+
+
+	struct StarParticle
+	{
+		Vector2D pos;
+		Vector2D velocity;
+		float alpha;
+		float length;
+		float life;
+	};
+
+	mutable std::vector<StarParticle> star_particles;
+
+
 
 	void ResultDraw(float delta);  // ← 関数プロトタイプ追加
 
