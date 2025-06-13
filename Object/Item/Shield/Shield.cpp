@@ -18,6 +18,9 @@ void Shield::Initialize()
     ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
     images = rm->GetImages("Resource/Image/Object/Item/PowerUp/anime_item32.png", 12, 6, 2, 32, 32);
     image = images[0];
+
+    se = rm->GetSounds("Resource/sound/se/effect/audiostock_1090663.mp3");
+    ChangeVolumeSoundMem(255 * 70 / 100, se);
 }
 
 void Shield::Update(float delta)

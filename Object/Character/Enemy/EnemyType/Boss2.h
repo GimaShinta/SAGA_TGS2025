@@ -9,6 +9,8 @@ const int MAX_ATTACK_PATTRN = 8;
 class Boss2 : public EnemyBase
 {
 private:
+	int se_beam;
+
 	int attack_pattrn = 0;
 	int prev_attack_pattrn = -1; // 前フレームのパターン記録用
 

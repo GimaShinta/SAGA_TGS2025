@@ -269,6 +269,9 @@ void Stage1::Update(float delta)
     }
 
 
+
+
+
     UpdateFade(delta);
 }
 
@@ -460,14 +463,14 @@ void Stage1::EnemyAppearance(float delta)
             zako->SetPlayer(player);
             enemy_list.push_back(zako);
 
-            if (stage_timer >= 20.0f && !zako4_spawned)
+      /*      if (stage_timer >= 20.0f && !zako4_spawned)
             {
                 Zako4* zako4 = objm->CreateObject<Zako4>(Vector2D(60, 20));
                 zako4->SetPlayer(player);
                 enemy_list.push_back(zako4);
 
                 zako4_spawned = true;
-            }
+            }*/
 
         }
 
@@ -518,6 +521,16 @@ void Stage1::EnemyAppearance(float delta)
         {
             if (!boss_spawned)
             {
+                    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+
+                    // パワーアップアイテム
+                    objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2 - 60, 120));
+
+                    // シールドアイテム
+                    objm->CreateObject<Shield>(Vector2D(D_WIN_MAX_X / 2 + 60, 120));
+
+                    item_spawned = true;
+                
                 boss1 = objm->CreateObject<Stage1Boss>(Vector2D(670, -200));
                 boss1->SetPattern(BossPattern::Entrance);
                 boss1->SetPlayer(player);

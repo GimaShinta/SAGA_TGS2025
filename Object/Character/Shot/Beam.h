@@ -24,6 +24,7 @@ private:
 	std::vector<int> beam_bs;
 	int beam_t = NULL;
 	int beam_b = NULL;
+	int se;
 
 public:
 	Beam();

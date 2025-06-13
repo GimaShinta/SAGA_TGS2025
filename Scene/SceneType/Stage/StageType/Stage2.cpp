@@ -119,7 +119,7 @@ void Stage2::Update(float delta)
     if (CheckHitKey(KEY_INPUT_I)) is_over = true;
 
     // タイムで自動クリア
-    if (stage_timer >= 30.0f)
+    if (stage_timer >= 20.0f)
 
     {
         is_clear = true;

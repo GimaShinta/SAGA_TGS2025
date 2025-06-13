@@ -257,7 +257,7 @@ bool Stage3::IsOver()
 
 StageBase* Stage3::GetNextStage(Player* player)
 {
-    return new Stage4(player); // 次のステージへ
+    return nullptr; // 次のステージへ
 }
 
 void Stage3::DisplayWarning(float delta_second)

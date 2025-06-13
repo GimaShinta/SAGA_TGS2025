@@ -56,6 +56,8 @@ void Boss2::Initialize()
 	boss2_jet = rm->GetImages("Resource/Image/Effect/exhaust_03_spritesheet.png", 24, 8, 3, 128, 200);
 	jet = boss2_jet[0];
 
+	se_beam = rm->GetSounds("Resource/sound/se/effect/audiostock_1090663.mp3");
+	ChangeVolumeSoundMem(255 * 60 / 100, se_beam);
 
 	// Å‰‚Í–{‘Ì‚ÌˆÊ’u‚ÉŒÅ’è
 	for (int i = 0; i < 6; ++i)
@@ -1161,6 +1163,7 @@ void Boss2::Pattrn12()
 
 	if (!beam_on)
 	{
+		PlaySoundMem(se_beam, DX_PLAYTYPE_BACK);
 		GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
 
 		for (int i = 0; i < 2; ++i)

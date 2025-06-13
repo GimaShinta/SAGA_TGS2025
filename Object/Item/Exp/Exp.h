@@ -12,6 +12,7 @@ private:
     float lifetime;        //5•b‚Å©“®íœ
 
     bool is_attracting;    //“–‚½‚Á‚Ä‚¢‚é‚©
+    int se;
 
 public:
     Exp();

@@ -37,6 +37,10 @@ void Beam::Initialize()
 
 	beam_state = BeamState::Charging;
 	charge_time = 0.0f;
+
+	se = rm->GetSounds("Resource/sound/se/effect/audiostock_1244545.mp3");
+	ChangeVolumeSoundMem(255 * 60 / 100, se);
+	PlaySoundMem(se, DX_PLAYTYPE_BACK);
 }
 
 /// <summary>

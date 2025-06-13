@@ -1,6 +1,7 @@
 // 修正済み Stage1BOSS.cpp（ワープや移動のX/Y範囲を調整済み）
 #include "Stage1BOSS.h"
 #include "../../Player/Player.h"
+#include "../../../Item/PowerUp/PowerUp.h"
 #include "../../../../Utility/AnimationManager.h"
 #include "../../../../Utility/ScoreData.h"
 #include <cstdlib>
@@ -317,12 +318,14 @@ void Stage1Boss::Update(float delta_second)
         is_alive = false;
         is_destroy = true;
 
+        // ====== 演出とスコア処理 ======
         auto* manager = Singleton<AnimationManager>::GetInstance();
         anim_id = manager->PlayerAnimation(EffectName::eExprotion, location, 0.05f, false);
         manager->SetScale(anim_id, 0.5f);
 
-        Singleton<ScoreData>::GetInstance()->SetScoreData(100);
+        Singleton<ScoreData>::GetInstance()->SetScoreData(1000);
     }
+
 
     Shot(delta_second);
     __super::Update(delta_second);

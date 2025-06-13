@@ -33,6 +33,10 @@ void Exp::Initialize()
     is_attracting = false;       // 吸収モードOFFで開始
     velocity = Vector2D(0, 50.0f); // 初期落下（ふわっと下へ）
 
+    ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
+    se = rm->GetSounds("Resource/sound/se/effect/audiostock_890909.mp3");
+    ChangeVolumeSoundMem(255 * 30 / 100, se);
+
 }
 
 // 更新処理
@@ -105,6 +109,8 @@ void Exp::OnHitCollision(GameObjectBase* hit_object)
     // プレイヤーと当たったら
     if (hit_object->GetCollision().object_type == eObjectType::ePlayer)
     {
+
+        PlaySoundMem(se, DX_PLAYTYPE_BACK);
         if (player && !player->GetBeamOn())  // ビーム中でなければ加算
         {
             player->AddCharge(1.0f);  // 調整可能
