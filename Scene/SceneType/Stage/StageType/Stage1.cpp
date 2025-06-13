@@ -21,6 +21,9 @@
 #include "../../../../Object/Character/Enemy/EnemyType/Stage1BOSS.h"
 #include "../../../../Scene/SceneType/Stage/StageType/Stage1.h"
 
+#include "../../../../Object/Item/PowerUp/PowerUp.h"
+#include "../../../../Object/Item/Shield/Shield.h"
+
 #include"../../../../Object/Item/Exp/Exp.h"
 #include"../../../../Utility/AnimationManager.h"
 #include <math.h>
@@ -119,40 +122,63 @@ void Stage1::Update(float delta)
    
 
 
-    // ƒvƒŒƒCƒ„[‚ª’e‚ð‘Å‚Â€”õ‚ª‚Å‚«‚Ä‚¢‚½‚ç’e‚ð¶¬
-    if (player->GetIsShot())
+    // ƒvƒŒƒCƒ„[‚ª’e‚ð‘Å‚Â€”õ‚ª‚Å‚«‚Ä‚¢‚½‚ç’e‚ð¶¬        
+    if (player->GetIsShot() == true)
     {
         Vector2D p_location = player->GetLocation();
         player->SetIsShot();
-
+        // ã‰º”½“]‚µ‚Ä‚¢‚È‚©‚Á‚½‚ç‰º•ûŒü‚É¶¬
         if (player->GetShotFlip() == false)
         {
-            shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 10, p_location.y - D_OBJECT_SIZE));
-            shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 10, p_location.y - D_OBJECT_SIZE));
+            if (player->GetPowerd() <= 1)
+            {
+                shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 10, p_location.y - D_OBJECT_SIZE));
+                shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 10, p_location.y - D_OBJECT_SIZE));
+
+            }
+            else if (player->GetPowerd() == 2)
+            {
+                shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 30, p_location.y));
+                shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 10, p_location.y - D_OBJECT_SIZE));
+                shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 10, p_location.y - D_OBJECT_SIZE));
+                shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 30, p_location.y));
+            }
+            else
+            {
+                shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 50, p_location.y + D_OBJECT_SIZE));
+                shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 30, p_location.y));
+                shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 10, p_location.y - D_OBJECT_SIZE));
+                shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 10, p_location.y - D_OBJECT_SIZE));
+                shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 30, p_location.y));
+                shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 50, p_location.y + D_OBJECT_SIZE));
+
+            }
             shot->SetShotFlip(false);
         }
+        // ”½“]‚µ‚Ä‚¢‚½‚çã•ûŒü‚É¶¬
         else
         {
+            Vector2D p_location = player->GetLocation();
             shot = objm->CreateObject<Shot>(Vector2D(p_location.x, p_location.y + D_OBJECT_SIZE));
             shot->SetShotFlip(true);
         }
     }
     // ƒvƒŒƒCƒ„[‚ªƒr[ƒ€‚ð‚¤‚Â€”õ‚ª‚Å‚«‚Ä‚¢‚½‚çƒr[ƒ€‚ð¶¬
-    else if (player->GetBeamOn())
+    else if (player->GetBeamOn() == true)
     {
         Vector2D p_location = player->GetLocation();
-
+        // ã‰º”½“]‚µ‚Ä‚¢‚È‚©‚Á‚½‚ç‰º•ûŒü‚É¶¬
         if (player->GetShotFlip() == false)
         {
             beam = objm->CreateObject<Beam>(Vector2D(p_location.x, (p_location.y - D_OBJECT_SIZE) - 848));
             beam->SetBeamFlip(false);
         }
+        // ”½“]‚µ‚Ä‚¢‚½‚çã•ûŒü‚É¶¬
         else
         {
             beam = objm->CreateObject<Beam>(Vector2D(p_location.x, (p_location.y + D_OBJECT_SIZE) + 848));
             beam->SetBeamFlip(true);
         }
-
         beam->SetPlayer(player);
         player->SetBeamOn();
     }
