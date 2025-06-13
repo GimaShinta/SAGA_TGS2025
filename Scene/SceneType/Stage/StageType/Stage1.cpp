@@ -510,17 +510,20 @@ void Stage1::EnemyAppearance(float delta)
         {
             for (auto& enemy : enemy_list)
             {
-                //if (enemy == nullptr || enemy->is_destroy) continue; // ★追加
-                //Zako* zako = dynamic_cast<Zako*>(enemy);
-                //if (zako == nullptr) continue;
+                if (enemy == nullptr || enemy->is_destroy) continue;
 
-                //ZakoPattern current = zako->GetPattern();
-                //if (current == ZakoPattern::MoveAndStopShoot || current == ZakoPattern::DiveOnce)
-                //{
-                //    zako->SetPattern(ZakoPattern::RetreatUp);
-                //}
+                // 安全なキャスト（RTTIが有効で仮想関数が正しく定義されている前提）
+                Zako* zako = dynamic_cast<Zako*>(enemy);
+                if (zako == nullptr) continue;
+
+                ZakoPattern current = zako->GetPattern();
+                if (current == ZakoPattern::MoveAndStopShoot || current == ZakoPattern::DiveOnce)
+                {
+                    zako->SetPattern(ZakoPattern::RetreatUp);
+                }
             }
         }
+
 
 
 
