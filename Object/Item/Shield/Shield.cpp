@@ -52,8 +52,8 @@ void Shield::Update(float delta)
 
 void Shield::Draw(const Vector2D& offset) const
 {
-    DrawBox(location.x - box_size.x, location.y - box_size.y,
-        location.x + box_size.x, location.y + box_size.y, GetColor(0, 255, 0), TRUE);
+    //DrawBox(location.x - box_size.x, location.y - box_size.y,
+    //    location.x + box_size.x, location.y + box_size.y, GetColor(0, 255, 0), TRUE);
 
     DrawRotaGraph(location.x, location.y, 1.0f, 0.0f, image, TRUE);
 

@@ -34,8 +34,13 @@ void Exp::Initialize()
     velocity = Vector2D(0, 50.0f); // 初期落下（ふわっと下へ）
 
     ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
+
     se = rm->GetSounds("Resource/sound/se/effect/audiostock_890909.mp3");
     ChangeVolumeSoundMem(255 * 30 / 100, se);
+
+    images = rm->GetImages("Resource/Image/Effect/pipo-gate01c.png", 15, 5, 3, 480, 480);
+    image = images[0];
+
 
 }
 
@@ -91,16 +96,40 @@ void Exp::Update(float delta)
         this->SetDestroy();
         return;
     }
+
+    std::vector<int> animation_num = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 };
+    //フレームレートで時間を計測
+    animation_time += delta;
+    //8秒経ったら画像を切り替える
+    if (animation_time >= 0.03f)
+    {
+        //計測時間の初期化
+        animation_time = 0.0f;
+        //時間経過カウントの増加
+        animation_count++;
+        //カウントがアニメーション画像の要素数以上になったら
+        if (animation_count >= animation_num.size())
+        {
+            //カウントの初期化
+            animation_count = 0;
+        }
+        // アニメーションが順番に代入される
+        image = images[animation_num[animation_count]];
+    }
+
 }
 
 // 描画処理
 void Exp::Draw(const Vector2D& offset) const
 {
-    // 外側：水色（グロー感）
-    DrawCircle(location.x, location.y, (int)box_size.x, GetColor(0, 255, 255), TRUE);
+    DrawRotaGraph(location.x, location.y, 0.07f, 0.0f, image, TRUE);
 
-    // 内側：黄色
-    DrawCircle(location.x, location.y, (int)box_size.x - 2.0f, GetColor(255, 255, 0), TRUE);
+
+    //// 外側：水色（グロー感）
+    //DrawCircle(location.x, location.y, (int)box_size.x, GetColor(0, 255, 255), TRUE);
+
+    //// 内側：黄色
+    //DrawCircle(location.x, location.y, (int)box_size.x - 2.0f, GetColor(255, 255, 0), TRUE);
 }
 
 // 衝突処理

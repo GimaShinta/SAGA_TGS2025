@@ -48,8 +48,8 @@ void PowerUp::Update(float delta)
 
 void PowerUp::Draw(const Vector2D& offset) const
 {
-    DrawBox(location.x - box_size.x, location.y - box_size.y,
-        location.x + box_size.x, location.y + box_size.y, GetColor(255, 0, 255), TRUE);
+    //DrawBox(location.x - box_size.x, location.y - box_size.y,
+    //    location.x + box_size.x, location.y + box_size.y, GetColor(255, 0, 255), TRUE);
 
     DrawRotaGraph(location.x, location.y, 1.0f, 0.0f, image, TRUE);
 }
