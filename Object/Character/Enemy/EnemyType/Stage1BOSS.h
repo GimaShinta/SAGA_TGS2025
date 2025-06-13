@@ -6,7 +6,13 @@
 
 enum class BossPattern
 {
-    Entrance
+    Entrance,
+    GlitchWarp,
+    CircleMove,
+    ZigzagMove,
+    RushDown,
+    Hover,
+    RandomMove
 };
 
 class Stage1Boss : public EnemyBase
@@ -34,6 +40,7 @@ protected:
 private:
     BossPattern pattern = BossPattern::Entrance;
     float pattern_timer = 0.0f;
+    float pattern_change_timer = 0.0f;
     bool is_alive = true;
 
     bool floating_center_initialized = false;

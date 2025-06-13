@@ -89,6 +89,10 @@ private:
 	int bg_image;	//”wŒi‰æ‘œ
 	mutable float grid_scroll_back = 0.0f;
 	mutable float grid_scroll_mid = 0.0f;
+	bool is_boss_dying = false;
+	float boss_death_timer = 0.0f;
+	float screen_shake_power = 0.0f;
+
 
 	int font_digital;
 

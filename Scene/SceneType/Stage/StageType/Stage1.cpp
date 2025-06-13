@@ -49,7 +49,7 @@ void Stage1::Initialize()
     // 乱数初期化（1回だけ行う）
     srand(static_cast<unsigned int>(time(NULL)));
 
-    font_digital = CreateFontToHandle("メイリオ", 28, 6, DX_FONTTYPE_ANTIALIASING);
+    font_digital = CreateFontToHandle("Orbitron", 28, 6, DX_FONTTYPE_ANTIALIASING);
 
     ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
     bg_image = rm->GetImages("Resource/Image/BackGround/Main/Stage1/bg_01.png")[0];
@@ -206,11 +206,53 @@ void Stage1::Update(float delta)
     }
 
     // ボスが倒れたらクリア
-    if (boss1 != nullptr && boss1->GetIsAlive() == false && is_over == false)
+    if (boss1 != nullptr && boss1->GetIsAlive() == false && !is_boss_dying)
     {
         boss1->SetDestroy();
-        is_clear = true;
+        is_boss_dying = true;
+        boss_death_timer = 0.0f;
+        screen_shake_power = 10.0f;  // 揺れの強さ初期値
     }
+
+
+    if (is_boss_dying)
+    {
+        boss_death_timer += delta;
+
+        // 爆発をランダムな位置に連続表示（大きさと回数UP）
+        if (static_cast<int>(boss_death_timer * 10) % 2 == 0)
+        {
+            for (int i = 0; i < 5; ++i)
+            {
+                int ex = static_cast<int>(boss1->GetLocation().x + GetRand(120) - 60);
+                int ey = static_cast<int>(boss1->GetLocation().y + GetRand(120) - 60);
+                int radius = 30 + GetRand(50);
+                DrawCircle(ex, ey, radius, GetColor(255, 150 + GetRand(100), 0), TRUE);
+                DrawLine(ex, ey, ex + GetRand(20) - 10, ey + GetRand(20) - 10, GetColor(255, 255, 100));
+            }
+        }
+
+        // 画面揺れ処理などはそのままでOK
+        screen_shake_power *= 0.9f;
+        if (screen_shake_power > 1.0f)
+        {
+            int shake_x = GetRand(static_cast<int>(screen_shake_power)) - screen_shake_power / 2;
+            int shake_y = GetRand(static_cast<int>(screen_shake_power)) - screen_shake_power / 2;
+            SetDrawArea(shake_x, shake_y, D_WIN_MAX_X + shake_x, D_WIN_MAX_Y + shake_y);
+        }
+        else
+        {
+            SetDrawArea(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y);
+        }
+
+        if (boss_death_timer > 2.0f)
+        {
+            is_clear = true;
+            is_boss_dying = false;
+        }
+    }
+
+
 
     if(boss1 != nullptr )
 
@@ -322,11 +364,42 @@ void Stage1::Draw()
             DrawBox(x, y, x + w, y + h, GetColor(GetRand(255), GetRand(255), GetRand(255)), TRUE);
         }
 
-        // WARNING文字をぶれながら描画
-        int base_x = (D_WIN_MAX_X / 2) - 80;
-        int base_y = D_WIN_MAX_Y / 2 - 40;
-        DrawString(base_x, base_y, "WARNING!!", GetColor(255, 0, 0));
-        DrawString(base_x + GetRand(4) - 2, base_y + GetRand(4) - 2, "WARNING!!", GetColor(255, 255, 255));
+       
+            int base_x = (D_WIN_MAX_X / 2) - 80;
+            int base_y = D_WIN_MAX_Y / 2 - 40;
+
+            int time = GetNowCount();
+            float scale = 1.0f + 0.1f * sinf(time / 5.0f);  // スケーリング
+
+            int shake_x = GetRand(6) - 3;
+            int shake_y = GetRand(6) - 3;
+
+            int red = 180 + GetRand(75);  // 点滅する赤色
+            int green = GetRand(50);
+            int blue = GetRand(50);
+
+            // メインの揺れるWARNING文字（白）
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+            DrawExtendStringToHandle(
+                base_x + shake_x, base_y + shake_y,
+                scale, scale,
+                "WARNING!!",
+                GetColor(255, 255, 255),
+                font_digital
+            );
+
+            // 背後の赤い文字で奥行き
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
+            DrawExtendStringToHandle(
+                base_x, base_y,
+                scale, scale,
+                "WARNING!!",
+                GetColor(red, green, blue),
+                font_digital
+            );
+
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+
     }
 
 }
