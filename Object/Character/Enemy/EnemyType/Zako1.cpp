@@ -199,12 +199,12 @@ void Zako::Update(float delta_second)
             {
                 if (location.y < 300)
                 {
-                    scale = 1.5f;  // ˆÚ“®’†‚Í‘å‚«‚­
+                    scale = 2.0f;  // ˆÚ“®’†‚Í‘å‚«‚­
                     velocity = { 0, 300 };
                 }
                 else
                 {
-                    scale = 1.5f;  // ’âŽ~‚µ‚ÄŒ‚‚Â‘O‚Ék¬
+                    scale = 2.0f;  // ’âŽ~‚µ‚ÄŒ‚‚Â‘O‚Ék¬
                     velocity = { 0, 0 };
                     shot_timer += delta_second;
 
@@ -248,12 +248,12 @@ void Zako::Update(float delta_second)
         case ZakoPattern::DiveOnce:
             if (pattern_timer < 1.0f)
             {
-                scale = 1.5f;  // “oêŽž‚Í‘å‚«‚­
+                scale = 2.0f;  // “oêŽž‚Í‘å‚«‚­
                 velocity = { 0, 300 };
             }
             else if (pattern_timer < 2.0f)
             {
-                scale = 1.5f;  // ˆêŽž’âŽ~Žž‚Ék¬
+                scale = 2.0f;  // ˆêŽž’âŽ~Žž‚Ék¬
                 velocity = { 0, 0 };
             }
             else

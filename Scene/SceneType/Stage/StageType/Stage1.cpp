@@ -49,7 +49,7 @@ void Stage1::Initialize()
     // 乱数初期化（1回だけ行う）
     srand(static_cast<unsigned int>(time(NULL)));
 
-    font_digital = CreateFontToHandle("Orbitron", 28, 6, DX_FONTTYPE_ANTIALIASING);
+    font_digital = CreateFontToHandle("メイリオ", 28, 6, DX_FONTTYPE_ANTIALIASING);
 
     ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
     bg_image = rm->GetImages("Resource/Image/BackGround/Main/Stage1/bg_01.png")[0];
@@ -206,53 +206,11 @@ void Stage1::Update(float delta)
     }
 
     // ボスが倒れたらクリア
-    if (boss1 != nullptr && boss1->GetIsAlive() == false && !is_boss_dying)
+    if (boss1 != nullptr && boss1->GetIsAlive() == false && is_over == false)
     {
         boss1->SetDestroy();
-        is_boss_dying = true;
-        boss_death_timer = 0.0f;
-        screen_shake_power = 10.0f;  // 揺れの強さ初期値
+        is_clear = true;
     }
-
-
-    if (is_boss_dying)
-    {
-        boss_death_timer += delta;
-
-        // 爆発をランダムな位置に連続表示（大きさと回数UP）
-        if (static_cast<int>(boss_death_timer * 10) % 2 == 0)
-        {
-            for (int i = 0; i < 5; ++i)
-            {
-                int ex = static_cast<int>(boss1->GetLocation().x + GetRand(120) - 60);
-                int ey = static_cast<int>(boss1->GetLocation().y + GetRand(120) - 60);
-                int radius = 30 + GetRand(50);
-                DrawCircle(ex, ey, radius, GetColor(255, 150 + GetRand(100), 0), TRUE);
-                DrawLine(ex, ey, ex + GetRand(20) - 10, ey + GetRand(20) - 10, GetColor(255, 255, 100));
-            }
-        }
-
-        // 画面揺れ処理などはそのままでOK
-        screen_shake_power *= 0.9f;
-        if (screen_shake_power > 1.0f)
-        {
-            int shake_x = GetRand(static_cast<int>(screen_shake_power)) - screen_shake_power / 2;
-            int shake_y = GetRand(static_cast<int>(screen_shake_power)) - screen_shake_power / 2;
-            SetDrawArea(shake_x, shake_y, D_WIN_MAX_X + shake_x, D_WIN_MAX_Y + shake_y);
-        }
-        else
-        {
-            SetDrawArea(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y);
-        }
-
-        if (boss_death_timer > 2.0f)
-        {
-            is_clear = true;
-            is_boss_dying = false;
-        }
-    }
-
-
 
     if(boss1 != nullptr )
 
@@ -399,6 +357,7 @@ void Stage1::Draw()
             );
 
             SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+        
 
     }
 
@@ -548,166 +507,10 @@ void Stage1::EnemyAppearance(float delta)
     }
 }
 
-void Stage1::PlayerShot()
-{
-    // オブジェクト管理クラスのインスタンスを取得
-    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
-
-    // プレイヤーが弾を打つ準備ができていたら弾を生成        
-    if (player->GetIsShot() == true)
-    {
-        Vector2D p_location = player->GetLocation();
-        player->SetIsShot();
-        // 上下反転していなかったら下方向に生成
-        if (player->GetShotFlip() == false)
-        {
-            if (player->GetPowerd() <= 1)
-            {
-                shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 10, p_location.y - D_OBJECT_SIZE));
-                shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 10, p_location.y - D_OBJECT_SIZE));
-
-            }
-            else if (player->GetPowerd() == 2)
-            {
-                shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 30, p_location.y));
-                shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 10, p_location.y - D_OBJECT_SIZE));
-                shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 10, p_location.y - D_OBJECT_SIZE));
-                shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 30, p_location.y));
-            }
-            else
-            {
-                shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 50, p_location.y + D_OBJECT_SIZE));
-                shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 30, p_location.y));
-                shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 10, p_location.y - D_OBJECT_SIZE));
-                shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 10, p_location.y - D_OBJECT_SIZE));
-                shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 30, p_location.y));
-                shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 50, p_location.y + D_OBJECT_SIZE));
-
-            }
-            shot->SetShotFlip(false);
-        }
-        // 反転していたら上方向に生成
-        else
-        {
-            Vector2D p_location = player->GetLocation();
-            shot = objm->CreateObject<Shot>(Vector2D(p_location.x, p_location.y + D_OBJECT_SIZE));
-            shot->SetShotFlip(true);
-        }
-    }
-    // プレイヤーがビームをうつ準備ができていたらビームを生成
-    else if (player->GetBeamOn() == true)
-    {
-        Vector2D p_location = player->GetLocation();
-        // 上下反転していなかったら下方向に生成
-        if (player->GetShotFlip() == false)
-        {
-            beam = objm->CreateObject<Beam>(Vector2D(p_location.x, (p_location.y - D_OBJECT_SIZE) - 848));
-            beam->SetBeamFlip(false);
-        }
-        // 反転していたら上方向に生成
-        else
-        {
-            beam = objm->CreateObject<Beam>(Vector2D(p_location.x, (p_location.y + D_OBJECT_SIZE) + 848));
-            beam->SetBeamFlip(true);
-        }
-        beam->SetPlayer(player);
-        player->SetBeamOn();
-    }
-}
-
 void Stage1::DrawScrollBackground() const
 {
     // === 背景色：やや明るめに変更 ===
     DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(30, 30, 60), TRUE);
-
-    // ==== グラデーション背景（紫寄り） + 簡易ゆらぎノイズ ====
-    for (int y = 0; y < D_WIN_MAX_Y; ++y)
-    {
-        int grad = 40 + (y * 80 / D_WIN_MAX_Y); // 下に行くほど明るく
-        int r = grad / 2 + GetRand(5); // ランダムでゆらぎを追加
-        int g = 0;
-        int b = grad + GetRand(5);     // 紫寄りに青を強く
-
-        DrawLine(0, y, D_WIN_MAX_X, y, GetColor(r, g, b));
-    }
-
-    // === データ文字列（薄め・少なめ） ===
-    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 90); // 透過度さらに薄く
-
-    static std::vector<float> data_cols;
-    static std::vector<float> scale_factors;
-    static std::vector<float> fall_speeds;
-
-    const int data_interval = 80;               // 列の間隔を広げて数を減らす
-    const int base_line_height = 30;
-    const int string_len = 10;                  // 文字列も少し短め
-
-    if (data_cols.empty()) {
-        for (int x = 0; x < D_WIN_MAX_X; x += data_interval) {
-            data_cols.push_back(static_cast<float>(GetRand(D_WIN_MAX_Y)));
-            scale_factors.push_back(0.9f + GetRand(50) / 100.0f);  // 0.9?1.4倍
-            fall_speeds.push_back(0.04f + GetRand(20) / 300.0f);   // 0.04?0.1くらい
-        }
-    }
-
-    for (size_t i = 0; i < data_cols.size(); ++i)
-    {
-        int x = static_cast<int>(i) * data_interval;
-        float& y = data_cols[i];
-        float scale = scale_factors[i];
-        float speed = fall_speeds[i];
-
-        y += speed;
-        if (y > D_WIN_MAX_Y + string_len * base_line_height * scale)
-            y = -GetRand(200);
-
-        for (int j = 0; j < string_len; ++j)
-        {
-            char str[2] = { '0' + GetRand(1), '\0' };
-
-            int draw_y = static_cast<int>(y) - j * static_cast<int>(base_line_height * scale);
-            if (draw_y < 0 || draw_y > D_WIN_MAX_Y) continue;
-
-            int g = 130 - j * (60 / string_len);  // 薄く（グリーン控えめ）
-            int b = 160;
-
-            DrawExtendStringToHandle(
-                x, draw_y,
-                scale, scale,
-                str,
-                GetColor(0, g, b),
-                font_digital
-            );
-        }
-    }
-
-    // ==== 奥のグリッド（スクロール）====
-    static float grid_scroll_back = 0.0f;
-    grid_scroll_back += 0.1f; // ゆっくり動く
-    const int grid_size_back = 80;
-    int offset_back = static_cast<int>(grid_scroll_back) % grid_size_back;
-
-    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 60); // かなり薄く
-
-    for (int x = -grid_size_back; x < D_WIN_MAX_X + grid_size_back; x += grid_size_back)
-        DrawLine(x, 0, x, D_WIN_MAX_Y, GetColor(180, 100, 255)); // 淡い紫
-
-    for (int y = -grid_size_back + offset_back; y < D_WIN_MAX_Y; y += grid_size_back)
-        DrawLine(0, y, D_WIN_MAX_X, y, GetColor(180, 100, 255));
-
-    // ==== 手前のグリッド（中速スクロール）====
-    static float grid_scroll_front = 0.0f;
-    grid_scroll_front += 0.25f;
-    const int grid_size_front = 40;
-    int offset_front = static_cast<int>(grid_scroll_front) % grid_size_front;
-
-    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100); // やや濃いめ
-
-    for (int x = -grid_size_front; x < D_WIN_MAX_X + grid_size_front; x += grid_size_front)
-        DrawLine(x, 0, x, D_WIN_MAX_Y, GetColor(255, 150, 255)); // ピンク寄り
-
-    for (int y = -grid_size_front + offset_front; y < D_WIN_MAX_Y; y += grid_size_front)
-        DrawLine(0, y, D_WIN_MAX_X, y, GetColor(255, 150, 255));
 
     // === ハイライトライン ===
     if (GetNowCount() % 120 < 60)
@@ -759,6 +562,57 @@ void Stage1::DrawScrollBackground() const
             }),
         star_particles.end()
     );
+
+    // === データ文字列 ===
+    //SetDrawBlendMode(DX_BLENDMODE_ALPHA, 130);
+
+    //static std::vector<float> data_cols;
+    //static std::vector<float> scale_factors;
+    //static std::vector<float> fall_speeds;
+
+    //const int data_interval = 60;
+    //const int base_line_height = 30;
+    //const int string_len = 12;
+
+    //if (data_cols.empty()) {
+    //    for (int x = 0; x < D_WIN_MAX_X; x += data_interval) {
+    //        data_cols.push_back(static_cast<float>(GetRand(D_WIN_MAX_Y)));
+    //        scale_factors.push_back(0.9f + GetRand(100) / 100.0f);    // 0.9?1.9倍
+    //        fall_speeds.push_back(0.06f + GetRand(30) / 300.0f);       // 0.6?0.9くらい
+    //    }
+    //}
+
+    //for (size_t i = 0; i < data_cols.size(); ++i)
+    //{
+    //    int x = static_cast<int>(i) * data_interval;
+    //    float& y = data_cols[i];
+    //    float scale = scale_factors[i];
+    //    float speed = fall_speeds[i];
+
+    //    y += speed;
+    //    if (y > D_WIN_MAX_Y + string_len * base_line_height * scale)
+    //        y = -GetRand(200);
+
+    //    for (int j = 0; j < string_len; ++j)
+    //    {
+    //        char str[2] = { '0' + GetRand(1), '\0' };
+
+    //        int draw_y = static_cast<int>(y) - j * static_cast<int>(base_line_height * scale);
+    //        if (draw_y < 0 || draw_y > D_WIN_MAX_Y) continue;
+
+    //        // 明るくコントラストある色
+    //        int g = 180 - j * (100 / string_len);
+    //        int b = 200;
+
+    //        DrawExtendStringToHandle(
+    //            x, draw_y,
+    //            scale, scale,
+    //            str,
+    //            GetColor(0, g, b),
+    //            font_digital
+    //        );
+    //    }
+    //}
 
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 }

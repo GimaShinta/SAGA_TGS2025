@@ -160,16 +160,16 @@ void Stage1Boss::Update(float delta_second)
             const float amplitude_y = 50.0f;
             const float frequency_y = 2.0f;
 
-            static bool warp_done[5] = { false };
             const float warp_times[5] = { 0.3f, 0.7f, 1.1f, 1.5f, 1.9f };
 
             for (int i = 0; i < 5; ++i)
             {
-                if (!warp_done[i] && pattern_timer >= warp_times[i])
+                if (!entrance_warp_done[i] && pattern_timer >= warp_times[i])
                 {
-                    location.x = 300.0f + GetRand(680);  // èCê≥çœÇ›
-                    location.y = 100.0f + GetRand(610);
-                    warp_done[i] = true;
+                    // Entrance
+                    location.x = 400.0f + GetRand(480); // X: 400?880
+                    location.y = 100.0f + GetRand(260); // Y: 100?360  // Y: 100Å`360 Å® è„îºï™ÇæÇØÇ…å¿íË
+                    entrance_warp_done[i] = true;
 
                     is_flashing = true;
                     flash_timer = 0.1f;
@@ -177,8 +177,6 @@ void Stage1Boss::Update(float delta_second)
                 }
             }
 
-            if (pattern_timer > 3.0f)
-                for (int i = 0; i < 5; ++i) warp_done[i] = false;
 
             if (pattern_timer < move_down_duration && location.y < target_y)
             {
@@ -202,6 +200,7 @@ void Stage1Boss::Update(float delta_second)
             }
             break;
         }
+
         case BossPattern::GlitchWarp:
         {
             static float warp_timer = 0.0f;
@@ -209,14 +208,16 @@ void Stage1Boss::Update(float delta_second)
 
             if (warp_timer >= 0.5f)
             {
-                location.x = 300.0f + GetRand(680);  // èCê≥çœÇ›
-                location.y = 100.0f + GetRand(610);
+                location.x = 400.0f + GetRand(480); // X: 400?880
+                location.y = 100.0f + GetRand(260); // Y: 100?360
+
                 warp_timer = 0.0f;
 
                 image = images_a[GetRand((int)images_a.size() - 1)];
                 is_flashing = true;
                 flash_timer = 0.1f;
             }
+
 
             velocity = { 0, 0 };
             break;
@@ -408,7 +409,11 @@ void Stage1Boss::SetPattern(BossPattern new_pattern)
 
     switch (pattern)
     {
-        case BossPattern::Entrance:     images = images_b; anim_indices = { 0, 1, 2, 3, 4, 5 }; break;
+        case BossPattern::Entrance:
+            images = images_b;
+            anim_indices = { 0, 1, 2, 3, 4, 5 };
+            for (int i = 0; i < 5; ++i) entrance_warp_done[i] = false;  // èâä˙âª
+            break;
         case BossPattern::GlitchWarp:   anim_indices = { 0, 2, 4 }; break;
         case BossPattern::CircleMove:   anim_indices = { 1, 3, 5 }; break;
         case BossPattern::ZigzagMove:   anim_indices = { 2, 3, 4 }; break;

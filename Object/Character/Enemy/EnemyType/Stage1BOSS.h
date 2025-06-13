@@ -84,4 +84,7 @@ private:
     Player* player = nullptr;
 
     void ChangePatternRandomly();
+
+    // Entranceパターン専用：ワープフラグ
+    bool entrance_warp_done[5] = { false };
 };
