@@ -339,8 +339,8 @@ void Stage1Boss::Update(float delta_second)
 
 void Stage1Boss::Draw(const Vector2D& screen_offset) const
 {
-    DrawFormatString(location.x - 8, location.y - 8, GetColor(0, 0, 0), "%.0f", hp);
-    DrawFormatString(location.x - 10, location.y - 40, GetColor(255, 255, 255), "%.0f", hp);
+    //DrawFormatString(location.x - 8, location.y - 8, GetColor(0, 0, 0), "%.0f", hp);
+    //DrawFormatString(location.x - 10, location.y - 40, GetColor(255, 255, 255), "%.0f", hp);
 
     float scale = 4.0f;
 

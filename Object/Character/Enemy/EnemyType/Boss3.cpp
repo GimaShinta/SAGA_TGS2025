@@ -179,46 +179,6 @@ void Boss3::Update(float delta_second)
 	}
 
 
-	//std::vector<int> animation_num = { 0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1 };
-	////フレームレートで時間を計測
-	//animation_time += delta_second;
-	////8秒経ったら画像を切り替える
-	//if (animation_time >= anim_speed)
-	//{
-	//	//計測時間の初期化
-	//	animation_time = 0.0f;
-	//	//時間経過カウントの増加
-	//	animation_count++;
-	//	//カウントがアニメーション画像の要素数以上になったら
-	//	if (animation_count >= animation_num.size())
-	//	{
-	//		//カウントの初期化
-	//		animation_count = 0;
-	//	}
-	//	// アニメーションが順番に代入される
-	//	boss3_image[10] = boss3_anim1[animation_num[animation_count]];
-	//}
-
-	//std::vector<int> jet_num = { 2, 3, 4, 8, 9, 10, 11, 12, 16, 17, 16, 12, 11, 10, 9, 8, 4, 3, 2 };
-	////フレームレートで時間を計測
-	//jet_timer += delta_second;
-	////8秒経ったら画像を切り替える
-	//if (jet_timer >= 0.01f)
-	//{
-	//	//計測時間の初期化
-	//	jet_timer = 0.0f;
-	//	//時間経過カウントの増加
-	//	jet_count++;
-	//	//カウントがアニメーション画像の要素数以上になったら
-	//	if (jet_count >= jet_num.size())
-	//	{
-	//		//カウントの初期化
-	//		jet_count = 0;
-	//	}
-	//	// アニメーションが順番に代入される
-	//	jet = boss3_jet[jet_num[jet_count]];
-	//}
-
 	if (attack_pattrn == 12)
 	{
 		anim_speed = 0.01;
