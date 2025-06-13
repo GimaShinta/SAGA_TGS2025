@@ -328,7 +328,7 @@ void Boss3::Movement(float delta_second)
 			//	box_size = Vector2D(160, 350);
 			//	check = false;
 			//}
-			image_size = 1.0f;
+			image_size =3.5f;
 		}
 		else
 		{

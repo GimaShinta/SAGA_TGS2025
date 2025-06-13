@@ -6,6 +6,8 @@ class EnemyShot4 :
 {
 private:
 	int attack_pattrn = 0;
+
+
 	std::vector<int> bullet_1;
 	std::vector<int> bullet_2;
 	std::vector<int> bullet_3;

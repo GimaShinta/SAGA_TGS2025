@@ -22,10 +22,14 @@ private:
 	BeamOwnerType beam_owner_type = BeamOwnerType::None;
 	float min_thickness = 8.0f;
 	float max_thickness = 48.0f;
+	float min_thickness_d = 8.0f;
+	float max_thickness_d = 48.0f;
 	int beam_t_index = 10;
 	int beam_b_index = 10;
 	float growth_duration_b = 4.0f;
 	float growth_duration_s = 0.5f;
+
+	bool checked = false;
 
 private:
 	std::vector<int> beam_ts;
@@ -45,7 +49,7 @@ private:
 	};
 
 	BeamState state = BeamState::Warning;
-	float warning_time = 1.0f;  // —\’›ü‚Ì•\¦ŠÔ
+	float warning_time = 1.5f;  // —\’›ü‚Ì•\¦ŠÔ
 	float state_timer = 0.0f;   // ó‘Ô‚ÌŒo‰ßŠÔ
 
 public:

@@ -2,6 +2,7 @@
 #include "../../../GameObjectManager.h"
 #include "../../../../Utility/ProjectConfig.h"
 #include "../../../../Utility/AnimationManager.h"
+#include "../../../../Utility/InputManager.h"
 #include "../../Enemy/EnemyType/Boss2.h"
 #include "../../Enemy/EnemyType/Boss3.h"
 #include <algorithm>
@@ -83,6 +84,27 @@ void EnemyBeam1::Update(float delta_second)
     switch (state)
     {
     case BeamState::Warning:
+
+        if (state_timer >= 0.5f)
+        {
+            if (boss3 != nullptr)
+            {
+                AnimationManager* am = Singleton<AnimationManager>::GetInstance();
+                int anim = am->PlayerAnimation(EffectName::eChenge, Vector2D(location.x, location.y - box_size.y), 0.03f, false);
+                am->SetScale(anim, 2.0f);
+                am->SetAlpha(anim, 30);
+
+            }
+            else if (boss2 != nullptr)
+            {
+                AnimationManager* am = Singleton<AnimationManager>::GetInstance();
+                int anim = am->PlayerAnimation(EffectName::eChenge, Vector2D(location.x, location.y - box_size.y), 0.02f, false);
+                am->SetScale(anim, 0.7f);
+                am->SetAlpha(anim, 30);
+
+            }
+
+        }
         if (state_timer >= warning_time)
         {
             state = BeamState::Firing;
@@ -94,20 +116,6 @@ void EnemyBeam1::Update(float delta_second)
         }
         else
         {
-            if (boss3 != nullptr)
-            {
-                AnimationManager* am = Singleton<AnimationManager>::GetInstance();
-                int anim = am->PlayerAnimation(EffectName::eChenge, Vector2D(location.x, location.y - box_size.y), 0.05f, false);
-                am->SetScale(anim, 1.5f);
-
-            }
-            else if(boss2 != nullptr)
-            {
-                AnimationManager* am = Singleton<AnimationManager>::GetInstance();
-                int anim = am->PlayerAnimation(EffectName::eChenge, Vector2D(location.x, location.y - box_size.y), 0.05f, false);
-                am->SetScale(anim, 0.7f);
-
-            }
             collision.hit_object_type.clear();
         }
         break;
@@ -191,6 +199,22 @@ void EnemyBeam1::Update(float delta_second)
         }
     }
 
+
+    InputManager* input = Singleton<InputManager>::GetInstance();
+    if (input->GetKeyDown(KEY_INPUT_C))
+    {
+        if (checked == false)
+        {
+            checked = true;
+
+        }
+        else
+        {
+            checked = false;
+
+        }
+    }
+
 #endif
 }
 
@@ -229,6 +253,10 @@ void EnemyBeam1::Draw(const Vector2D& screen_offset) const
 
     SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);  // 元に戻す
 #else
+
+    if (checked)
+    {
+
     if (state == BeamState::Firing || state == BeamState::Shrinking || state == BeamState::Holding)
     {
         float t = 1.0f;
@@ -246,7 +274,7 @@ void EnemyBeam1::Draw(const Vector2D& screen_offset) const
             t = 1.0f; // 最大サイズ固定
         }
 
-        float half_width = min_thickness + (max_thickness - min_thickness) * t;
+        float half_width = min_thickness_d + (max_thickness_d - min_thickness_d) * t;
 
         // 波揺れ + オフセット処理はそのままでOK
         float wave_amplitude = 2.0f;
@@ -296,6 +324,15 @@ void EnemyBeam1::Draw(const Vector2D& screen_offset) const
         );
         SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
     }
+    }
+    else
+    {
+    DrawBox(location.x - box_size.x, location.y - box_size.y,
+	location.x + box_size.x, location.y + box_size.y,
+	GetColor(255, 100, 0), TRUE);
+
+    }
+
 #endif
 
 }
@@ -315,6 +352,8 @@ void EnemyBeam1::SetBoss2(Boss2* p_boss)
 
     max_thickness = 48.0f;
     min_thickness = 4.0f;
+    max_thickness_d = 48.0f;
+    min_thickness_d = 4.0f;
     growth_duration_b = 1.0f; // 拡大時間
     growth_duration_s = 0.2f; // 縮小時間
 
@@ -327,14 +366,16 @@ void EnemyBeam1::SetBoss3(Boss3* p_boss)
 {
 	boss3 = p_boss;
 
-    max_thickness = 170.0f;
+    max_thickness = 110.0f;
     min_thickness = 16.0f;
+    max_thickness_d = 140.0f;
+    min_thickness_d = 16.0f;
     growth_duration_b = 4.0f;
     growth_duration_s = 0.5f;
 
-    beams_t.push_back(beam_ts[4]);
     beams_t.push_back(beam_ts[0]);
-    beams_b.push_back(beam_bs[4]);
+    beams_t.push_back(beam_ts[4]);
     beams_b.push_back(beam_bs[0]);
+    beams_b.push_back(beam_bs[4]);
 
 }

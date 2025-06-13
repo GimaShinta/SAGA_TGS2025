@@ -19,7 +19,7 @@ void Boss2::Initialize()
 	hp = 10000;
 
 	// 攻撃パターンの設定
-	attack_pattrn_num = { 12 };
+	attack_pattrn_num = { 4 };
 
 	// 当たり判定のオブジェクト設定
 	collision.is_blocking = true;

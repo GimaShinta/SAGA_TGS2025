@@ -13,10 +13,11 @@ void AnimationManager::LoadAllEffects()
 	std::vector<int> charge = rm->GetImages("Resource/Image/Effect/E_Charged.png", 80, 10, 8, 357, 295);
 	std::vector<int> charge_2;
 
-	for (int i = 0; i < 20; i++)
+	for (int i = 0; i < 25; i++)
 	{
 		charge_2.push_back(charge[i]);
 	}
+
 	effect_images[EffectName::eChenge] = charge_2;
 }
 

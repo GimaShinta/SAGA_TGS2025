@@ -2,6 +2,8 @@
 #include "../ItemBase.h"
 class Shield : public ItemBase
 {
+private:
+    std::vector<int> images;
 public:
     void Initialize() override;
     void Update(float delta) override;
