@@ -2,6 +2,7 @@
 #include "../../../../Object/GameObjectManager.h"
 #include "../../../../Object/Character/Shot/EnemyShot/EnemyShot4.h"
 #include "../../../../Object/Character/Shot/EnemyShot/EnemyShot5.h"
+#include "../../../../Utility/AnimationManager.h"
 #include <cmath>
 
 Zako5::Zako5()
@@ -93,9 +94,13 @@ void Zako5::Update(float delta)
 
             Shot(delta);
 
-            if (hp <= 0)
-                is_destroy = true;
+            if (hp <= 0) {
 
+                is_destroy = true;
+                AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+                anim_id = manager->PlayerAnimation(EffectName::eExprotion2, location, 0.035f, false);
+                manager->SetScale(anim_id, 1.5f);
+                      }
             break;
     }
 
@@ -191,7 +196,7 @@ void Zako5::Pattern7(float delta_second)
 void Zako5::Draw(const Vector2D& screen_offset) const
 {
     DrawRotaGraph(location.x, location.y, scale, 3.14, image, TRUE);
-    DrawFormatString(location.x - 20, location.y - 30, GetColor(255, 255, 255), "Zako5: %.0f", hp);
+   // DrawFormatString(location.x - 20, location.y - 30, GetColor(255, 255, 255), "Zako5: %.0f", hp);
    
 }
 

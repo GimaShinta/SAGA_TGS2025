@@ -8,6 +8,8 @@
 #include "../../../../Object/Character/Enemy/EnemyType/Zako1.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako4.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako5.h"
+#include"../../../../Object/Item/Exp/Exp.h"
+#include"../../../../Utility/AnimationManager.h"
 
 #include <cstdlib>
 #include <ctime>
@@ -38,6 +40,10 @@ void Stage2::Update(float delta)
 {
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
     objm->Update(delta);
+
+    AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+    manager->Update(delta);
+
 
     stage_timer += delta;
     EnemyAppearance(delta);
@@ -95,6 +101,18 @@ void Stage2::Update(float delta)
         is_over = true;
     }
 
+    // 敵が倒された時に経験値を生成
+    for (auto& enemy : enemy_list)
+    {
+        if (enemy->is_destroy == true && !enemy->is_exp_generated)
+        {
+            Exp* exp = Singleton<GameObjectManager>::GetInstance()->CreateObject<Exp>(enemy->GetLocation());
+            exp->SetPlayer(player);
+            enemy->is_exp_generated = true;
+        }
+    }
+
+
     // ステージ終了処理
     if (is_clear || is_over)
     {
@@ -110,6 +128,8 @@ void Stage2::Update(float delta)
             finished = true;
         }
     }
+
+
 
     UpdateFade(delta);
 }
@@ -157,6 +177,10 @@ void Stage2::Draw()
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 
     DrawFadeOverlay();
+
+    AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+    manager->Draw();
+
 }
 
 bool Stage2::IsFinished()
@@ -179,68 +203,88 @@ StageBase* Stage2::GetNextStage(Player* player)
 
 void Stage2::EnemyAppearance(float delta)
 {
-    enemy_spawn_timer += delta;
-    const float spawn_interval = 2.5f;
-    const int MAX_ENEMIES_ON_SCREEN = 20;
+    //enemy_spawn_timer += delta;
+    //const float spawn_interval = 2.5f;
+    //const int MAX_ENEMIES_ON_SCREEN = 20;
 
-    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+    //GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
 
-    if (enemy_list.size() >= MAX_ENEMIES_ON_SCREEN)
-        return;
+    //if (enemy_list.size() >= MAX_ENEMIES_ON_SCREEN)
+    //    return;
 
-    if (stage_timer < 15.0f)
-    {
-        if (enemy_spawn_timer >= spawn_interval)
+    //if (stage_timer < 15.0f)
+    //{
+    //    if (enemy_spawn_timer >= spawn_interval)
+    //    {
+    //        enemy_spawn_timer = 0.0f;
+
+    //        float base_x = (std::rand() % 2 == 0) ? 400.0f : 900.0f;
+    //        float base_y = 0.0f;
+    //        float offset_x = 50.0f;
+    //        float offset_y = 30.0f;
+
+    //        Zako* zako_top = objm->CreateObject<Zako>(Vector2D(base_x, base_y - offset_y));
+    //        zako_top->SetPattern(ZakoPattern::MoveStraight);
+    //        enemy_list.push_back(zako_top);
+
+    //        Zako* zako_left = objm->CreateObject<Zako>(Vector2D(base_x - offset_x, base_y + offset_y));
+    //        zako_left->SetPattern(ZakoPattern::MoveStraight);
+    //        enemy_list.push_back(zako_left);
+
+    //        Zako* zako_right = objm->CreateObject<Zako>(Vector2D(base_x + offset_x, base_y + offset_y));
+    //        zako_right->SetPattern(ZakoPattern::MoveStraight);
+    //        enemy_list.push_back(zako_right);
+    //    }
+    //}
+    //else if (stage_timer < 40.0f && !zako5_spawned)
+    //{
+    //    if (enemy_spawn_timer >= spawn_interval)
+    //    {
+    //        enemy_spawn_timer = 0.0f;
+
+    //        GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+
+    //        Zako5* left = objm->CreateObject<Zako5>(Vector2D(250.0f, 200.0f));  // 左側を50右にずらす
+    //        left->Initialize();
+    //        left->SetPlayer(player);
+    //        enemy_list.push_back(left);
+
+    //        Zako5* right = objm->CreateObject<Zako5>(Vector2D(1030.0f, 200.0f));  // 画面右外
+    //        right->Initialize();
+    //        right->SetPlayer(player);
+    //        enemy_list.push_back(right);
+
+
+    //        zako5_spawned = true;
+    //    }
+    //}
+
+
+
+    //else if (stage_timer < 60.0f && !zako5_spawned)
+    //{
+    //    
+    //}
+
+        enemy_spawn_timer += delta;
+
+        GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+
+        if (stage_timer < 2.0f && !zako5_spawned)
         {
-            enemy_spawn_timer = 0.0f;
+            zako5_spawned = true;
 
-            float base_x = (std::rand() % 2 == 0) ? 400.0f : 900.0f;
-            float base_y = 0.0f;
-            float offset_x = 50.0f;
-            float offset_y = 30.0f;
-
-            Zako* zako_top = objm->CreateObject<Zako>(Vector2D(base_x, base_y - offset_y));
-            zako_top->SetPattern(ZakoPattern::MoveStraight);
-            enemy_list.push_back(zako_top);
-
-            Zako* zako_left = objm->CreateObject<Zako>(Vector2D(base_x - offset_x, base_y + offset_y));
-            zako_left->SetPattern(ZakoPattern::MoveStraight);
-            enemy_list.push_back(zako_left);
-
-            Zako* zako_right = objm->CreateObject<Zako>(Vector2D(base_x + offset_x, base_y + offset_y));
-            zako_right->SetPattern(ZakoPattern::MoveStraight);
-            enemy_list.push_back(zako_right);
-        }
-    }
-    else if (stage_timer < 40.0f && !zako5_spawned)
-    {
-        if (enemy_spawn_timer >= spawn_interval)
-        {
-            enemy_spawn_timer = 0.0f;
-
-            GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
-
-            Zako5* left = objm->CreateObject<Zako5>(Vector2D(250.0f, 200.0f));  // 左側を50右にずらす
+            Zako5* left = objm->CreateObject<Zako5>(Vector2D(250.0f, 200.0f));  // 左側
             left->Initialize();
             left->SetPlayer(player);
             enemy_list.push_back(left);
 
-            Zako5* right = objm->CreateObject<Zako5>(Vector2D(1030.0f, 200.0f));  // 画面右外
+            Zako5* right = objm->CreateObject<Zako5>(Vector2D(1030.0f, 200.0f));  // 右側
             right->Initialize();
             right->SetPlayer(player);
             enemy_list.push_back(right);
-
-
-            zako5_spawned = true;
         }
-    }
 
-
-
-    else if (stage_timer < 60.0f && !zako5_spawned)
-    {
-        
-    }
 }
 
 void Stage2::DrawScrollBackground() const

@@ -72,4 +72,9 @@ private:
     void ChangePatternRandomly();
 
 
+    //ƒqƒbƒg
+    int sound_hit = -1;
+    int sound_destroy = -1;
+
+
 };
