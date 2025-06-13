@@ -103,6 +103,7 @@ void Stage3::Update(float delta)
     }
 
     UpdateBackgroundScroll(delta);
+    ScrollEffectUpdate(delta);
 
     //// ゲームの骨組みとなる処理を、ここに記述する
     //int spd = 1; // スクロールの速さ
@@ -122,6 +123,7 @@ void Stage3::Update(float delta)
 
     // delta_second 分加算
     stage_timer += delta;
+    delta_draw = delta;  // ← delta を保存
 
     // 一定時間ごとに distance を減らす（例：0.1秒ごとに1減らす）
     if (stage_timer >= 0.01f)
@@ -165,6 +167,15 @@ void Stage3::Update(float delta)
 
     // クリア判定
     UpdateGameStatus(delta);
+
+    if (is_clear)
+    {
+        if (result_started)
+        {
+            ResultDraw(delta);  
+        }
+    }
+
 }
 
 void Stage3::Draw()
@@ -201,14 +212,24 @@ void Stage3::Draw()
 
     if (is_clear == true)
     {
-        SetDrawBlendMode(DX_BLENDMODE_ALPHA, transparent);
-        DrawBox((D_WIN_MAX_X / 2) - 350, 0, (D_WIN_MAX_X / 2) + 350, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
+        if (result_started)
+        {
+            // 薄い暗転
+            int fade_alpha = (result_timer * 12.0f < 60.0f) ? static_cast<int>(result_timer * 12.0f) : 60;
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, fade_alpha);
+            DrawBox((D_WIN_MAX_X / 2) - 350, 0, (D_WIN_MAX_X / 2) + 350, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 
-        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
-        DrawFormatStringToHandle((D_WIN_MAX_X / 2) - 100.0f, (D_WIN_MAX_Y / 2), GetColor(255, 255, 255), font_digital, "NEXT STAGE...");
+            ResultDraw(delta_draw);  // ← ここで描画処理呼び出し
+        }
 
-        //DrawString((D_WIN_MAX_X / 2) - 40, (D_WIN_MAX_Y / 2) - 100, "ゲームクリア", GetColor(0, 0, 0));
+        // 「NEXT STAGE...」は常時表示
+       // DrawFormatStringToHandle((D_WIN_MAX_X / 2) - 100.0f,120, GetColor(255, 255, 255), font_digital, "GAME CLEAR");
     }
+
+
+
+
     else if (is_over == true)
     {
         SetDrawBlendMode(DX_BLENDMODE_ALPHA, transparent);
@@ -572,10 +593,10 @@ void Stage3::UpdateGameStatus(float delta)
             gameover_timer = 0.0f;
         }
         
-        if (scene_timer >= 4.0f)
+     /*   if (scene_timer >= 8.0f)
         {
             finished = true;
-        }
+        }*/
     }
 
     // 仮の条件：スペースキーを押したらステージ終了
@@ -583,48 +604,242 @@ void Stage3::UpdateGameStatus(float delta)
     {
         finished = true;
     }
+
+    if (is_clear == true && result_started == false)
+    {
+        clear_wait_timer += delta;
+        if (clear_wait_timer >= 5.0f)
+        {
+            result_started = true;
+            result_timer = 0.0f; // スコア演出タイマーリセット
+        }
+    }
 }
+
+//リザルト
+void Stage3::ResultDraw(float delta)
+{
+    if (!result_started) return;
+
+    result_timer += delta * 60.0f;
+
+    const int cx = D_WIN_MAX_X / 2;
+    const int cy = D_WIN_MAX_Y / 2 - 20;
+
+    // フェード：透明度60まで
+    int fade_alpha = (result_timer * 12.0f < 60.0f) ? static_cast<int>(result_timer * 12.0f) : 60;
+
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, fade_alpha);
+    DrawBox(cx - 350, 0, cx + 350, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
+    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+    // フェード＆スライド演出設定
+    const int fade_duration = 30;
+    const int slide_distance = 60;
+
+    auto GetAlpha = [&](int delay) -> int {
+        int t = static_cast<int>(result_timer) - delay;
+        if (t < 0) return 0;
+        if (t >= fade_duration) return 255;
+        return (255 * t) / fade_duration;
+    };
+
+    auto GetSlideY = [&](int base_y, int delay) -> int {
+        int t = static_cast<int>(result_timer) - delay;
+        if (t < 0) return base_y + slide_distance;
+        if (t >= fade_duration) return base_y;
+        return base_y + slide_distance - (slide_distance * t) / fade_duration;
+    };
+
+    // スコア取得
+    ScoreData* score = Singleton<ScoreData>::GetInstance();
+    const auto& scores = score->GetScoreData();
+    float base_score = 0.0f;
+    for (float s : scores) base_score += s;
+    int life_bonus = player->life * 1000;
+    total_score = base_score + life_bonus;
+
+    // 表示ライン
+    struct ResultLine {
+        int delay;
+        int y_offset;
+        std::string label;
+        std::string format;  // 空なら固定テキスト
+    };
+
+    std::vector<ResultLine> lines = {
+        {  30, -80, "RESULT", "" },
+        {  70, -20, "BASE SCORE", "BASE SCORE : %.0f" },
+        { 110,  20, "LIFE BONUS", "LIFE BONUS : %d" },
+        { 160,  60, "TOTAL SCORE", "TOTAL SCORE : %.0f" },
+    };
+
+    for (const auto& line : lines)
+    {
+        int alpha = GetAlpha(line.delay);
+        int y = GetSlideY(cy + line.y_offset, line.delay);
+        int color = GetColor(255, 255, 255);
+
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+
+        // 表示文字生成
+        char buf[128];
+        if (line.format.empty())
+        {
+            sprintf_s(buf, "%s", line.label.c_str());
+        }
+        else if (line.label == "BASE SCORE")
+        {
+            sprintf_s(buf, line.format.c_str(), base_score);
+        }
+        else if (line.label == "LIFE BONUS")
+        {
+            sprintf_s(buf, line.format.c_str(), life_bonus);
+        }
+        else if (line.label == "TOTAL SCORE")
+        {
+            sprintf_s(buf, line.format.c_str(), total_score);
+        }
+
+        // 中央寄せ位置を計算
+        int width = GetDrawStringWidthToHandle(buf, strlen(buf), font_digital);
+        DrawStringToHandle(cx - width / 2, y, buf, color, font_digital);
+
+        if (line.label == "TOTAL SCORE" && alpha == 255)
+        {
+            result_displayed = true;
+        }
+    }
+
+    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+    // スコア表示完了後の待機タイマー
+    if (result_displayed && !glitch_started && !glitch_done)
+    {
+        post_result_wait_timer += delta;
+        if (post_result_wait_timer >= 8.0f) // 5秒待機後
+        {
+            glitch_started = true;
+            glitch_timer = 0.0f;
+        }
+    }
+
+    // グリッチ演出（強化バージョン）
+    if (glitch_started && !glitch_done)
+    {
+        for (int i = 0; i < 50; ++i) // ← 数を増やして密度アップ（元は8）
+        {
+            int x = (rand() % 700) + (D_WIN_MAX_X / 2 - 350);
+            int y = rand() % D_WIN_MAX_Y;
+            int w = 80 + rand() % 150; // ← 幅広く
+            int h = 8 + rand() % 40;   // ← 高さも太く
+            int r = 150 + rand() % 106;  // 暗めの色も混ぜるとノイズ感が出る
+            int g = 150 + rand() % 106;
+            int b = 255;
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, 220); // ← 不透明度強めで覆う
+            DrawBox(x, y, x + w, y + h, GetColor(r, g, b), TRUE);
+        }
+
+        glitch_timer += delta;
+        if (glitch_timer > 2.0f)
+        {
+            glitch_done = true;
+            finished = true;
+        }
+    }
+
+
+    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+
+}
+
 
 void Stage3::DrawScrollBackground() const
 {
-    static float time = 0.0f;
-    time += 0.05f;
+    // === 背景の塗りつぶし ===
+    DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(20, 5, 30), TRUE);
 
-    // 背景色：やや赤みがかったグレー
-    DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(30, 10, 10), TRUE);
-
-    // === 背面レイヤー（奥・細かく・暗め） ===
+    // === 奥のグリッド描画 ===
     const int grid_size_back = 40;
-    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
-
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
     for (int x = 0; x < D_WIN_MAX_X; x += grid_size_back)
-        DrawLine(x, 0, x, D_WIN_MAX_Y, GetColor(100, 0, 0));
+        DrawLine(x, 0, x, D_WIN_MAX_Y, GetColor(100, 0, 100));
 
     for (int y = -grid_size_back; y < D_WIN_MAX_Y + grid_size_back; y += grid_size_back) {
-        int sy = y - static_cast<int>(bg_scroll_offset_layer1) % grid_size_back;
-        DrawLine(0, sy, D_WIN_MAX_X, sy, GetColor(100, 0, 0));
+        int sy = y - static_cast<int>(scroll_back) % grid_size_back;
+        DrawLine(0, sy, D_WIN_MAX_X, sy, GetColor(100, 0, 100));
     }
 
-    // === 前面レイヤー（太く・明るく・警告感） ===
+    // === 前面の太いグリッド ===
     const int grid_size_front = 80;
-    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
-
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
     for (int x = 0; x < D_WIN_MAX_X; x += grid_size_front)
-        DrawBox(x - 1, 0, x + 1, D_WIN_MAX_Y, GetColor(255, 40, 40), TRUE);
+        DrawBox(x - 1, 0, x + 1, D_WIN_MAX_Y, GetColor(200, 40, 200), TRUE);
 
     for (int y = -grid_size_front; y < D_WIN_MAX_Y + grid_size_front; y += grid_size_front) {
-        int sy = y - static_cast<int>(bg_scroll_offset_layer2) % grid_size_front;
-        DrawBox(0, sy - 1, D_WIN_MAX_X, sy + 1, GetColor(255, 40, 40), TRUE);
+        int sy = y - static_cast<int>(scroll_front) % grid_size_front;
+        DrawBox(0, sy - 1, D_WIN_MAX_X, sy + 1, GetColor(200, 40, 200), TRUE);
     }
 
-    // === ノイズ演出（崩壊感） ===
+    // === 粒子描画 ===
+    for (const auto& p : star_particles)
+    {
+        int a = static_cast<int>(p.alpha);
+        if (a <= 0) continue;
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, a);
+
+        DrawLine(static_cast<int>(p.pos.x), static_cast<int>(p.pos.y),
+            static_cast<int>(p.pos.x), static_cast<int>(p.pos.y + p.length),
+            GetColor(180, 130, 255));
+    }
+
+    // === ノイズエフェクト ===
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
     for (int i = 0; i < 5; ++i) {
-        if (rand() % 70 == 0) {
+        if (rand() % 60 == 0) {
             int nx = rand() % D_WIN_MAX_X;
             int ny = rand() % D_WIN_MAX_Y;
-            DrawBox(nx, ny, nx + 3, ny + 3, GetColor(255, 100, 50), TRUE); // オレンジ警告ドット
+            DrawBox(nx, ny, nx + 3, ny + 3, GetColor(255, 100, 50), TRUE);
         }
     }
 
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 }
+
+void Stage3::ScrollEffectUpdate(float delta)
+{
+        scroll_back -= delta * 220.2f;   // 奥グリッドは遅く
+        scroll_front -= delta * 420.0f;  // 前面グリッドは速く
+        time += delta;                 // ノイズ等に使うタイマー
+
+        // 粒子の更新
+        for (auto& p : star_particles)
+        {
+            p.pos.y += p.velocity.y * delta;
+            p.alpha -= delta * 30.0f;
+        }
+
+        star_particles.erase(
+            std::remove_if(star_particles.begin(), star_particles.end(),
+                [](const StarParticle& p)
+                { return (p.pos.y > D_WIN_MAX_Y || p.alpha <= 0); }),
+            star_particles.end());
+
+        // 粒子追加（負荷軽減のため毎フレーム追加しない）
+        if (star_particles.size() < 60)
+        {
+            StarParticle p;
+            p.pos = Vector2D(GetRand(D_WIN_MAX_X), GetRand(D_WIN_MAX_Y));
+            p.velocity = Vector2D(0, 60.0f + GetRand(30));
+            p.alpha = 100.0f + GetRand(100);
+            p.length = 10.0f + GetRand(10);
+            p.life = 2.0f + GetRand(100) / 50.0f;
+            star_particles.push_back(p);
+        }
+}
+
+
+
+
+

@@ -46,7 +46,7 @@ private:
 	int bs_attack_pattrn = 0;  // ボスの攻撃パターン制御用インデックス
 	float shot_timer;          // ショット発射の間隔制御タイマー
 
-	float stage_timer = 70.0f;  // ステージの経過時間（秒単位）
+	float stage_timer = 0.0f;  // ステージの経過時間（秒単位）
 
 	float scene_timer = 0.0f;  // 演出や状態遷移用タイマー
 	bool boss_spawned = false;
@@ -77,10 +77,13 @@ public:
 	bool IsOver() override;                  // ゲームオーバー判定
 	StageBase* GetNextStage(Player* player) override; // 次のステージを取得
 
+
+
 private:
 	// ステージ内部処理
 	void DisplayWarning(float delta_second); // 警告演出処理
 	void EnemyAppearance(float delta);       // 敵の出現処理
+	void PlayerShot();
 
 private:
 	bool finished = false;                   // ステージ終了フラグ

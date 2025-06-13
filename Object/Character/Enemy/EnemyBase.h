@@ -26,6 +26,9 @@ protected:
 	float hp;
 	bool on_hit;
 	int enemy_type;
+
+
+
 private:
 	int move_pattern = 0; // 0〜3：移動パターン
 
@@ -51,6 +54,8 @@ public:
 protected:
 	virtual void Movement(float delta_second) override;
 	virtual void Shot(float delta_second);
+	void DropItems();  // ← 追加
+
 
 public:
 	bool GetIsShot() const;
@@ -60,4 +65,5 @@ public:
 	void SetPlayer(Player* p);
 
 	bool is_exp_generated = false;
+
 };

@@ -9,10 +9,29 @@ private:
 	float beam_time = 0.0f;
 
 	float alpha_timer = 0.0f;          // 点滅用のタイマー
-	const float growth_duration = 1.0f;  // ビームが完成するまでの時間
+
+	float shrink_duration = 1.0f;  // 縮小にかける時間
+	float beam_lifetime = 8.0f;    // ビーム全体の生存時間（今と同じ）
+	enum class BeamOwnerType 
+	{
+		None,
+		Boss2,
+		Boss3,
+	};
+
+	BeamOwnerType beam_owner_type = BeamOwnerType::None;
+	float min_thickness = 8.0f;
+	float max_thickness = 48.0f;
+	int beam_t_index = 10;
+	int beam_b_index = 10;
+	float growth_duration_b = 4.0f;
+	float growth_duration_s = 0.5f;
+
 private:
 	std::vector<int> beam_ts;
 	std::vector<int> beam_bs;
+	std::vector<int> beams_t;
+	std::vector<int> beams_b;
 	int beam_t = NULL;
 	int beam_b = NULL;
 
@@ -20,7 +39,9 @@ private:
 	enum class BeamState 
 	{
 		Warning,
-		Firing
+		Firing,
+		Holding,   // ← 追加
+		Shrinking, // ← 追加！
 	};
 
 	BeamState state = BeamState::Warning;
@@ -59,5 +80,9 @@ public:
 	void SetBoss2(class Boss2* p_boss);
 	void SetBoss3(class Boss3* p_boss);
 
+	template<typename T>
+	T MyMax(const T& a, const T& b) {
+		return (a > b) ? a : b;
+	}
 };
 

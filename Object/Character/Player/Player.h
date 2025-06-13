@@ -58,6 +58,10 @@ private:
 	bool is_shield = false;
 	bool shield_secand = false;
 
+	bool is_dead_animation_playing = false;
+	float dead_animation_timer = 0.0f;    // 演出再生用タイマー
+	const float dead_animation_duration = 2.0f; // 例：2秒間の死の演出
+
 private:
 	float charge = 0.0f;
 	const float charge_max = 100.0f;
@@ -127,6 +131,8 @@ private:
 	void Shot(float delta_second);
 
 	void Damage(float delta_second);
+
+	void BuhinAnim(float delta_second);
 
 public:
 	bool GetIsShot() const;

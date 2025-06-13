@@ -14,7 +14,7 @@ Shot::~Shot()
 // ‰Šú‰»ˆ—
 void Shot::Initialize()
 {
-	z_layer = 4;
+	z_layer = 3;
 	velocity.y = -1000.0f;
 	box_size = Vector2D(5.0f, 14.0f);
 

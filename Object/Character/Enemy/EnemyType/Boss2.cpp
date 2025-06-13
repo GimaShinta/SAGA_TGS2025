@@ -19,7 +19,7 @@ void Boss2::Initialize()
 	hp = 10000;
 
 	// 攻撃パターンの設定
-	attack_pattrn_num = { 4 };
+	attack_pattrn_num = { 12 };
 
 	// 当たり判定のオブジェクト設定
 	collision.is_blocking = true;
@@ -275,7 +275,20 @@ void Boss2::Movement(float delta_second)
 			velocity.y = distance_y;
 			if (velocity.y > max_speed) velocity.y = max_speed;
 			if (velocity.y < -max_speed) velocity.y = -max_speed;
-			box_size = Vector2D(190, 80);
+
+			static bool check = false;
+			if (check == false)
+			{
+				box_size = Vector2D(200, 70);
+				check = true;
+			}
+			else
+			{
+				box_size = Vector2D(100, 120);
+				check = false;
+			}
+
+			//box_size = Vector2D(190, 80);
 			image_size = 2.0f;
 		}
 		else
@@ -432,6 +445,9 @@ void Boss2::DrawBoss2(const Vector2D position) const
 		DrawRotaGraph(part_positions[4].x, part_positions[4].y + 110.0f, image_size, angle, boss2_image[7], TRUE);
 		DrawRotaGraph(part_positions[5].x, part_positions[5].y + 110.0f, image_size, angle, boss2_image[7], TRUE);
 	}
+	//DrawBox(location.x - box_size.x, location.y - box_size.y,
+	//	location.x + box_size.x, location.y + box_size.y, GetColor(0, 255, 0), TRUE);
+
 }
 
 int Boss2::GetAttackPattrn() const
