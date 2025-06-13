@@ -45,6 +45,11 @@ void Zako::Initialize()
     images = images_a;
     image = images[0];
 
+    //SE
+   // sound_hit = rm->GetSounds("Resource/Sound/reaction.mp3");
+    sound_destroy = rm->GetSounds("Resource/sound/se/se_effect/kill_4.mp3");
+    ChangeVolumeSoundMem(255 * 50 / 100, sound_destroy);
+
     ChangePatternRandomly();
 }
 
@@ -347,11 +352,13 @@ void Zako::Update(float delta_second)
 
     location += velocity * delta_second;
 
+    // Zako::Update() ‚Ì hp <= 0 ‚Ì’†‚É’Ç‰Á
     if (hp <= 0)
     {
+        PlaySoundMem(sound_destroy, DX_PLAYTYPE_BACK);
         is_destroy = true;
 
-        DropItems(); 
+        DropItems();
 
         AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
         anim_id = manager->PlayerAnimation(EffectName::eExprotion2, location, 0.035f, false);
@@ -359,6 +366,7 @@ void Zako::Update(float delta_second)
 
         Singleton<ScoreData>::GetInstance()->SetScoreData(100);
     }
+
 
 
     __super::Update(delta_second);

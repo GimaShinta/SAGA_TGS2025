@@ -60,4 +60,9 @@ private:
     std::vector<int> anim_indices;
 
     void ChangePatternRandomly();
+
+    //ƒqƒbƒgŽž
+    int sound_hit = -1;
+    int sound_destroy = -1;
+
 };
