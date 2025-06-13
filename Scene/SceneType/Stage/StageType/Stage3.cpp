@@ -41,7 +41,7 @@ void Stage3::Initialize()
     distance = STAGE3_DISTANCE;
 
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
-    objm->CreateObject<Shield>(Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) + 100.0f));
+    objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) + 100.0f));
 
 
 #if 0

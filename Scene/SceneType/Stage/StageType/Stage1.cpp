@@ -80,6 +80,13 @@ void Stage1::Update(float delta)
 {   
     UpdateBackgroundScroll(delta);
 
+
+    enemy_list.erase(
+        std::remove_if(enemy_list.begin(), enemy_list.end(),
+            [](EnemyBase* e) { return (e == nullptr || e->is_destroy); }),
+        enemy_list.end());
+
+
     // 敵が画面外に出た場合に削除
     for (auto it = enemy_list.begin(); it != enemy_list.end(); )
     {
@@ -200,6 +207,7 @@ void Stage1::Update(float delta)
         else
         {
             distance = 0;
+            //is_clear = true;
         }
         distance_timer = 0;
     }
@@ -220,16 +228,16 @@ void Stage1::Update(float delta)
 
   
 
-    // 敵が倒された時は経験値を生成。
-    for (auto& enemy : enemy_list)
-    {
-        if (enemy->is_destroy == true && !enemy->is_exp_generated)
-        {
-            Exp* exp = Singleton<GameObjectManager>::GetInstance()->CreateObject<Exp>(enemy->GetLocation());
-            exp->SetPlayer(player);
-            enemy->is_exp_generated = true;
-        }
-    }
+    //// 敵が倒された時は経験値を生成。
+    //for (auto& enemy : enemy_list)
+    //{
+    //    if (enemy->is_destroy == true && !enemy->is_exp_generated)
+    //    {
+    //        Exp* exp = Singleton<GameObjectManager>::GetInstance()->CreateObject<Exp>(enemy->GetLocation());
+    //        exp->SetPlayer(player);
+    //        enemy->is_exp_generated = true;
+    //    }
+    //}
 
     // ボスが倒れたらクリア
     if (boss1 != nullptr && boss1->GetIsAlive() == false && is_over == false)
@@ -502,19 +510,18 @@ void Stage1::EnemyAppearance(float delta)
         {
             for (auto& enemy : enemy_list)
             {
-                Zako* zako = dynamic_cast<Zako*>(enemy);
-                if (zako != nullptr)
-                {
-                    // 対象パターンだけ逆行させる
-                    ZakoPattern current = zako->GetPattern(); // ←この関数をZakoに追加（下に説明あり）
+                //if (enemy == nullptr || enemy->is_destroy) continue; // ★追加
+                //Zako* zako = dynamic_cast<Zako*>(enemy);
+                //if (zako == nullptr) continue;
 
-                    if (current == ZakoPattern::MoveAndStopShoot || current == ZakoPattern::DiveOnce)
-                    {
-                        zako->SetPattern(ZakoPattern::RetreatUp);
-                    }
-                }
+                //ZakoPattern current = zako->GetPattern();
+                //if (current == ZakoPattern::MoveAndStopShoot || current == ZakoPattern::DiveOnce)
+                //{
+                //    zako->SetPattern(ZakoPattern::RetreatUp);
+                //}
             }
         }
+
 
 
         else
