@@ -29,7 +29,7 @@ private:
 	float growth_duration_b = 4.0f;
 	float growth_duration_s = 0.5f;
 
-	bool checked = false;
+	bool checked = true;
 
 private:
 	std::vector<int> beam_ts;

@@ -202,20 +202,20 @@ void EnemyBeam1::Update(float delta_second)
     }
 
 
-    InputManager* input = Singleton<InputManager>::GetInstance();
-    if (input->GetKeyDown(KEY_INPUT_C))
-    {
-        if (checked == false)
-        {
-            checked = true;
+    //InputManager* input = Singleton<InputManager>::GetInstance();
+    //if (input->GetKeyDown(KEY_INPUT_C))
+    //{
+    //    if (checked == false)
+    //    {
+    //        checked = true;
 
-        }
-        else
-        {
-            checked = false;
+    //    }
+    //    else
+    //    {
+    //        checked = false;
 
-        }
-    }
+    //    }
+    //}
 
 #endif
 }
