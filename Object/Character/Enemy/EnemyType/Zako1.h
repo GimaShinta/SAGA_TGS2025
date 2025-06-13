@@ -34,6 +34,16 @@ public:
     void Draw(const Vector2D& screen_offset) const override;
     void Finalize() override;
 
+    private:
+    float custom_ascend_y = 0.0f; // è„è∏Å®ê‹ÇËï‘Çµà íu
+    float custom_stop_y = 200.0f;   // ç~â∫Å®í‚é~ÅEçUåÇà íu
+
+public:
+    void SetAscendY(float y) { custom_ascend_y = y; }
+    void SetStopY(float y) { custom_stop_y = y; }    // Å© êVÇµÇ≠í«â¡
+
+
+
     void SetPattern(ZakoPattern new_pattern);
     ZakoPattern GetPattern() const
     {
@@ -60,4 +70,6 @@ private:
     std::vector<int> anim_indices;
 
     void ChangePatternRandomly();
+
+
 };
