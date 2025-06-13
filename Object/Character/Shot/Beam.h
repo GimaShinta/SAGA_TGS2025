@@ -8,7 +8,7 @@ private:
 	BeamState beam_state = BeamState::Idle;
 
 	float charge_time = 0.0f;
-	const float charge_duration = 1.0f; // 1秒でチャージ完了
+	const float charge_duration = 0.0f; // 1秒でチャージ完了
 	bool charge_on = false;
 private:
 	bool Beam_flip = false;

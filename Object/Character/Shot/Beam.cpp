@@ -15,7 +15,7 @@ Beam::~Beam()
 // 初期化処理
 void Beam::Initialize()
 {
-	z_layer = 4;
+	z_layer = 5;
 	box_size = Vector2D(60.0f, 800.0f);
 
 	// 当たり判定のオブジェクト設定
@@ -52,9 +52,9 @@ void Beam::Update(float delta_second)
 
 		if (beam_state == BeamState::Charging && player != nullptr && charge_on == false)
 		{
-			AnimationManager* am = Singleton<AnimationManager>::GetInstance();
-			am->PlayerAnimation(EffectName::eExprotion2, player->GetLocation(), 0.1f, false);
-			charge_on = true;
+			//AnimationManager* am = Singleton<AnimationManager>::GetInstance();
+			//am->PlayerAnimation(EffectName::eExprotion2, player->GetLocation(), 0.1f, false);
+			//charge_on = true;
 		}
 
 		if (charge_time >= charge_duration)
@@ -159,22 +159,49 @@ void Beam::OnHitCollision(GameObjectBase* hit_object)
 	}
 	last_explosion_time = destroy_time;
 
-	AnimationManager* am = Singleton<AnimationManager>::GetInstance();
-	int anim_id = 0;
-
-	float random_x = static_cast<float>(GetRand(70));
-	if (GetRand(2) == 1)
+	if (hit_object->GetCollision().object_type == eObjectType::eBoss3)
 	{
-		random_x *= -1;
+		AnimationManager* am = Singleton<AnimationManager>::GetInstance();
+		int anim_id = 0;
+
+		float random_x = static_cast<float>(GetRand(70));
+		if (GetRand(2) == 1)
+		{
+			random_x *= -1;
+		}
+		Vector2D t_location = hit_object->GetLocation();
+
+		float random_y = static_cast<float>(GetRand(100));
+
+		anim_id = am->PlayerAnimation(EffectName::eExprotion2, Vector2D(location.x + random_x, (t_location.y + hit_object->GetBoxSize().y) - random_y), 0.03f, false);
+		// アニメーションの追加設定
+		am->SetAlpha(anim_id, 255);       // 半透明
+		am->SetScale(anim_id, 0.8f);      // 1.5倍拡大
+		am->SetZLayer(anim_id, 3);
 	}
-	Vector2D t_location = hit_object->GetLocation();
+	else
+	{
 
-	float random_y = static_cast<float>(GetRand(150));
+		AnimationManager* am = Singleton<AnimationManager>::GetInstance();
+		int anim_id = 0;
 
-	anim_id = am->PlayerAnimation(EffectName::eExprotion2, Vector2D(location.x + random_x, (t_location.y + 48.0f) - random_y), 0.03f, false);
-	// アニメーションの追加設定
-	am->SetAlpha(anim_id, 255);       // 半透明
-	am->SetScale(anim_id, 0.8f);      // 1.5倍拡大
+		float random_x = static_cast<float>(GetRand(70));
+		if (GetRand(2) == 1)
+		{
+			random_x *= -1;
+		}
+		Vector2D t_location = hit_object->GetLocation();
+
+		float random_y = static_cast<float>(GetRand(150));
+
+		anim_id = am->PlayerAnimation(EffectName::eExprotion2, Vector2D(location.x + random_x, (t_location.y + 48.0f) - random_y), 0.03f, false);
+		// アニメーションの追加設定
+		am->SetAlpha(anim_id, 255);       // 半透明
+		am->SetScale(anim_id, 0.8f);      // 1.5倍拡大
+		am->SetZLayer(anim_id, 3);
+	}
+
+
 }
 
 void Beam::SetBeamFlip(bool flip)

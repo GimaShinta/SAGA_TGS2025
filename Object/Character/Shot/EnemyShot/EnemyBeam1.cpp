@@ -93,6 +93,7 @@ void EnemyBeam1::Update(float delta_second)
                 int anim = am->PlayerAnimation(EffectName::eChenge, Vector2D(location.x, location.y - box_size.y), 0.03f, false);
                 am->SetScale(anim, 2.0f);
                 am->SetAlpha(anim, 30);
+                am->SetZLayer(anim, 2);
 
             }
             else if (boss2 != nullptr)
@@ -101,6 +102,7 @@ void EnemyBeam1::Update(float delta_second)
                 int anim = am->PlayerAnimation(EffectName::eChenge, Vector2D(location.x, location.y - box_size.y), 0.02f, false);
                 am->SetScale(anim, 0.7f);
                 am->SetAlpha(anim, 30);
+                am->SetZLayer(anim, 2);
 
             }
 

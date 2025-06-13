@@ -25,6 +25,10 @@ void EnemyShot2::Initialize()
 
 	// 動くかどうか（trueなら動く、falseなら止まる）
 	is_mobility = true;
+
+	ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
+	image = rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime81.png", 6, 6, 1, 24, 24)[0];
+
 }
 
 /// <summary>
@@ -78,8 +82,11 @@ void EnemyShot2::Draw(const Vector2D& screen_offset) const
 	p4 = rotate(p4);
 
 	int color = GetColor(255, 255, 0);
-	DrawTriangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, color, TRUE);
-	DrawTriangle(p1.x, p1.y, p3.x, p3.y, p4.x, p4.y, color, TRUE);
+	//DrawTriangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, color, TRUE);
+	//DrawTriangle(p1.x, p1.y, p3.x, p3.y, p4.x, p4.y, color, TRUE);
+
+	DrawRotaGraph(location.x, location.y, 1.9f, angle, image, TRUE);
+
 }
 
 // 終了時処理

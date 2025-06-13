@@ -378,7 +378,7 @@ void Stage1Boss::Shot(float delta_second)
 
     shot_timer += delta_second;
 
-    if (shot_timer >= 0.3f)
+    if (shot_timer >= 0.5f)
     {
         Vector2D dir = player->GetLocation() - location;
         float len = dir.Length();

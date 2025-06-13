@@ -14,7 +14,7 @@ Player::~Player()
 // ‰Šú‰»ˆ—
 void Player::Initialize()
 {
-	z_layer = 2;
+	z_layer = 5;
 	velocity = 0;
 	box_size = 10;
 
