@@ -5,6 +5,8 @@
 class Exp : public ItemBase
 {
 private:
+    std::vector<int> images;
+
     float attract_range;   //追従をONにする距離
     float speed;           // 初期スピード
     float max_speed;       // 最大スピード

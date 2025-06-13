@@ -396,7 +396,8 @@ void Player::Shot(float delta_second)
 	}
 
 	// Bを押したらビーム発射
-	if ((input->GetKeyDown(KEY_INPUT_B) || input->GetButtonDown(XINPUT_BUTTON_B)) )  // チャージ完了時のみ
+	if ((input->GetKeyDown(KEY_INPUT_B) || input->GetButtonDown(XINPUT_BUTTON_B)) &&
+		CanUseSpecial())  // チャージ完了時のみ
 	{
 		if (stop == false)
 		{
@@ -406,18 +407,6 @@ void Player::Shot(float delta_second)
 			UseSpecial();  // ゲージ消費
 		}
 	}
-	//// Bを押したらビーム発射
-	//if ((input->GetKeyDown(KEY_INPUT_B) || input->GetButtonDown(XINPUT_BUTTON_B)) &&
-	//	CanUseSpecial())  // チャージ完了時のみ
-	//{
-	//	if (stop == false)
-	//	{
-	//		beam_on = true;
-	//		stop = true;
-	//		beam_timer = 0.0f;
-	//		UseSpecial();  // ゲージ消費
-	//	}
-	//}
 
 
 	// ５秒経ったらビームの再起
