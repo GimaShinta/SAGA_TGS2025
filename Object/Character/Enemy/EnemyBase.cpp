@@ -120,12 +120,12 @@ void EnemyBase::DropItems()
 	exp->SetPlayer(player);
 
 	// 1%でPowerUpドロップ
-	if (rand() % 100 < 1) {
-		manager.CreateObject<PowerUp>(location);
-	}
+	//if (rand() % 100 < 1) {
+	//	manager.CreateObject<PowerUp>(location);
+	//}
 
 	// 5%でShieldドロップ
-	if (rand() % 100 < 3) {
+	if (rand() % 100 < 2) {
 		manager.CreateObject<Shield>(location);
 	}
 }
