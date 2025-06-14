@@ -58,6 +58,10 @@ private:
 	float jet_count = 0;
 
 
+	float hpbar_fade_timer = 0.0f;  // フェード用タイマー
+	bool show_hpbar = false;        // HPバーを表示するか
+
+
 public:
 	Boss2();
 	~Boss2();
@@ -108,6 +112,10 @@ public:
 		return (a > b) ? a : b;
 	}
 
+	//template <typename T>
+	//T Clamp(T value, T min, T max) {
+	//	return (value < min) ? min : (value > max) ? max : value;
+	//}
 private:
 	void Attack(float delta_second);
 

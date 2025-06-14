@@ -8,6 +8,9 @@
 #include "../../../../Object/Character/Enemy/EnemyType/Boss2.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Boss3.h"
 #include "Stage3.h"
+#include "../../../../Object/Item/PowerUp/PowerUp.h"
+#include "../../../../Object/Item/Shield/Shield.h"
+#include <memory>
 
 
 
@@ -24,6 +27,9 @@ void Stage4::Initialize()
 	// 初期化処理
 // 【記述位置は仮】ステージの長さを代入
 	distance = STAGE3_DISTANCE;
+    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+    objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) + 100.0f));
+    objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) + 50.0f));
 
 	//フォント
 // font_digital = CreateFontToHandle("DS-Digital", 28, 6, DX_FONTTYPE_ANTIALIASING);

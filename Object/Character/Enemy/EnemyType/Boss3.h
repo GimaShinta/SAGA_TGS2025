@@ -55,6 +55,8 @@ private:
 	float jet_timer = 0.0f;
 	float jet_count = 0;
 
+	float hpbar_fade_timer = 0.0f;  // フェード用タイマー
+	bool show_hpbar = false;        // HPバーを表示するか
 
 public:
 	Boss3();

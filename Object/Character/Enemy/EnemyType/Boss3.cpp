@@ -16,7 +16,7 @@ void Boss3::Initialize()
 	enemy_type = ENE_BOSS3;
 	z_layer = 1;
 	box_size = 30;
-	hp = 10000;
+	hp = 40000;
 
 	// 攻撃パターンの設定
 	attack_pattrn_num = { 11 };
@@ -188,6 +188,14 @@ void Boss3::Update(float delta_second)
 		anim_speed = 0.1f;
 	}
 
+	if (generate) { // 登場演出が終わったら
+		show_hpbar = true;
+
+		if (hpbar_fade_timer < 1.0f) { // 1秒かけてフェード
+			hpbar_fade_timer += delta_second;
+			if (hpbar_fade_timer > 1.0f) hpbar_fade_timer = 1.0f;
+		}
+	}
 
 	// 親クラスの更新処理を呼び出す
 	__super::Update(delta_second);
@@ -203,11 +211,63 @@ void Boss3::Draw(const Vector2D& screen_offset) const
 	//DrawBox(location.x - box_size.x, location.y - box_size.y,
 	//	location.x + box_size.x, location.y + box_size.y, GetColor(0, 255, 0), TRUE);
 
-	// 体力の表示
-	DrawFormatString(location.x - 8, location.y - 8, GetColor(0, 0, 0), "%.0f", hp);
+	DrawBoss3(location);
 
-	// ボスの描画
-	DrawBoss3(Vector2D(location.x, location.y));
+	if (!show_hpbar) {
+		// HPバーをまだ描画しない
+		return;
+	}
+
+	// フェードイン用透明度（0.0～1.0）
+	const float fade_alpha = hpbar_fade_timer;
+	int alpha = static_cast<int>(fade_alpha * 255); // 0～255
+
+	// アルファブレンド設定
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+
+
+	//if (damage_flash_timer > 0) {
+	//	DrawBox(x, y, x + bar_width * hp_ratio, y + bar_height, GetColor(255, 255, 255), TRUE);
+	//}
+
+	const float max_hp = 40000.0f;
+	const float bar_width = 650.0f;   // 中心から左右で350
+	const float bar_height = 8.0f;   // 細め
+	const float x = D_WIN_MAX_X / 2 - bar_width / 2;
+	const float y = 30.0f;
+
+	// 背景（枠）
+	DrawBox(x - 2, y - 2, x + bar_width + 2, y + bar_height + 2, GetColor(0, 0, 0), TRUE);
+
+	// 内部の赤いバー（残り体力）
+	// 内部の赤いバー（残り体力）
+	float hp_ratio = hp / max_hp;
+	if (hp_ratio < 0.0f) hp_ratio = 0.0f;
+	if (hp_ratio > 1.0f) hp_ratio = 1.0f;
+	DrawBox(x, y, x + bar_width * hp_ratio, y + bar_height, GetColor(255, 100, 0), TRUE);
+
+	// 枠（白線）
+	DrawBox(x, y, x + bar_width, y + bar_height, GetColor(255, 255, 255), FALSE);
+
+	// 揺れる
+	if (hp_ratio < 0.2f) {
+		float wave_offset = sin(GetNowCount() / 50.0f) * 2.0f;
+		DrawBox(x + wave_offset, y, x + bar_width * hp_ratio + wave_offset, y + bar_height, GetColor(255, 0, 0), TRUE);
+	}
+
+
+	// ?? 追加：第二形態の目印（くぼみ）
+	const float notch_x = x + bar_width * 0.5f;  // 50%位置
+	const float notch_width = 2.0f;
+	const float notch_height = bar_height + 4.0f; // 少し上にはみ出す
+	DrawBox(
+		notch_x - notch_width / 2,
+		y - 2.0f,
+		notch_x + notch_width / 2,
+		y + bar_height + 2.0f,
+		GetColor(255, 255, 0), TRUE // 黄色など目立つ色
+	);
+
 }
 
 // 終了時処理
