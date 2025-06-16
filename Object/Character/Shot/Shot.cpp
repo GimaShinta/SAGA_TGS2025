@@ -25,6 +25,7 @@ void Shot::Initialize()
 	// 当たる相手のオブジェクトタイプ
 	collision.hit_object_type.push_back(eObjectType::eEnemy);
 	collision.hit_object_type.push_back(eObjectType::eBoss);
+	collision.hit_object_type.push_back(eObjectType::eEnemyPart);
 
 	// 動くかどうか（trueなら動く、falseなら止まる）
 	is_mobility = true;
@@ -130,6 +131,16 @@ void Shot::OnHitCollision(GameObjectBase* hit_object)
 
 		is_destroy = true;
 	}
+
+	if (hit_object->GetCollision().object_type == eObjectType::eEnemyPart)
+	{
+		anim_id = am->PlayerAnimation(EffectName::eExprotion2, location, 0.01f, false);
+		am->SetAlpha(anim_id, 255);
+		am->SetScale(anim_id, 0.2f);
+		is_destroy = true;
+	}
+
+
 }
 
 void Shot::SetShotFlip(bool flip)

@@ -13,6 +13,7 @@ enum eObjectType
     eEnemyBeam,
     eEnemyShot,
     eEnemy,
+    eEnemyPart,
     eBoss,
     eBoss2,
     eBoss3,
