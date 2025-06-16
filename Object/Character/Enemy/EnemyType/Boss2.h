@@ -61,6 +61,8 @@ private:
 	float hpbar_fade_timer = 0.0f;  // フェード用タイマー
 	bool show_hpbar = false;        // HPバーを表示するか
 
+	float damage_timer = 0.0f;
+
 
 public:
 	Boss2();

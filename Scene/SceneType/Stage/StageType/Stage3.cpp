@@ -15,6 +15,9 @@
 #include "../../../../Object/Character/Enemy/EnemyBase.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako1.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako3.h"
+#include "../../../../Object/Character/Enemy/EnemyType/Zako4.h"
+#include "../../../../Object/Character/Enemy/EnemyType/Zako5.h"
+#include "../../../../Object/Character/Enemy/EnemyType/Zako6.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Boss.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Boss2.h"
 #include "../../../../Object/Item/PowerUp/PowerUp.h"
@@ -114,25 +117,25 @@ void Stage3::Update(float delta)
     //stageMap(); // ステージマップ
     //drawParameter(); // 自機のシールドなどのパラメーターを表示
 
-    timer++; // タイマーをカウント
+    //timer++; // タイマーをカウント
 
     // delta_second 分加算
     stage_timer += delta;
     delta_draw = delta;  // ← delta を保存
 
-    // 一定時間ごとに distance を減らす（例：0.1秒ごとに1減らす）
-    if (stage_timer >= 0.01f)
-    {
-        if (distance > 0)
-        {
-            distance--;
-        }
-        else
-        {
-            distance = 0;
-        }
-        stage_timer = 0;
-    }
+    //// 一定時間ごとに distance を減らす（例：0.1秒ごとに1減らす）
+    //if (stage_timer >= 0.01f)
+    //{
+    //    if (distance > 0)
+    //    {
+    //        distance--;
+    //    }
+    //    else
+    //    {
+    //        distance = 0;
+    //    }
+    //    stage_timer = 0;
+    //}
 
     // オブジェクト管理クラスのインスタンスを取得
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
@@ -152,7 +155,7 @@ void Stage3::Update(float delta)
     PlayerShot();
 
     // 敵の出現
-    EnemyAppearance();
+    EnemyAppearance(delta);
 
     // 敵の攻撃
     EnemyShot(delta);
@@ -376,58 +379,34 @@ void Stage3::PlayerShot()
 }
 
 // 敵の出現
-void Stage3::EnemyAppearance()
+void Stage3::EnemyAppearance(float delta)
 {
-    // オブジェクト管理クラスのインスタンスを取得
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
 
-    // 雑魚１と雑魚２の出現
-    if (300 < distance && distance % 1000 == 0)
+    stage_timer += delta;
+    enemy_spawn_timer += delta;
+    zako2_spawn_timer += delta;
+    boss2_spawn_timer += delta;
+
+    // 1. ボスが出ていればZakoは出現しない
+    if (boss2_spawned) return;
+
+    // 2. 各時間帯ごとの出現処理に分岐
+    if (stage_timer < 5.0f)
     {
-        // 出現範囲を画面中央の幅200に設定
-        int center_x = D_WIN_MAX_X / 2;
-        int half_width = 250; // 出現範囲の半分の幅
-        int x = center_x - half_width + rand() % (half_width * 2);
-        int y = -50;
-        int e = 1 + rand() % 2;
-        if (e == ENE_ZAKO1)
-        {
-            enemy_list.push_back(objm->CreateObject<Zako>(Vector2D(x, y)));
-        }
-        if (e == ENE_ZAKO2)
-        {
-            int vx = 0;
-            if (player->GetLocation().x < x)
-            {
-                vx = -60;
-            }
-            if (player->GetLocation().x > x)
-            {
-                vx = 60;
-            }
-        }
+        HandleZako1_LR(delta);
     }
-    // ザコ3の出現
-    if (300 < distance && distance < 900 && distance % 400 == 0)
+    else if (stage_timer < 10.0f)
     {
-        // 出現範囲を画面中央の幅200に設定
-        int center_x = D_WIN_MAX_X / 2;
-        int half_width = 250; // 出現範囲の半分の幅
-        int x = center_x - half_width + rand() % (half_width * 2);
-        int y = -50;
-        enemy_list.push_back(objm->CreateObject<Zako3>(Vector2D(x, -100)));
+        HandleZako1_Center(delta);
     }
-    // 警告表示
-    if (distance == 150)
+    else if (stage_timer < 15.0f)
     {
-        is_warning = true;
+        HandleZako2_Upward(delta);
     }
-    // ボス出現
-    if (distance == 1 && boss2 == nullptr)
+    else
     {
-        //enemy_list.push_back(boss = objm->CreateObject<Boss>(Vector2D(D_WIN_MAX_X / 2 + 200, D_WIN_MAX_Y + 200)));
-        enemy_list.push_back(boss2 = objm->CreateObject<Boss2>(Vector2D(D_WIN_MAX_X / 2, D_WIN_MAX_Y / 2)));
-        
+        SpawnBossAndItems();
     }
 }
 
@@ -554,12 +533,12 @@ void Stage3::EnemyShot(float delta_second)
 // クリア判定
 void Stage3::UpdateGameStatus(float delta)
 {
-    // ボスが倒れたらクリア
-    if (boss != nullptr && boss->GetIsAlive() == false && is_over == false)
-    {
-        boss->SetDestroy();
-        is_clear = true;
-    }
+    //// ボスが倒れたらクリア
+    //if (boss != nullptr && boss->GetIsAlive() == false && is_over == false)
+    //{
+    //    boss->SetDestroy();
+    //    is_clear = true;
+    //}
 
     // ボス２が倒れたらクリア
     if (boss2 != nullptr && boss2->GetIsAlive() == false && is_over == false)
@@ -588,10 +567,10 @@ void Stage3::UpdateGameStatus(float delta)
             gameover_timer = 0.0f;
         }
         
-     /*   if (scene_timer >= 8.0f)
+        if (scene_timer >= 8.0f)
         {
             finished = true;
-        }*/
+        }
     }
 
     // 仮の条件：スペースキーを押したらステージ終了
@@ -832,6 +811,116 @@ void Stage3::ScrollEffectUpdate(float delta)
             p.life = 2.0f + GetRand(100) / 50.0f;
             star_particles.push_back(p);
         }
+}
+
+void Stage3::HandleZako1_LR(float delta)
+{
+    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+
+    float spawn_interval = my_max(2.0f - stage_timer / 5.0f, 0.5f);
+
+    if (enemy_spawn_timer < spawn_interval) return;
+
+    const int num = 3;
+    const float spacing = 60.0f;
+    const float appear_y = -100.0f;
+    const float target_y = 300.0f;
+
+    bool from_left = (enemy_group_index % 2 == 0);
+    float base_x = from_left ? 60.0f : (D_WIN_MAX_X - 60.0f);
+    float dx = from_left ? spacing : -spacing;
+    float end_base_x = from_left ? D_WIN_MAX_X / 2 + 120.0f : D_WIN_MAX_X / 2 - 240.0f;
+
+    for (int i = 0; i < num; ++i)
+    {
+        Vector2D appear_pos(base_x + dx * i, appear_y);
+        Vector2D end_pos(end_base_x + spacing * i, target_y);
+        float delay = i * 0.5f;
+
+        auto zako = objm->CreateObject<Zako6>(appear_pos);
+        zako->SetMode(ZakoMode::Zako3);
+        zako->SetAppearParams(appear_pos, end_pos, 1.3f + delay, from_left);
+    }
+
+    enemy_group_index++;
+    enemy_spawn_timer = 0.0f;
+}
+void Stage3::HandleZako1_Center(float delta)
+{
+    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+
+    const float spawn_interval = 2.0f;
+    if (enemy_spawn_timer < spawn_interval) return;
+
+    const int num = 3;
+    const float spacing = 60.0f;
+    const float appear_y = -100.0f;
+    const float target_y = 250.0f;
+
+    float base_x = D_WIN_MAX_X / 2 + 180.0f;
+    float dx = -spacing;
+    float end_base_x = D_WIN_MAX_X / 2 - spacing;
+
+    for (int i = 0; i < num; ++i)
+    {
+        float x = base_x + dx * i;
+        float end_x = end_base_x + spacing * i;
+
+        Vector2D appear_pos(x, appear_y);
+        Vector2D end_pos(end_x, target_y);
+        float delay = i * 0.2f;
+
+        auto zako = objm->CreateObject<Zako6>(appear_pos);
+        zako->SetMode(ZakoMode::Zako3);
+        zako->SetAppearParams(appear_pos, end_pos, 1.3f + delay, true);
+    }
+
+    enemy_group_index++;
+    enemy_spawn_timer = 0.0f;
+}
+
+void Stage3::HandleZako2_Upward(float delta)
+{
+    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+
+    const float spawn_interval = 4.0f;
+    if (zako2_spawn_timer < spawn_interval) return;
+
+    const int num = 3;
+    const float spacing = 80.0f;
+    const float base_y = D_WIN_MAX_Y + 50.0f;
+    const float target_y = D_WIN_MAX_Y / 2 - 50.0f;
+    const float delay_per = 0.3f;
+
+    float start_x = D_WIN_MAX_X / 2 - spacing;
+
+    for (int i = 0; i < num; ++i)
+    {
+        float x = start_x + spacing * i;
+        float delay = 2.0f + delay_per * i;
+
+        Vector2D appear_pos(x, base_y);
+        Vector2D target_pos(x, target_y);
+
+        auto zako = objm->CreateObject<Zako6>(appear_pos);
+        zako->SetMode(ZakoMode::Zako2);
+        zako->SetAppearParams(appear_pos, target_pos, delay, true);
+    }
+
+    zako2_spawn_timer = 0.0f;
+}
+void Stage3::SpawnBossAndItems()
+{
+    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+
+    if (boss2_spawned) return;
+
+    objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2 - 60, 120));
+    objm->CreateObject<Shield>(Vector2D(D_WIN_MAX_X / 2 + 60, 120));
+
+    boss2 = objm->CreateObject<Boss2>(Vector2D(670, -200));
+    boss2_spawned = true;
+    is_warning = false;
 }
 
 

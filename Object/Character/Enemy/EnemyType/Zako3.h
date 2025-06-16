@@ -3,8 +3,33 @@
 class Zako3 : public EnemyBase
 {
 private:
+	enum class Zako3State {
+		Appearing,
+		Floating
+	};
+
+private:
+	Zako3State state;
+
+	float appear_timer;
+	float appear_duration;
+	float scale;
+	float alpha;
+	float rotation;
+
+	bool is_appearing;
+	Vector2D velocity;
+	float gravity;
+
+	Vector2D base_location;
+	float float_timer;
+
 	bool zako3_flip = false;
 
+	Vector2D appear_start_pos;
+	Vector2D appear_end_pos;
+
+	bool is_from_left = true; // デフォルトは左から登場
 public:
 	Zako3();
 	~Zako3();
@@ -33,6 +58,11 @@ protected:
 
 public:
 	void SetFlip(bool flip);
+	template <typename T>
+	T my_min(T a, T b) {
+		return (a < b) ? a : b;
+	}
 
+	void SetAppearParams(const Vector2D& start_pos, const Vector2D& end_pos, float appear_time = 3.0f, bool from_left = false);
 };
 

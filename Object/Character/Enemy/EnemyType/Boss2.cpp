@@ -33,7 +33,7 @@ void Boss2::Initialize()
 	is_mobility = true;
 
 	// 戦闘中の中心座標
-	base_position = Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) - 225);
+	base_position = Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) - 75);
 
 	// 登場時の中心座標
 	generate_base_position = Vector2D(D_WIN_MAX_X / 2 + 150, D_WIN_MAX_Y + 200);
@@ -84,6 +84,14 @@ void Boss2::Update(float delta_second)
 	if (hp <= 0)
 	{
 		is_alive = false;
+	}
+
+	damage_timer += delta_second;
+
+	if (damage_timer >= 0.05f)
+	{
+		damage_timer = 0.0f;
+		hp -= 5;
 	}
 
 	//// 攻撃パターン変更時に時間リセット
@@ -256,20 +264,20 @@ void Boss2::Draw(const Vector2D& screen_offset) const
 	const float bar_width = 650.0f;   // 中心から左右で350
 	const float bar_height = 4.0f;   // 細め
 	const float x = D_WIN_MAX_X / 2 - bar_width / 2;
-	const float y = 30.0f;
+	const float y = 15.0f;
 
 	// 背景（枠）
-	DrawBox(x - 2, y - 2, x + bar_width + 2, y + bar_height + 2, GetColor(0, 0, 0), TRUE);
+	DrawBox(x - 2, y - 2, x + bar_width + 2, y + bar_height + 2, GetColor(255, 255, 255), TRUE);
+	// 枠（白線）
+	DrawBox(x, y, x + bar_width, y + bar_height, GetColor(0, 0, 0), TRUE);
 
 	// 内部の赤いバー（残り体力）
 	// 内部の赤いバー（残り体力）
 	float hp_ratio = hp / max_hp;
 	if (hp_ratio < 0.0f) hp_ratio = 0.0f;
 	if (hp_ratio > 1.0f) hp_ratio = 1.0f;
-	DrawBox(x, y, x + bar_width * hp_ratio, y + bar_height, GetColor(255, 100, 0), TRUE);
+	DrawBox(x, y, x + bar_width * hp_ratio, y + bar_height, GetColor(255, 200, 0), TRUE);
 
-	// 枠（白線）
-	DrawBox(x, y, x + bar_width, y + bar_height, GetColor(255, 255, 255), FALSE);
 
 	if (hp_ratio < 0.2f) {
 		float wave_offset = sin(GetNowCount() / 50.0f) * 2.0f;

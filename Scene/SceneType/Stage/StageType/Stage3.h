@@ -57,6 +57,16 @@ private:
 	int font_orbitron;
 	int obi_handle;
 
+	bool zako3_spawned = false;
+	bool boss2_spawned = false;
+	float enemy_spawn_timer = 0.0f;
+	float boss2_spawn_timer = 0.0f;
+
+	int enemy_group_index = 0; // 偶数: 左、奇数: 右
+
+	float enemy_group_timer = 0.0f;
+	bool is_spawning_group = false;
+
 public:
 	Stage3(Player* player);
 	~Stage3();
@@ -73,7 +83,7 @@ public:
 private:
 	void DisplayWarning(float delta_second);
 	void PlayerShot();
-	void EnemyAppearance();
+	void EnemyAppearance(float delta);
 	void EnemyShot(float delta_second);
 	void UpdateGameStatus(float delta);
 
@@ -83,6 +93,14 @@ private:
 	/*スクロール*/
 	void DrawScrollBackground() const override;
 	void ScrollEffectUpdate(float delta);
+
+	void HandleZako1_LR(float delta);
+	void HandleZako1_Center(float delta);
+	void HandleZako2_Upward(float delta);
+	void SpawnBossAndItems();
+
+	float zako2_spawn_timer = 0.0f;
+
 
 	//グリッド
 	mutable float scroll_back = 0.0f;
@@ -102,7 +120,6 @@ private:
 	mutable std::vector<StarParticle> star_particles;
 
 
-
 	void ResultDraw(float delta);  // ← 関数プロトタイプ追加
 
 	float result_timer = 0.0f;
@@ -118,4 +135,10 @@ private:
 	float post_result_wait_timer = 0.0f;  // ←これを追加
 	float delta_draw = 0.0f;
 
+
+	template <typename T>
+	T my_max(const T& a, const T& b)
+	{
+		return (a > b) ? a : b;
+	}
 };
