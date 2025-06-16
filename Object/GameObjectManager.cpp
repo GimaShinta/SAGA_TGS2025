@@ -205,34 +205,29 @@ void GameObjectManager::DestroyGameObject(GameObjectBase* target)
 /// <param name="partner">例：敵</param>
 void GameObjectManager::CheckCollision(GameObjectBase* target, GameObjectBase* partner)
 {
-	// 中身が入っているかをチェック
 	if (target == nullptr || partner == nullptr)
 	{
 		return;
 	}
 
-	// 当たり判定情報を作成
-	// tcとpcは、Collisionクラスのメンバ変数を利用できる
-	BoxCollision tc = target->GetCollision();
-	BoxCollision pc = partner->GetCollision();
+	// ★参照で受けるように変更！
+	const BoxCollision& tc = target->GetCollision();
+	const BoxCollision& pc = partner->GetCollision();
 
-	// 当たり判定が有効か確認する
+	// 当たり判定が有効な対象同士か確認
 	if (tc.IsCheckHitTarget(pc.object_type) || pc.IsCheckHitTarget(tc.object_type))
 	{
 		// 対角線上の頂点座標を求める
-		// プレイヤーの左上の座標を求める
-		tc.point[0] += target->GetLocation() - target->GetBoxSize();
-		// プレイヤーの右下の座標を求める
-		tc.point[1] += target->GetLocation() + target->GetBoxSize();
-		// 敵とかブロックの左上の座標を求める
-		pc.point[0] += partner->GetLocation() - partner->GetBoxSize();
-		// 敵とかブロックの右下の座標を求める
-		pc.point[1] += partner->GetLocation() + partner->GetBoxSize();
+		BoxCollision t_copy = tc;
+		BoxCollision p_copy = pc;
 
-		// ボックス同士の当たり判定
-		if (IsCheckCollision(tc, pc))
+		t_copy.point[0] += target->GetLocation() - target->GetBoxSize();
+		t_copy.point[1] += target->GetLocation() + target->GetBoxSize();
+		p_copy.point[0] += partner->GetLocation() - partner->GetBoxSize();
+		p_copy.point[1] += partner->GetLocation() + partner->GetBoxSize();
+
+		if (IsCheckCollision(t_copy, p_copy))
 		{
-			// 当たっていることを通知する
 			target->OnHitCollision(partner);
 			partner->OnHitCollision(target);
 		}

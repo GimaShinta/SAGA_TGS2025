@@ -11,6 +11,7 @@ private:
     class Beam* beam;
     class Zako4* zako4;
     class Zako* zako;
+    class Stage2BOSS* boss;
     std::vector<EnemyBase*> enemy_list;
     float stage_timer = 0.0f; // Œo‰ßŠÔi•bj
     bool zako4_spawned = false;

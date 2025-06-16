@@ -8,6 +8,7 @@
 #include "../../../../Object/Character/Enemy/EnemyType/Zako1.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako4.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako5.h"
+#include"../../../../Object/Character/Enemy/EnemyType/Stage2BOSS.h"
 #include"../../../../Object/Item/Exp/Exp.h"
 #include"../../../../Utility/AnimationManager.h"
 #include "../../../../Object/Item/PowerUp/PowerUp.h"
@@ -299,19 +300,32 @@ void Stage2::EnemyAppearance(float delta)
 
         GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
 
-        if (stage_timer < 2.0f && !zako5_spawned)
+        //if (stage_timer < 2.0f && !zako5_spawned)
+        //{
+        //    zako5_spawned = true;
+
+        //    Zako5* left = objm->CreateObject<Zako5>(Vector2D(250.0f, 200.0f));  // 左側
+        //    left->Initialize();
+        //    left->SetPlayer(player);
+        //    enemy_list.push_back(left);
+
+        //    Zako5* right = objm->CreateObject<Zako5>(Vector2D(1030.0f, 200.0f));  // 右側
+        //    right->Initialize();
+        //    right->SetPlayer(player);
+        //    enemy_list.push_back(right);
+        //}
+
+
+        // ★ Stage2BOSS を一度だけ中央に出す
+        static bool stage2boss_spawned = false;
+        if (!stage2boss_spawned && stage_timer <= 5.0f)
         {
-            zako5_spawned = true;
+            stage2boss_spawned = true;
 
-            Zako5* left = objm->CreateObject<Zako5>(Vector2D(250.0f, 200.0f));  // 左側
-            left->Initialize();
-            left->SetPlayer(player);
-            enemy_list.push_back(left);
-
-            Zako5* right = objm->CreateObject<Zako5>(Vector2D(1030.0f, 200.0f));  // 右側
-            right->Initialize();
-            right->SetPlayer(player);
-            enemy_list.push_back(right);
+            Stage2Boss* boss = objm->CreateObject<Stage2Boss>(Vector2D(640.0f, 360.0f));
+            boss->Initialize();
+            boss->SetPlayer(player);
+            enemy_list.push_back(boss);
         }
 
 }
