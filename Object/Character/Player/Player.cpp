@@ -278,63 +278,60 @@ void Player::Movement(float delta_second)
 	// 入力ベクトル（初期化）
 	Vector2D input_dir = { 0.0f, 0.0f };
 
-	// キー入力に応じて方向を設定
-	if (input->GetKey(KEY_INPUT_D) || input->GetButton(XINPUT_BUTTON_DPAD_RIGHT)) input_dir.x += 1.0f;
-	if (input->GetKey(KEY_INPUT_A) || input->GetButton(XINPUT_BUTTON_DPAD_LEFT)) input_dir.x -= 1.0f;
-	if (input->GetKey(KEY_INPUT_S) || input->GetButton(XINPUT_BUTTON_DPAD_DOWN)) input_dir.y += 1.0f;
-	if (input->GetKey(KEY_INPUT_W) || input->GetButton(XINPUT_BUTTON_DPAD_UP)) input_dir.y -= 1.0f;
-
-	// スティック入力も合成
-	if (std::abs(stick_value.x) > dead_zone) input_dir.x += stick_value.x;
-	if (std::abs(stick_value.y) > dead_zone) input_dir.y -= stick_value.y;
+	// スティック入力が有効ならそれを優先
+	if (std::abs(stick_value.x) > dead_zone || std::abs(stick_value.y) > dead_zone) {
+		input_dir.x = stick_value.x;
+		input_dir.y = -stick_value.y;
+	}
+	else {
+		if (input->GetKey(KEY_INPUT_D) || input->GetButton(XINPUT_BUTTON_DPAD_RIGHT)) input_dir.x += 1.0f;
+		if (input->GetKey(KEY_INPUT_A) || input->GetButton(XINPUT_BUTTON_DPAD_LEFT))  input_dir.x -= 1.0f;
+		if (input->GetKey(KEY_INPUT_S) || input->GetButton(XINPUT_BUTTON_DPAD_DOWN))  input_dir.y += 1.0f;
+		if (input->GetKey(KEY_INPUT_W) || input->GetButton(XINPUT_BUTTON_DPAD_UP))    input_dir.y -= 1.0f;
+	}
 
 	// 入力方向があれば正規化
 	if (input_dir.Length() > 1.0f) input_dir.Normalize();
 
-	// 入力方向に基づいて速度を設定（加速処理を削除）
-	velocity = input_dir * max_speed;  // 一定の最大速度で移動
-
-	// 画面外移動制限
-	const float limit_x = (D_WIN_MAX_X / 2);
-	const float half_width = 350.0f; // プレイヤーの幅
-
-	// X軸の制限
-	if (location.x < limit_x - half_width + 10)
-	{
-		location.x = limit_x - half_width + 10;
-		velocity.x = 0.0f; // 位置制限後に速度もゼロにする
-	}
-	if (location.x > limit_x + half_width - 10)
-	{
-		location.x = limit_x + half_width - 10;
-		velocity.x = 0.0f; // 位置制限後に速度もゼロにする
-	}
-
-	// Y軸の制限
-	if (location.y < 10)
-	{
-		location.y = 10;
-		velocity.y = 0.0f; // 位置制限後に速度もゼロにする
-	}
-	if (location.y > D_WIN_MAX_Y - 10)
-	{
-		location.y = D_WIN_MAX_Y - 10;
-		velocity.y = 0.0f; // 位置制限後に速度もゼロにする
-	}
-
-	// アニメーション状態決定
-	if (velocity.x > 10.0f)
-	{
+	// ★ アニメーション状態を先に決定（速度制限や位置制限より前に）★
+	if (input_dir.x > 0.1f) {
 		anim_state = PlayerAnimState::TiltRight;
 	}
-	else if (velocity.x < -10.0f)
-	{
+	else if (input_dir.x < -0.1f) {
 		anim_state = PlayerAnimState::TiltLeft;
 	}
-	else
-	{
+	else {
 		anim_state = PlayerAnimState::Neutral;
 	}
+
+	// 仮の次の位置を計算
+	Vector2D next_location = location + (input_dir * max_speed * delta_second);
+
+	const float limit_x = (D_WIN_MAX_X / 2);
+	const float half_width = 350.0f;
+
+	// X軸の制限処理
+	if (next_location.x < limit_x - half_width + 10) {
+		input_dir.x = 0.0f;
+		location.x = limit_x - half_width + 10;
+	}
+	else if (next_location.x > limit_x + half_width - 10) {
+		input_dir.x = 0.0f;
+		location.x = limit_x + half_width - 10;
+	}
+
+	// Y軸の制限処理
+	if (next_location.y < 10) {
+		input_dir.y = 0.0f;
+		location.y = 10;
+	}
+	else if (next_location.y > D_WIN_MAX_Y - 10) {
+		input_dir.y = 0.0f;
+		location.y = D_WIN_MAX_Y - 10;
+	}
+
+	// 最終速度更新
+	velocity = input_dir * max_speed;
 
 	// 位置更新
 	location += velocity * delta_second;
