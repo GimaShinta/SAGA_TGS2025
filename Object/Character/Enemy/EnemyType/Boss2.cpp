@@ -527,6 +527,11 @@ int Boss2::GetIsAlive() const
 	return is_alive;
 }
 
+bool Boss2::GetGenerate() const
+{
+	return generate;
+}
+
 // ƒ{ƒX‚Q‚ÌUŒ‚
 void Boss2::Attack(float delta_second)
 {
