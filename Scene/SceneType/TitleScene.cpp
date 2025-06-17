@@ -86,7 +86,7 @@ eSceneType TitleScene::Update(float delta_second)
             m_transitionTimer = 0.0f;
         }
         else if (m_selectedIndex == 1) {
-            return eSceneType::eResult;
+            return eSceneType::eRanking;
         }
         else if (m_selectedIndex == 3) {
             return eSceneType::eXit;
