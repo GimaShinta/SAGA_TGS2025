@@ -206,10 +206,6 @@ void Player::Draw(const Vector2D& screen_offset) const
 		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 	}
 
-	DrawBox(location.x - box_size.x, location.y - box_size.y,
-		location.x + box_size.x, location.y + box_size.y,
-		GetColor(0, 255, 0), TRUE);
-
 	// ライフ表示などはそのまま
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 	DrawFormatString(D_WIN_MAX_X - 150, 0, GetColor(255, 255, 255), "残りライフ : %d", life);
