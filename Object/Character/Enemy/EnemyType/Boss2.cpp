@@ -19,15 +19,20 @@ void Boss2::Initialize()
 	hp = 20000;
 
 	// 攻撃パターンの設定
-	attack_pattrn_num = { 4, 5, 6, 12 };
+	attack_pattrn_num = { 12 };
+
 
 	// 当たり判定のオブジェクト設定
-	collision.is_blocking = true;
-	// 自分のオブジェクトタイプ
-	collision.object_type = eObjectType::eBoss2;
-	// 当たる相手のオブジェクトタイプ
-	collision.hit_object_type.push_back(eObjectType::eShot);
-	collision.hit_object_type.push_back(eObjectType::eBeam);
+	//collision.is_blocking = true;
+	collision.is_blocking = false;
+	collision.object_type = eObjectType::eNone;
+	collision.hit_object_type.clear();
+
+	//// 自分のオブジェクトタイプ
+	//collision.object_type = eObjectType::eBoss2;
+	//// 当たる相手のオブジェクトタイプ
+	//collision.hit_object_type.push_back(eObjectType::eShot);
+	//collision.hit_object_type.push_back(eObjectType::eBeam);
 
 	// 動くかどうか（trueなら動く、falseなら止まる）
 	is_mobility = true;
@@ -328,6 +333,8 @@ void Boss2::Movement(float delta_second)
 		if (location.y < -400)
 		{
 			generate = true;
+			collision.object_type = eObjectType::eBoss2;
+			collision.hit_object_type = { eObjectType::eShot, eObjectType::eBeam };
 		}
 	}
 	else
@@ -363,7 +370,7 @@ void Boss2::Movement(float delta_second)
 			generate2 = true;
 
 			const float swing_range = 100.0f;
-			const float move_speed = 100.0f;
+			const float move_speed = 75.0f;
 			// 減速距離
 			const float deceleration_distance = 50.0f;
 			const float min_speed = 10.0f;

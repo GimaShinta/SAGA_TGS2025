@@ -206,6 +206,10 @@ void Player::Draw(const Vector2D& screen_offset) const
 		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 	}
 
+	DrawBox(location.x - box_size.x, location.y - box_size.y,
+		location.x + box_size.x, location.y + box_size.y,
+		GetColor(0, 255, 0), TRUE);
+
 	// ライフ表示などはそのまま
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 	DrawFormatString(D_WIN_MAX_X - 150, 0, GetColor(255, 255, 255), "残りライフ : %d", life);
@@ -296,12 +300,15 @@ void Player::Movement(float delta_second)
 	// ★ アニメーション状態を先に決定（速度制限や位置制限より前に）★
 	if (input_dir.x > 0.1f) {
 		anim_state = PlayerAnimState::TiltRight;
+		box_size = Vector2D(8, 10); // 右に傾いているときの当たり判定（少し大きめ）
 	}
 	else if (input_dir.x < -0.1f) {
 		anim_state = PlayerAnimState::TiltLeft;
+		box_size = Vector2D(8, 10); // 左に傾いているときの当たり判定
 	}
 	else {
 		anim_state = PlayerAnimState::Neutral;
+		box_size = 10; // 通常時の当たり判定
 	}
 
 	// 仮の次の位置を計算
