@@ -155,25 +155,29 @@ void Player::Draw(const Vector2D& screen_offset) const
 
 		}
 #else
-		if (powerd <= 1)
+		if (stop == false)
 		{
-			DrawRotaGraph(position, location.y - 20.0f, 1.0f, 0.0f, engen, TRUE);
+			if (powerd <= 1)
+			{
+				DrawRotaGraph(position, location.y - 20.0f, 1.0f, 0.0f, engen, TRUE);
 
-		}
-		else if (powerd == 2)
-		{
-			DrawRotaGraph(position + 10.0f, location.y - 0.0f, 1.5f, 0.0f, engen, TRUE);
-			DrawRotaGraph(position - 10.0f, location.y - 0.0f, 1.5f, 0.0f, engen, TRUE);
+			}
+			else if (powerd == 2)
+			{
+				DrawRotaGraph(position + 10.0f, location.y - 0.0f, 1.5f, 0.0f, engen, TRUE);
+				DrawRotaGraph(position - 10.0f, location.y - 0.0f, 1.5f, 0.0f, engen, TRUE);
 
-			//DrawRotaGraph(position - 22.0f, location.y - 0.0f, 1.0f, 0.0f, engen, TRUE);
-			//DrawRotaGraph(position + 22.0f, location.y - 0.0f, 1.0f, 0.0f, engen, TRUE);
+				//DrawRotaGraph(position - 22.0f, location.y - 0.0f, 1.0f, 0.0f, engen, TRUE);
+				//DrawRotaGraph(position + 22.0f, location.y - 0.0f, 1.0f, 0.0f, engen, TRUE);
 
-		}
-		else
-		{
-			DrawRotaGraph(position - 25.0f, location.y - 0.0f, 1.0f, 0.0f, engen, TRUE);
-			DrawRotaGraph(position, location.y - 20.0f, 1.0f, 0.0f, engen, TRUE);
-			DrawRotaGraph(position + 25.0f, location.y - 0.0f, 1.0f, 0.0f, engen, TRUE);
+			}
+			else
+			{
+				DrawRotaGraph(position - 25.0f, location.y - 0.0f, 1.0f, 0.0f, engen, TRUE);
+				DrawRotaGraph(position, location.y - 20.0f, 1.0f, 0.0f, engen, TRUE);
+				DrawRotaGraph(position + 25.0f, location.y - 0.0f, 1.0f, 0.0f, engen, TRUE);
+
+			}
 
 		}
 #endif
@@ -346,19 +350,19 @@ void Player::Shot(float delta_second)
 	shot_timer += delta_second;
 	beam_timer += delta_second;
 
-	// 上下に打てるようにする
-	if (input->GetKeyDown(KEY_INPUT_L) ||
-		input->GetButtonDown(XINPUT_BUTTON_RIGHT_SHOULDER))
-	{
-		if (shot_flip == false)
-		{
-			shot_flip = true;
-		}
-		else
-		{
-			shot_flip = false;
-		}
-	}
+	//// 上下に打てるようにする
+	//if (input->GetKeyDown(KEY_INPUT_L) ||
+	//	input->GetButtonDown(XINPUT_BUTTON_RIGHT_SHOULDER))
+	//{
+	//	if (shot_flip == false)
+	//	{
+	//		shot_flip = true;
+	//	}
+	//	else
+	//	{
+	//		shot_flip = false;
+	//	}
+	//}
 
 	// スペースを押したら単発で発射
 	if (input->GetKeyDown(KEY_INPUT_SPACE) ||
@@ -395,9 +399,21 @@ void Player::Shot(float delta_second)
 		shot_timer = SHOT_INTERVAL; 
 	}
 
+	//// Bを押したらビーム発射
+	//if ((input->GetKeyDown(KEY_INPUT_B) || input->GetButtonDown(XINPUT_BUTTON_B)) &&
+	//	CanUseSpecial())  // チャージ完了時のみ
+	//{
+	//	if (stop == false)
+	//	{
+	//		beam_on = true;
+	//		stop = true;
+	//		beam_timer = 0.0f;
+	//		UseSpecial();  // ゲージ消費
+	//	}
+	//}
+	
 	// Bを押したらビーム発射
-	if ((input->GetKeyDown(KEY_INPUT_B) || input->GetButtonDown(XINPUT_BUTTON_B)) &&
-		CanUseSpecial())  // チャージ完了時のみ
+	if ((input->GetKeyDown(KEY_INPUT_B) || input->GetButtonDown(XINPUT_BUTTON_B)))  // チャージ完了時のみ
 	{
 		if (stop == false)
 		{
@@ -408,9 +424,8 @@ void Player::Shot(float delta_second)
 		}
 	}
 
-
 	// ５秒経ったらビームの再起
-	if (beam_timer >= 6.0f)
+	if (beam_timer >= 5.0f)
 	{
 		stop = false;
 	}
