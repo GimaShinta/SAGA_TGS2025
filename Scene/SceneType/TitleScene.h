@@ -16,7 +16,24 @@ private:
 	int m_logoW;
 	int m_logoH;
 
+	float m_logoAppearTimer = 0.0f;
+	bool m_logoAppeared = false;
+
+
+
 	int drawY;
+	float m_cursorY; // カーソルY座標
+
+
+
+	//選択時状態フラグ
+	bool m_startTransitioning = false;  // 出撃演出中フラグ
+	float m_transitionTimer = 0.0f;     // 出撃演出タイマー
+
+
+	float m_menuScale = 1.0f;
+	float m_menuAlpha = 255.0f;
+
 
 	//パーティクルの演出用
 	struct Particle {
