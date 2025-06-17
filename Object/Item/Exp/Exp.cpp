@@ -5,12 +5,7 @@
 
 
 Exp::Exp() : 
-    attract_range(250.0f),  //追従をONにする距離
-    speed(1.0f),            //初期スピード
-    max_speed(200.0f),      //最大スピード
-    acceleration(100.0f),   //加速度(一秒あたりの増加量)
-    lifetime(5.0f),         //自動削除する秒数
-    is_attracting(false)    //当たっているか
+    lifetime(5.0f)         //自動削除する秒数
 {
 }
 

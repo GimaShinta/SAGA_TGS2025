@@ -4,7 +4,7 @@
 void Shield::Initialize()
 {
     velocity.y = 60.0f;
-    box_size = 10.0f;
+    box_size = 20.0f;
     z_layer = 1;
     is_mobility = true;
 
@@ -47,6 +47,39 @@ void Shield::Update(float delta)
         image = images[animation_num[animation_count]];
     }
 
+    if (!player)
+    {
+        return; // プレイヤーが未設定なら処理しない
+    }
+
+    //プレイヤー情報：位置情報
+    Vector2D to_player = player->GetLocation() - location;
+
+    // 距離の2乗で吸収開始を判定
+    float dist_sq = to_player.x * to_player.x + to_player.y * to_player.y;
+    float attract_range_sq = attract_range * attract_range;
+
+    if (!is_attracting && dist_sq < attract_range_sq)
+    {
+        // 吸収開始
+        is_attracting = true;
+    }
+
+    if (is_attracting)
+    {
+        // 吸収モード中：加速してプレイヤーに向かう
+        to_player.Normalize();
+
+        speed += acceleration * delta;   // 徐々に加速
+
+        if (speed > max_speed)
+        {
+            speed = max_speed; // 最大スピード制限
+        }
+        velocity = to_player * speed;
+    }
+
+    // 現在の速度で位置更新
     location += velocity * delta;
 }
 

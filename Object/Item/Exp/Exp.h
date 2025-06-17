@@ -7,13 +7,8 @@ class Exp : public ItemBase
 private:
     std::vector<int> images;
 
-    float attract_range;   //追従をONにする距離
-    float speed;           // 初期スピード
-    float max_speed;       // 最大スピード
-    float acceleration;    // 加速度（1秒あたりの増加量）
     float lifetime;        //5秒で自動削除
 
-    bool is_attracting;    //当たっているか
     int se;
 
 public:
