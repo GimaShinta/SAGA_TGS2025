@@ -11,18 +11,20 @@ private:
 	class Player* player;
 	StageBase* current_stage;
 	float next_scene_timer;
-
+	bool isPaused = false;
 private:
 	int font_digital;
 	int font_orbitron;
 	int obi_handle; 
 
-
+	float background_scroll_x = 0.0f;
 private:
 	int current_bgm_handle = -1;
 	int stage_bgm1 = -1; // ステージ1,2の共通BGM
 	int stage_bgm3 = -1; // ステージ3用BGM
 
+	float pause_timer = 0.0f;
+	int transparent = 0.0f;
 
 	// ↓ スコアログ処理用構造体と変数
 	struct ScoreLog 
@@ -34,6 +36,12 @@ private:
 
 	std::vector<ScoreLog> score_logs;
 	float previous_score_count = 0.0f;
+
+	int m_selectedIndex = 0; // 選択中のインデックス
+	bool m_startTransitioning = false;  // 出撃演出中フラグ
+	float m_transitionTimer = 0.0f;     // 出撃演出タイマー
+	int m_menuFontHandle;
+	float line_effect_timer = 0.0f; // ライン演出用の独自タイマー
 
 public:
 	GameMainScene();

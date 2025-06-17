@@ -93,10 +93,14 @@ void Boss2::Update(float delta_second)
 
 	damage_timer += delta_second;
 
-	if (damage_timer >= 0.05f)
+	if (generate2 == true)
 	{
-		damage_timer = 0.0f;
-		hp -= 5;
+		if (damage_timer >= 0.05f)
+		{
+			damage_timer = 0.0f;
+			hp -= 5;
+		}
+
 	}
 
 	//// 攻撃パターン変更時に時間リセット
@@ -309,6 +313,35 @@ void Boss2::Finalize()
 {
 }
 
+void Boss2::OnHitCollision(GameObjectBase* hit_object)
+{
+	if (hit_object->GetCollision().object_type == eObjectType::eShot)
+	{
+		if (generate2 == true)
+		{
+			if (on_hit == false)
+			{
+				hp -= 10;
+				on_hit = true;
+			}
+			else
+			{
+				on_hit = false;
+			}
+		}
+	}
+	if (hit_object->GetCollision().object_type == eObjectType::eBeam)
+	{
+		beam_damage_timer += delta;
+
+		if (beam_damage_timer >= 0.05f)
+		{
+			hp -= 10;
+			beam_damage_timer = 0;
+		}
+	}
+}
+
 /// <summary>
 /// 移動処理
 /// </summary>
@@ -333,8 +366,6 @@ void Boss2::Movement(float delta_second)
 		if (location.y < -400)
 		{
 			generate = true;
-			collision.object_type = eObjectType::eBoss2;
-			collision.hit_object_type = { eObjectType::eShot, eObjectType::eBeam };
 		}
 	}
 	else
@@ -362,11 +393,15 @@ void Boss2::Movement(float delta_second)
 				check = false;
 			}
 
+			collision.object_type = eObjectType::eBoss2;
+			collision.hit_object_type = { eObjectType::eShot, eObjectType::eBeam };
+
 			//box_size = Vector2D(190, 80);
 			image_size = 2.0f;
 		}
 		else
 		{
+
 			generate2 = true;
 
 			const float swing_range = 100.0f;

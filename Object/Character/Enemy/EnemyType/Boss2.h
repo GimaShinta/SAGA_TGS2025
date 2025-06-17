@@ -87,6 +87,8 @@ public:
 	// I—¹ˆ—
 	void Finalize() override;
 
+	void OnHitCollision(GameObjectBase* hit_object) override;
+
 protected:
 	/// <summary>
 	/// ˆÚ“®ˆ—

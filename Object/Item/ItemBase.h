@@ -7,12 +7,12 @@ class ItemBase : public GameObjectBase
 protected:
 	Player* player;	//共有されたプレイヤー情報
 
-	float attract_range;   //追従をONにする距離
-	bool is_attracting;    //当たっているか
+	float attract_range = 250.0f;   //追従をONにする距離
+	bool is_attracting = false;    //当たっているか
 
-	float speed;           // 初期スピード
-	float max_speed;       // 最大スピード
-	float acceleration;    // 加速度（1秒あたりの増加量）
+	float speed = 1.0f;           // 初期スピード
+	float max_speed = 200.0f;       // 最大スピード
+	float acceleration = 100.0f;    // 加速度（1秒あたりの増加量）
 
 public:
 	// 初期化処理

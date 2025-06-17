@@ -126,6 +126,8 @@ void EnemyBase::DropItems()
 
 	// 5%‚ÅShieldƒhƒƒbƒv
 	if (rand() % 100 < 2) {
-		manager.CreateObject<Shield>(location);
+		auto shi = manager.CreateObject<Shield>(location);
+		shi->SetPlayer(player);
+
 	}
 }
