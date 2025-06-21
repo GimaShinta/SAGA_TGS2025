@@ -67,6 +67,8 @@ private:
 	float enemy_group_timer = 0.0f;
 	bool is_spawning_group = false;
 
+	bool draw_animation_first = false;  // デフォルトはfalse
+
 public:
 	Stage3(Player* player);
 	~Stage3();

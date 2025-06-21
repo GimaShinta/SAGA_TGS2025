@@ -178,69 +178,61 @@ void Stage3::Update(float delta)
 
 void Stage3::Draw()
 {
-    // 背景を白で塗る（最初に描画）
+    // 背景などの描画
     DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(255, 255, 255), TRUE);
-
-    //スクロール背景
-    DrawScrollBackground();  
-
-    // 左の黒帯
+    DrawScrollBackground();
     DrawBox(0, 0, (D_WIN_MAX_X / 2) - 350, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
-
-    // 右の黒帯
     DrawBox((D_WIN_MAX_X / 2) + 350, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
 
+    // テキスト表示
     DrawString(0, 0, "Stage3", GetColor(255, 255, 255));
     DrawFormatString(0, 20, GetColor(255, 255, 0), "敵数: %d", enemy_list.size());
 
-    // ステージ描画
-    if (stage <= 1)
+    // 警告演出
+    if (stage <= 1 && is_warning)
     {
-        if (is_warning == true)
-        {
-            SetDrawBlendMode(DX_BLENDMODE_ALPHA, brend);
-            DrawBox((D_WIN_MAX_X / 2) - 350, 0, (D_WIN_MAX_X / 2) + 350, D_WIN_MAX_Y, GetColor(255, 0, 0), TRUE);
-            SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
-        }
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, brend);
+        DrawBox((D_WIN_MAX_X / 2) - 350, 0, (D_WIN_MAX_X / 2) + 350, D_WIN_MAX_Y, GetColor(255, 0, 0), TRUE);
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
     }
 
-    // オブジェクト管理クラスのインスタンスを取得
+    // --- 描画順を制御 ---
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
-    objm->Draw();
+    AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
 
-    if (is_clear == true)
+    if (draw_animation_first)  // ← このフラグで順序を切り替える
+    {
+        manager->Draw();       // 先にアニメーション
+        objm->Draw();          // 後にオブジェクト
+    }
+    else
+    {
+        objm->Draw();          // 先にオブジェクト
+        manager->Draw();       // 後にアニメーション
+    }
+
+    // ゲームクリア描画
+    if (is_clear)
     {
         if (result_started)
         {
-            // 薄い暗転
             int fade_alpha = (result_timer * 12.0f < 60.0f) ? static_cast<int>(result_timer * 12.0f) : 60;
             SetDrawBlendMode(DX_BLENDMODE_ALPHA, fade_alpha);
             DrawBox((D_WIN_MAX_X / 2) - 350, 0, (D_WIN_MAX_X / 2) + 350, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
             SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
-
-            ResultDraw(delta_draw);  // ← ここで描画処理呼び出し
+            ResultDraw(delta_draw);
         }
 
-        // 「NEXT STAGE...」は常時表示
-       // DrawFormatStringToHandle((D_WIN_MAX_X / 2) - 100.0f,120, GetColor(255, 255, 255), font_digital, "GAME CLEAR");
+        //DrawFormatStringToHandle((D_WIN_MAX_X / 2) - 100.0f,120, GetColor(255, 255, 255), font_digital, "GAME CLEAR");
     }
-
-
-
-
-    else if (is_over == true)
+    else if (is_over)
     {
         SetDrawBlendMode(DX_BLENDMODE_ALPHA, transparent);
         DrawBox((D_WIN_MAX_X / 2) - 350, 0, (D_WIN_MAX_X / 2) + 350, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
-
         SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+
         DrawFormatStringToHandle((D_WIN_MAX_X / 2) - 100.0f, (D_WIN_MAX_Y / 2), GetColor(255, 255, 255), font_digital, "GAME OVER");
-
-        //DrawString((D_WIN_MAX_X / 2) - 60, (D_WIN_MAX_Y / 2) - 100, "ゲームオーバー", GetColor(0, 0, 0));
     }
-
-    AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
-    manager->Draw();                  // 描画
 }
 
 bool Stage3::IsFinished()
@@ -394,6 +386,7 @@ void Stage3::EnemyAppearance(float delta)
     // 2. 各時間帯ごとの出現処理に分岐
     if (stage_timer < 5.0f)
     {
+        SpawnBossAndItems();
         HandleZako1_LR(delta);
     }
     else if (stage_timer < 10.0f)
@@ -403,6 +396,96 @@ void Stage3::EnemyAppearance(float delta)
     else if (stage_timer < 15.0f)
     {
         HandleZako2_Upward(delta);
+    }
+    else if (stage_timer < 20.0f)
+    {
+        const float spawn_interval = 4.0f;
+        if (zako2_spawn_timer < spawn_interval) return;
+
+        const int num = 6;
+        const float spacing = 100.0f;
+        const float base_y = D_WIN_MAX_Y + 50.0f;
+        const float target_y = D_WIN_MAX_Y / 2 - 100.0f;
+        const float delay_per = 0.3f;
+
+        float start_x = ((D_WIN_MAX_X / 2) - 180.0f) - spacing;
+
+        for (int i = 0; i < num; ++i)
+        {
+            float x = start_x + spacing * i;
+            float delay = 2.0f + delay_per * i;
+
+            Vector2D target_pos(x, target_y);
+            Vector2D appear_pos(x - 50.0f * i, base_y);  // ← ここが修正ポイント
+
+            auto zako = objm->CreateObject<Zako6>(appear_pos);
+            zako->SetMode(ZakoMode::Zako2);
+            zako->SetAppearParams(appear_pos, target_pos - (50.0f * i), delay, true);
+        }
+
+        zako2_spawn_timer = 0.0f;
+    }
+    else if (stage_timer < 30.0f)
+    {
+        const float spawn_interval = 4.0f;
+        if (zako2_spawn_timer < spawn_interval) return;
+
+        const int num = 6;
+        const float spacing = 0.0f;
+        const float base_y = D_WIN_MAX_Y + 50.0f;
+        const float target_y = D_WIN_MAX_Y / 2 - 100.0f;
+        const float delay_per = 0.3f;
+
+        float start_x = ((D_WIN_MAX_X / 2) + 300.0f) - spacing;
+
+        for (int i = 0; i < num; ++i)
+        {
+            float x = start_x - spacing * i;
+            float delay = 2.0f + delay_per * i;
+
+            Vector2D appear_pos(x - 50.0f * i, base_y);
+            Vector2D target_pos(x, target_y);
+
+            auto zako = objm->CreateObject<Zako6>(appear_pos);
+            zako->SetMode(ZakoMode::Zako2);
+            zako->SetAppearParams(appear_pos, target_pos - (50.0f * i), delay, true);
+        }
+
+        zako2_spawn_timer = 0.0f;
+    }
+    else if (stage_timer < 32.0f)
+    {
+        //float spawn_interval = my_max(2.0f - stage_timer / 5.0f, 0.5f);
+        //if (enemy_spawn_timer < spawn_interval) return;
+
+        //const int num = 5;
+        //const float spacing = 150.0f;
+
+        //bool from_left = (enemy_group_index % 2 == 0);
+
+        //// y座標を from_left に応じて上下に切り替える
+        //float appear_y = from_left ? -100.0f : D_WIN_MAX_Y + 100.0f;
+        //float target_y = 300.0f;
+
+        //float base_x = from_left ? 60.0f : (D_WIN_MAX_X - 60.0f);
+        //float dx = from_left ? spacing : -spacing;
+        //float end_base_x = from_left ? D_WIN_MAX_X / 2 + 120.0f : D_WIN_MAX_X / 2 - 240.0f;
+
+        //for (int i = 0; i < num; ++i)
+        //{
+        //    float x = base_x + dx * i;
+        //    float delay = i * 0.5f;
+
+        //    Vector2D appear_pos(x, appear_y);
+        //    Vector2D end_pos(end_base_x + spacing * i, target_y + (enemy_group_index * 100.0f));
+
+        //    auto zako = objm->CreateObject<Zako6>(appear_pos);
+        //    zako->SetMode(ZakoMode::Zako3);
+        //    zako->SetAppearParams(appear_pos, end_pos, 1.3f + delay, from_left);
+        //}
+
+        //enemy_group_index++;
+        //enemy_spawn_timer = 0.0f;
     }
     else
     {
@@ -533,12 +616,11 @@ void Stage3::EnemyShot(float delta_second)
 // クリア判定
 void Stage3::UpdateGameStatus(float delta)
 {
-    //// ボスが倒れたらクリア
-    //if (boss != nullptr && boss->GetIsAlive() == false && is_over == false)
-    //{
-    //    boss->SetDestroy();
-    //    is_clear = true;
-    //}
+    if (boss2 != nullptr && boss2->GetIsCrashing() == true)
+    {
+        draw_animation_first = true;
+    }
+
 
     // ボス２が倒れたらクリア
     if (boss2 != nullptr && boss2->GetIsAlive() == false && is_over == false)
@@ -889,7 +971,7 @@ void Stage3::HandleZako2_Upward(float delta)
     const int num = 3;
     const float spacing = 80.0f;
     const float base_y = D_WIN_MAX_Y + 50.0f;
-    const float target_y = D_WIN_MAX_Y / 2 - 50.0f;
+    const float target_y = D_WIN_MAX_Y / 2;
     const float delay_per = 0.3f;
 
     float start_x = D_WIN_MAX_X / 2 - spacing;

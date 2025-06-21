@@ -8,9 +8,12 @@ private:
 	int attack_pattrn = 0;
 
 
+	std::vector<int> bullet;
 	std::vector<int> bullet_1;
 	std::vector<int> bullet_2;
 	std::vector<int> bullet_3;
+
+	std::vector<std::vector<int>> bullets;
 
 public:
 	EnemyShot4();

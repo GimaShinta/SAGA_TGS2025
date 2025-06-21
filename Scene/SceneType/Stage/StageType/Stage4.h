@@ -54,6 +54,8 @@ private:
 	int font_orbitron;
 	int obi_handle;
 
+	bool draw_animation_first = false;  // デフォルトはfalse
+
 public:
 	Stage4(Player* player);
 	~Stage4();

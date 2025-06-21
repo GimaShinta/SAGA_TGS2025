@@ -201,6 +201,15 @@ void EnemyBeam1::Update(float delta_second)
         }
     }
 
+    if (boss2 != nullptr && boss2->GetIsCrashing())
+    {
+        is_destroy = true;
+    }
+    if (boss3 != nullptr && boss3->GetIsCrashing())
+    {
+        is_destroy = true;
+    }
+
 
     //InputManager* input = Singleton<InputManager>::GetInstance();
     //if (input->GetKeyDown(KEY_INPUT_C))

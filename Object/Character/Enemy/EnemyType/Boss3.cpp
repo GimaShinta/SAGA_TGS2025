@@ -1,5 +1,6 @@
 #include "Boss3.h"
 #include "../../../../Utility/ProjectConfig.h"
+#include "../../../../Utility/AnimationManager.h"
 #include "../../Shot/EnemyBeam1.h"
 
 Boss3::Boss3()
@@ -16,7 +17,7 @@ void Boss3::Initialize()
 	enemy_type = ENE_BOSS3;
 	z_layer = 1;
 	box_size = 30;
-	hp = 40000;
+	hp = 100;
 
 	// 攻撃パターンの設定
 	attack_pattrn_num = { 11 };
@@ -75,45 +76,31 @@ void Boss3::Update(float delta_second)
 {
 	// アニメーション
 	GameObjectBase::AnimationControl(image);
-	// 攻撃パターンを設定して弾を打つ
-	Shot(delta_second);
 
 	// 移動処理
 	Movement(delta_second);
 
 	// 体力がなくなったら削除
-	if (hp <= 0)
-	{
-		is_alive = false;
+	if (hp <= 0 && !is_crashing) {
+		is_crashing = true;
+		velocity = Vector2D(0, 0); // 落下は手動処理
+		return; // このフレームで以降の処理は行わない
 	}
 
-	//// 攻撃パターン変更時に時間リセット
-	//if (attack_pattrn != prev_attack_pattrn)
-	//{
-	//	if (prev_attack_pattrn == 3)
-	//	{
-	//		move_time = 0.0f; // 軌道の先頭に戻す！
-	//	}
-	//	prev_attack_pattrn = attack_pattrn;
-	//}
+	//// 部品の相対オフセット（左右に2個ずつ）
+	//Vector2D offsets[11] = {
+	//	Vector2D(110, 0), // 中央
+	//	Vector2D(0,  -100.0f), // 顔
+	//	Vector2D(-60,  0), // 右手前
+	//	Vector2D(-110, 0),  // 右奥
 
-	// 部品を遅れて追従させる処理
-	const float follow_speed = 5.0f; // 追従速度（大きいと早くついてくる）
-
-	// 部品の相対オフセット（左右に2個ずつ）
-	Vector2D offsets[11] = {
-		Vector2D(110, 0), // 中央
-		Vector2D(0,  -100.0f), // 顔
-		Vector2D(-60,  0), // 右手前
-		Vector2D(-110, 0),  // 右奥
-
-		Vector2D(60, 30),  // 砲
-		Vector2D(-60, 30),  // 砲
-		Vector2D(-60, 30),  // 砲
-		Vector2D(-60, 30),  // 砲
-		Vector2D(-60, 30),  // 砲
-		Vector2D(-60, 30)  // 砲
-	};
+	//	Vector2D(60, 30),  // 砲
+	//	Vector2D(-60, 30),  // 砲
+	//	Vector2D(-60, 30),  // 砲
+	//	Vector2D(-60, 30),  // 砲
+	//	Vector2D(-60, 30),  // 砲
+	//	Vector2D(-60, 30)  // 砲
+	//};
 
 	// 部品の相対オフセット（左右に2個ずつ）
 	Vector2D offsets_2[11] = {
@@ -128,6 +115,107 @@ void Boss3::Update(float delta_second)
 		Vector2D(350, -70),  // 砲
 		Vector2D(-60, 30)  // 砲
 	};
+
+	if (is_crashing) {
+		collision.object_type = eObjectType::eNone;
+		collision.hit_object_type.clear();
+
+		crash_timer += delta_second;
+
+		const float crash_duration = 10.0f;
+		float t = Clamp(crash_timer / crash_duration, 0.0f, 1.0f);
+		float eased_t = 1.0f - pow(1.0f - t, 3); // easeOutCubic
+		image_size = Lerp(3.5f, 1.0f, eased_t);
+
+		// 横移動・振動処理
+		base_position.x += 200.0f * delta_second;
+		float shake_amplitude = 20.0f * t;
+		base_position.y += sin(crash_timer * 10.0f) * shake_amplitude * delta_second;
+
+		// 部品のオフセットを縮めて寄せる
+		for (int i = 0; i < 11; ++i) {
+			float offset_ratio = Lerp(1.0f, 0.3f, eased_t);
+			Vector2D adjusted_offset = offsets_2[i] * offset_ratio;
+			part_positions[i] = location + adjusted_offset;
+		}
+
+		// ----- 爆発処理開始条件 -----
+		if (!explosions_started && crash_timer >= 10.0f) {
+			explosions_started = true;
+			explosion_index = 0;
+			explosion_timer = 0.0f;
+		}
+
+		// ----- 時間差で爆発を生成 -----
+		if (explosions_started) {
+			explosion_timer += delta_second;
+
+			if (explosion_index < max_explosions && explosion_timer >= explosion_interval) {
+				explosion_timer = 0.0f;
+
+				// ランダム位置（±100px）
+				float offset_x = static_cast<float>(GetRand(200) - 100);
+				float offset_y = static_cast<float>(GetRand(200) - 100);
+				Vector2D random_pos = location + Vector2D(offset_x, offset_y);
+
+				// ランダムなスケール（例：0.5?1.5倍）
+				float scale = 0.3f + (GetRand(200) / 200.0f); // 0.5 ～ 1.5
+
+				// アニメーション再生＋スケール指定
+				int id = AnimationManager::GetInstance()->PlayerAnimation(
+					EffectName::eExprotion2,
+					random_pos,
+					0.05f,
+					false
+				);
+
+				AnimationManager::GetInstance()->SetScale(id, scale);
+
+				explosion_index++;
+			}
+
+			// 全部爆発したら死亡
+			if (explosion_index >= max_explosions) {
+				// アニメーション再生＋スケール指定
+				int id = AnimationManager::GetInstance()->PlayerAnimation(
+					EffectName::eExprotion2,
+					location,
+					0.07f,
+					false
+				);
+				AnimationManager::GetInstance()->SetScale(id, 3.0f);
+				id = AnimationManager::GetInstance()->PlayerAnimation(
+					EffectName::eExprotion2,
+					location,
+					0.07f,
+					false
+				);
+				AnimationManager::GetInstance()->SetScale(id, 2.0f);
+				is_alive = false;
+			}
+		}
+
+		return;
+	}
+
+
+	// 攻撃パターンを設定して弾を打つ
+	Shot(delta_second);
+
+
+	//// 攻撃パターン変更時に時間リセット
+	//if (attack_pattrn != prev_attack_pattrn)
+	//{
+	//	if (prev_attack_pattrn == 3)
+	//	{
+	//		move_time = 0.0f; // 軌道の先頭に戻す！
+	//	}
+	//	prev_attack_pattrn = attack_pattrn;
+	//}
+
+	// 部品を遅れて追従させる処理
+	const float follow_speed = 5.0f; // 追従速度（大きいと早くついてくる）
+
 
 	// 追従の速さ
 	float individual_follow_speeds[11] = {
@@ -165,9 +253,9 @@ void Boss3::Update(float delta_second)
 		Vector2D target;
 		if (generate == false)
 		{
-			target = location + offsets[i];
-			part_positions[i] += (target - part_positions[i]) * individual_follow_speeds_2[i] * delta_second;
-			angle = 3.14 / 1.0f;
+			//target = location + offsets[i];
+			//part_positions[i] += (target - part_positions[i]) * individual_follow_speeds_2[i] * delta_second;
+			//angle = 3.14 / 1.0f;
 
 		}
 		else
@@ -275,6 +363,49 @@ void Boss3::Finalize()
 {
 }
 
+void Boss3::OnHitCollision(GameObjectBase* hit_object)
+{
+	if (hit_object->GetCollision().object_type == eObjectType::eShot)
+	{
+		if (generate2 == true)
+		{
+			if (on_hit == false)
+			{
+				if (is_weakness == true)
+				{
+					hp -= 30;
+				}
+				else
+				{
+					hp -= 10;
+				}
+				on_hit = true;
+			}
+			else
+			{
+				on_hit = false;
+			}
+		}
+	}
+	if (hit_object->GetCollision().object_type == eObjectType::eBeam)
+	{
+		beam_damage_timer += delta;
+
+		if (beam_damage_timer >= 0.05f)
+		{
+			if (is_weakness == true)
+			{
+				hp -= 30;
+			}
+			else
+			{
+				hp -= 10;
+			}
+			beam_damage_timer = 0;
+		}
+	}
+}
+
 /// <summary>
 /// 移動処理
 /// </summary>
@@ -324,17 +455,21 @@ void Boss3::Movement(float delta_second)
 			case 1:
 				box_size = Vector2D(350, 150);
 				chenge++;
+				is_weakness = false;
 				break;
 			case 2:
 				box_size = Vector2D(230, 250);
 				chenge++;
+				is_weakness = false;
 				break;
 			case 3:
-				box_size = Vector2D(160, 350);
+				box_size = Vector2D(140, 350);
 				chenge++;
+				is_weakness = true;
 				break;
 			default:
 				chenge = 1;
+				is_weakness = false;
 				break;
 			}
 
@@ -463,6 +598,11 @@ int Boss3::GetAttackPattrn() const
 int Boss3::GetIsAlive() const
 {
 	return is_alive;
+}
+
+bool Boss3::GetIsCrashing() const
+{
+	return is_crashing;
 }
 
 // ボス２の攻撃
@@ -1131,7 +1271,7 @@ void Boss3::Pattrn11(float offsets_x)
 		b = objm->CreateObject<EnemyBeam1>(
 			Vector2D(
 				location.x + offsets_x,
-				(location.y + 350.0f) - box_size.y
+				(location.y + 300.0f) - box_size.y
 			));
 		b->SetBoss3(this);
 		beam_on = true;
@@ -1143,7 +1283,7 @@ void Boss3::Pattrn11(float offsets_x)
 		b->SetLocation(
 			Vector2D(
 				location.x + offsets_x,
-				(location.y + 350.0f) + b->GetBoxSize().y
+				(location.y + 300.0f) + b->GetBoxSize().y
 			));
 	}
 

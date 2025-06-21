@@ -127,9 +127,20 @@ void Stage4::Draw()
         }
     }
 
-    // オブジェクト管理クラスのインスタンスを取得
+    // --- 描画順を制御 ---
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
-    objm->Draw();
+    AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+
+    if (draw_animation_first)  // ← このフラグで順序を切り替える
+    {
+        manager->Draw();       // 先にアニメーション
+        objm->Draw();          // 後にオブジェクト
+    }
+    else
+    {
+        objm->Draw();          // 先にオブジェクト
+        manager->Draw();       // 後にアニメーション
+    }
 
     if (is_clear == true)
     {
@@ -151,9 +162,6 @@ void Stage4::Draw()
 
         //DrawString((D_WIN_MAX_X / 2) - 60, (D_WIN_MAX_Y / 2) - 100, "ゲームオーバー", GetColor(0, 0, 0));
     }
-
-    AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
-    manager->Draw();                  // 描画
 
 }
 
@@ -324,6 +332,12 @@ void Stage4::UpdateGameStatus(float delta)
     //    boss->SetDestroy();
     //    is_clear = true;
     //}
+
+    if (boss3 != nullptr && boss3->GetIsCrashing() == true)
+    {
+        draw_animation_first = true;
+    }
+
 
     // ボス２が倒れたらクリア
     if (boss3 != nullptr && boss3->GetIsAlive() == false && is_over == false)

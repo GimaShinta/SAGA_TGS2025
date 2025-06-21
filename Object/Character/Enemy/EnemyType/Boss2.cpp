@@ -1,5 +1,6 @@
 #include "Boss2.h"
 #include "../../../../Utility/ProjectConfig.h"
+#include "../../../../Utility/AnimationManager.h"
 #include "../../Shot/EnemyBeam1.h"
 
 Boss2::Boss2()
@@ -16,7 +17,7 @@ void Boss2::Initialize()
 	enemy_type = ENE_BOSS2;
 	z_layer = 1;
 	box_size = 30;
-	hp = 20000;
+	hp = 200;
 
 	// 攻撃パターンの設定
 	attack_pattrn_num = { 12 };
@@ -79,17 +80,115 @@ void Boss2::Update(float delta_second)
 {
 	// アニメーション
 	GameObjectBase::AnimationControl(image);
-	// 攻撃パターンを設定して弾を打つ
-	Shot(delta_second);
 
 	// 移動処理
 	Movement(delta_second);
 
 	// 体力がなくなったら削除
-	if (hp <= 0)
-	{
-		is_alive = false;
+	if (hp <= 0 && !is_crashing) {
+		is_crashing = true;
+		velocity = Vector2D(0, 0); // 落下は手動処理
+		return; // このフレームで以降の処理は行わない
 	}
+
+	// 部品の相対オフセット（左右に2個ずつ）
+	Vector2D offsets_2[6] = {
+		Vector2D(-180, 0), // 左奥
+		Vector2D(-100,  0), // 左手前
+		Vector2D(100,  0), // 右手前
+		Vector2D(180, 0),  // 右奥
+
+		Vector2D(-100, -100),  // 砲
+		Vector2D(100, -100)  // 砲
+	};
+
+
+	if (is_crashing) {
+		collision.object_type = eObjectType::eNone;
+		collision.hit_object_type.clear();
+
+		crash_timer += delta_second;
+
+		const float crash_duration = 10.0f;
+		float t = Clamp(crash_timer / crash_duration, 0.0f, 1.0f);
+		float eased_t = 1.0f - pow(1.0f - t, 3); // easeOutCubic
+		image_size = Lerp(2.0f, 1.0f, eased_t);
+
+		// 横移動・振動処理
+		base_position.x += 200.0f * delta_second;
+		float shake_amplitude = 20.0f * t;
+		base_position.y += sin(crash_timer * 10.0f) * shake_amplitude * delta_second;
+
+		// 部品のオフセットを縮めて寄せる
+		for (int i = 0; i < 6; ++i) {
+			float offset_ratio = Lerp(1.0f, 0.5f, eased_t);
+			Vector2D adjusted_offset = offsets_2[i] * offset_ratio;
+			part_positions[i] = location + adjusted_offset;
+		}
+
+		// ----- 爆発処理開始条件 -----
+		if (!explosions_started && crash_timer >= 3.0f) {
+			explosions_started = true;
+			explosion_index = 0;
+			explosion_timer = 0.0f;
+		}
+
+		// ----- 時間差で爆発を生成 -----
+		if (explosions_started) {
+			explosion_timer += delta_second;
+
+			if (explosion_index < max_explosions && explosion_timer >= explosion_interval) {
+				explosion_timer = 0.0f;
+
+				// ランダム位置（±100px）
+				float offset_x = static_cast<float>(GetRand(200) - 100);
+				float offset_y = static_cast<float>(GetRand(200) - 100);
+				Vector2D random_pos = location + Vector2D(offset_x, offset_y);
+
+				// ランダムなスケール（例：0.5?1.5倍）
+				float scale = 0.3f + (GetRand(200) / 200.0f); // 0.5 ～ 1.5
+
+				// アニメーション再生＋スケール指定
+				int id = AnimationManager::GetInstance()->PlayerAnimation(
+					EffectName::eExprotion2,
+					random_pos,
+					0.05f,
+					false
+				);
+
+				AnimationManager::GetInstance()->SetScale(id, scale);
+
+				explosion_index++;
+			}
+
+			// 全部爆発したら死亡
+			if (explosion_index >= max_explosions) {
+				// アニメーション再生＋スケール指定
+				int id = AnimationManager::GetInstance()->PlayerAnimation(
+					EffectName::eExprotion2,
+					location,
+					0.07f,
+					false
+				);
+				AnimationManager::GetInstance()->SetScale(id, 3.0f);
+				id = AnimationManager::GetInstance()->PlayerAnimation(
+					EffectName::eExprotion2,
+					location,
+					0.07f,
+					false
+				);
+				AnimationManager::GetInstance()->SetScale(id, 2.0f);
+				is_alive = false;
+			}
+		}
+
+		return;
+	}
+
+
+	// 攻撃パターンを設定して弾を打つ
+	Shot(delta_second);
+
 
 	damage_timer += delta_second;
 
@@ -102,7 +201,6 @@ void Boss2::Update(float delta_second)
 		}
 
 	}
-
 	//// 攻撃パターン変更時に時間リセット
 	//if (attack_pattrn != prev_attack_pattrn)
 	//{
@@ -127,16 +225,6 @@ void Boss2::Update(float delta_second)
 		Vector2D(-60, 30)  // 砲
 	};
 
-	// 部品の相対オフセット（左右に2個ずつ）
-	Vector2D offsets_2[6] = {
-		Vector2D(-180, 0), // 左奥
-		Vector2D(-100,  0), // 左手前
-		Vector2D(100,  0), // 右手前
-		Vector2D(180, 0),  // 右奥
-
-		Vector2D(-100, -100),  // 砲
-		Vector2D(100, -100)  // 砲
-	};
 
 	// 追従の速さ
 	float individual_follow_speeds[6] = {
@@ -321,7 +409,14 @@ void Boss2::OnHitCollision(GameObjectBase* hit_object)
 		{
 			if (on_hit == false)
 			{
-				hp -= 10;
+				if (is_weakness == true)
+				{
+					hp -= 30;
+				}
+				else
+				{
+					hp -= 10;
+				}
 				on_hit = true;
 			}
 			else
@@ -336,7 +431,14 @@ void Boss2::OnHitCollision(GameObjectBase* hit_object)
 
 		if (beam_damage_timer >= 0.05f)
 		{
-			hp -= 10;
+			if (is_weakness == true)
+			{
+				hp -= 30;
+			}
+			else
+			{
+				hp -= 10;
+			}
 			beam_damage_timer = 0;
 		}
 	}
@@ -482,7 +584,7 @@ void Boss2::Shot(float delta_second)
 			attack_pattrn = 5;
 	#else
 			// HPが減ったら攻撃パターンを変更（オーバーフロー防止に合わせてリセット）
-			if (hp <= 50 && attack_pattrn_num != std::vector<int>{7, 8})
+			if (hp <= 10000 && attack_pattrn_num != std::vector<int>{7, 8})
 			{
 				attack_pattrn_num = { 7, 8 };
 				attack_count = 0; // 安全にリセット
@@ -527,16 +629,20 @@ void Boss2::DrawBoss2(const Vector2D position) const
 	// 部品
 	DrawRotaGraph(part_positions[1].x, part_positions[1].y, image_size, angle, boss2_image[3], TRUE); // 左手前
 	DrawRotaGraph(part_positions[0].x, part_positions[0].y, image_size, angle, boss2_image[5], TRUE); // 左奥
-	if (generate == false)
+	if (is_crashing == false)
 	{
-		DrawRotaGraph(position.x - 70, position.y + 150, image_size, 0.0f, jet, TRUE);
-		DrawRotaGraph(position.x + 70, position.y + 150, image_size, 0.0f, jet, TRUE);
+		if (generate == false)
+		{
+			DrawRotaGraph(position.x - 70, position.y + 150, image_size, 0.0f, jet, TRUE);
+			DrawRotaGraph(position.x + 70, position.y + 150, image_size, 0.0f, jet, TRUE);
 
-	}
-	else
-	{
-		DrawRotaGraph(position.x - 110, position.y - 250, image_size, 3.14 / 1.0f, jet, TRUE);
-		DrawRotaGraph(position.x + 110, position.y - 250, image_size, 3.14 / 1.0f, jet, TRUE);
+		}
+		else
+		{
+			DrawRotaGraph(position.x - 110, position.y - 250, image_size, 3.14 / 1.0f, jet, TRUE);
+			DrawRotaGraph(position.x + 110, position.y - 250, image_size, 3.14 / 1.0f, jet, TRUE);
+		}
+
 	}
 	DrawRotaGraph(part_positions[2].x, part_positions[2].y, image_size, angle, boss2_image[4], TRUE); // 右手前
 	DrawRotaGraph(part_positions[3].x, part_positions[3].y, image_size, angle, boss2_image[6], TRUE); // 右奥
@@ -544,15 +650,19 @@ void Boss2::DrawBoss2(const Vector2D position) const
 	DrawRotaGraph(part_positions[5].x, part_positions[5].y, image_size, angle, boss2_image[1], TRUE);
 
 
-	if (generate == false)
+	if (is_crashing == false)
 	{
-		DrawRotaGraph(part_positions[4].x, part_positions[4].y - 50.0f, image_size, angle, boss2_image[7], TRUE);
-		DrawRotaGraph(part_positions[5].x, part_positions[5].y - 50.0f, image_size, angle, boss2_image[7], TRUE);
-	}
-	else
-	{
-		DrawRotaGraph(part_positions[4].x, part_positions[4].y + 110.0f, image_size, angle, boss2_image[7], TRUE);
-		DrawRotaGraph(part_positions[5].x, part_positions[5].y + 110.0f, image_size, angle, boss2_image[7], TRUE);
+		if (generate == false)
+		{
+			DrawRotaGraph(part_positions[4].x, part_positions[4].y - 50.0f, image_size, angle, boss2_image[7], TRUE);
+			DrawRotaGraph(part_positions[5].x, part_positions[5].y - 50.0f, image_size, angle, boss2_image[7], TRUE);
+		}
+		else
+		{
+			DrawRotaGraph(part_positions[4].x, part_positions[4].y + 110.0f, image_size, angle, boss2_image[7], TRUE);
+			DrawRotaGraph(part_positions[5].x, part_positions[5].y + 110.0f, image_size, angle, boss2_image[7], TRUE);
+		}
+
 	}
 	//DrawBox(location.x - box_size.x, location.y - box_size.y,
 	//	location.x + box_size.x, location.y + box_size.y, GetColor(0, 255, 0), TRUE);
@@ -572,6 +682,11 @@ int Boss2::GetIsAlive() const
 bool Boss2::GetGenerate() const
 {
 	return generate;
+}
+
+bool Boss2::GetIsCrashing() const
+{
+	return is_crashing;
 }
 
 // ボス２の攻撃

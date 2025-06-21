@@ -33,6 +33,11 @@ void EnemyShot4::Initialize()
 	bullet_1 = rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime81.png", 6, 6, 1, 24, 24);
 	bullet_2 = rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime89.png", 4, 4, 1, 16, 32);
 	
+	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime81.png", 6, 6, 1, 24, 24));
+	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/standard/anime81.png", 6, 6, 1, 24, 24));
+	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime89.png", 4, 4, 1, 16, 32));
+	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime89.png", 4, 4, 1, 16, 32));
+
 	//bullet[0] = rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime01.png", 8, 8, 1, 16, 16);
 	//bullet[1] = rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime02.png", 6, 6, 1, 16, 16);
 	//bullet[2] = rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime03.png", 8, 8, 1, 24, 24);
@@ -159,6 +164,27 @@ void EnemyShot4::Update(float delta_second)
 		is_destroy = true;
 	}
 
+	std::vector<int> animation_num = { 0, 1 };
+	//フレームレートで時間を計測
+	animation_time += delta_second;
+	//8秒経ったら画像を切り替える
+	if (animation_time >= 0.02f)
+	{
+		//計測時間の初期化
+		animation_time = 0.0f;
+		//時間経過カウントの増加
+		animation_count++;
+		//カウントがアニメーション画像の要素数以上になったら
+		if (animation_count >= animation_num.size())
+		{
+			//カウントの初期化
+			animation_count = 0;
+		}
+		// アニメーションが順番に代入される
+		image = bullet[animation_num[animation_count]];
+	}
+
+
 	location += velocity * delta_second;
 }
 
@@ -209,11 +235,13 @@ void EnemyShot4::SetAttackPattrn(int pattrn)
 	attack_pattrn = pattrn;
 	if (pattrn <= 1)
 	{
-		image = bullet_1[0];
+		bullet.push_back(bullets[0][0]);
+		bullet.push_back(bullets[1][0]);
 	}
 	else if (pattrn == 2)
 	{
-		image = bullet_2[0];
+		bullet.push_back(bullets[2][0]);
+		bullet.push_back(bullets[3][0]);
 	}
 	else
 	{

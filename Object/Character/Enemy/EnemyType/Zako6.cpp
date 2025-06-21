@@ -105,6 +105,18 @@ void Zako6::Update(float delta_second)
         case ZakoState::Floating: {
             location.x = base_location.x + sinf(float_timer * 1.5f) * 10.0f;
             location.y = base_location.y + sinf(float_timer * 2.0f) * 5.0f;
+
+            if (float_timer >= 5.0f) {
+                state = ZakoState::Leaving;
+                float_timer = 0.0f;
+            }
+            break;
+        }
+        case ZakoState::Leaving: {
+            location.y -= delta_second * 300.0f;  // 300px/secÇ≈è„Ç…à⁄ìÆ
+            if (location.y + box_size.y < 0) {
+                is_destroy = true;  // âÊñ äOÇ…èoÇΩÇÁçÌèú
+            }
             break;
         }
         }
@@ -136,6 +148,18 @@ void Zako6::Update(float delta_second)
         case ZakoState::Floating: {
             location.x = base_location.x + sinf(float_timer * 1.5f) * 10.0f;
             location.y = base_location.y + sinf(float_timer * 2.0f) * 5.0f;
+
+            if (float_timer >= 5.0f) {
+                state = ZakoState::Leaving;
+                float_timer = 0.0f;
+            }
+            break;
+        }
+        case ZakoState::Leaving: {
+            location.y -= delta_second * 300.0f;
+            if (location.y + box_size.y < 0) {
+                is_destroy = true;
+            }
             break;
         }
         }

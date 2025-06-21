@@ -10,7 +10,8 @@ enum class ZakoState {
     AppearingFromBottom,  // Zako2スタイル
     Descending,           // Zako2スタイル
     Appearing,            // Zako3スタイル
-    Floating              // 共通
+    Floating,              // 共通
+    Leaving
 };
 
 class Zako6 : public EnemyBase {

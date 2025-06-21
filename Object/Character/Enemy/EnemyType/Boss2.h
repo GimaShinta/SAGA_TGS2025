@@ -63,6 +63,16 @@ private:
 
 	float damage_timer = 0.0f;
 
+	bool is_weakness = false;
+
+	bool is_crashing = false; // 墜落中かどうか
+	float crash_timer = 0.0f; // 墜落開始からの時間
+
+	int explosion_index = 0;
+	float explosion_timer = 0.0f;
+	const float explosion_interval = 0.2f; // 爆発の間隔（秒）
+	const int max_explosions = 10;          // 爆発の最大数
+	bool explosions_started = false;       // 爆発処理を開始したかどうか
 
 public:
 	Boss2();
@@ -115,8 +125,14 @@ public:
 	{
 		return (a > b) ? a : b;
 	}
+	template <typename T>
+	T Lerp(T a, T b, float t)
+	{
+		return a + (b - a) * t;
+	}
 
 	bool GetGenerate() const;
+	bool GetIsCrashing() const;
 
 	//template <typename T>
 	//T Clamp(T value, T min, T max) {
