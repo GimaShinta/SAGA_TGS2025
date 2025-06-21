@@ -60,25 +60,30 @@ void Player::Update(float delta_second)
 	// ダメージを受けたら
 	Damage(delta_second);
 
-	if (is_dead_animation_playing) 
+	if (is_dead_animation_playing)
 	{
 		dead_animation_timer += delta_second;
 
-		// 演出終了判定
-		if (dead_animation_timer >= dead_animation_duration) 
+		if (dead_animation_timer >= dead_animation_duration)
 		{
-			is_alive = false;  // 演出終わったら消すフラグを立てる
+			is_alive = false;
 		}
 		else
 		{
+			// 爆発演出を定期的に再生
+			if (dead_animation_timer - last_explosion_time > 0.2f)  // 0.2秒ごとに
+			{
+				last_explosion_time = dead_animation_timer;
 
-			//AnimationManager* am = Singleton<AnimationManager>::GetInstance();
-			//am->PlayerAnimation(EffectName::eExprotion2, location, 0.05f, false);
-			//am->PlayerAnimation(EffectName::eExprotion2, location, 0.05f, false);
-			//am->PlayerAnimation(EffectName::eExprotion2, location, 0.05f, false);
+				Vector2D effect_pos = location;
+				effect_pos.x += GetRand(30);
+				effect_pos.y += GetRand(30);
 
+				AnimationManager* am = Singleton<AnimationManager>::GetInstance();
+				int id = am->PlayerAnimation(EffectName::eExprotion2, effect_pos, 0.05f, false); // スケール2倍
+				am->SetScale(id, 1.0f);
+			}
 		}
-		// 演出中の処理（アニメーション更新など）もここで行う
 	}
 	else
 	{

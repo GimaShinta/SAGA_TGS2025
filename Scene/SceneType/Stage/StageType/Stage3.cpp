@@ -43,8 +43,8 @@ void Stage3::Initialize()
     // 【記述位置は仮】ステージの長さを代入
     distance = STAGE3_DISTANCE;
 
-    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
-    objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) + 100.0f));
+    //GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+    //objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) + 100.0f));
 
 
 #if 0
@@ -59,15 +59,15 @@ void Stage3::Initialize()
 #else
     //-----------アニメーション生成パターン２-----------
     // 生成したいエフェクトを指定する（エフェクトのみ）
-    AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
-    anim_id = manager->PlayerAnimation(EffectName::eExprotion, Vector2D(D_WIN_MAX_X / 2, D_WIN_MAX_Y / 2), 0.05f, false);
+    //AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+    //anim_id = manager->PlayerAnimation(EffectName::eExprotion, Vector2D(D_WIN_MAX_X / 2, D_WIN_MAX_Y / 2), 0.05f, false);
     //--------------------------------------------------
 #endif
 
-    // アニメーションの追加設定
-    manager->SetAlpha(anim_id, 255);       // 半透明
-    manager->SetScale(anim_id, 5.0f);      // 1.5倍拡大
-    manager->SetZLayer(anim_id, 1);        // 描画順指定
+    //// アニメーションの追加設定
+    //manager->SetAlpha(anim_id, 255);       // 半透明
+    //manager->SetScale(anim_id, 5.0f);      // 1.5倍拡大
+    //manager->SetZLayer(anim_id, 1);        // 描画順指定
 
     //フォント
     // font_digital = CreateFontToHandle("DS-Digital", 28, 6, DX_FONTTYPE_ANTIALIASING);
@@ -486,6 +486,14 @@ void Stage3::EnemyAppearance(float delta)
 
         //enemy_group_index++;
         //enemy_spawn_timer = 0.0f;
+    }
+    else if (stage_timer < 35.0f)
+    {
+
+    }
+    else if (stage_timer < 37.0f)
+    {
+        is_warning = true;
     }
     else
     {

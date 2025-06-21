@@ -17,10 +17,10 @@ void Boss2::Initialize()
 	enemy_type = ENE_BOSS2;
 	z_layer = 1;
 	box_size = 30;
-	hp = 200;
+	hp = 1000;
 
 	// 攻撃パターンの設定
-	attack_pattrn_num = { 12 };
+	attack_pattrn_num = { 7 };
 
 
 	// 当たり判定のオブジェクト設定
@@ -104,87 +104,105 @@ void Boss2::Update(float delta_second)
 
 
 	if (is_crashing) {
+		// 衝突処理は無効化
 		collision.object_type = eObjectType::eNone;
 		collision.hit_object_type.clear();
 
+		// タイマー加算
 		crash_timer += delta_second;
 
 		const float crash_duration = 10.0f;
 		float t = Clamp(crash_timer / crash_duration, 0.0f, 1.0f);
-		float eased_t = 1.0f - pow(1.0f - t, 3); // easeOutCubic
-		image_size = Lerp(2.0f, 1.0f, eased_t);
+		float eased_t = 1.0f - pow(1.0f - t, 3);
+		image_size = Lerp(2.0f, 1.0f, eased_t); // スケール縮小
 
-		// 横移動・振動処理
-		base_position.x += 200.0f * delta_second;
+		// ===== 放物線的な移動 =====
+		crash_velocity.y += gravity * delta_second;   // 重力で落下加速
+		base_position += crash_velocity * delta_second;
+
+		// ===== 振動演出 =====
 		float shake_amplitude = 20.0f * t;
-		base_position.y += sin(crash_timer * 10.0f) * shake_amplitude * delta_second;
+		float shake = sin(crash_timer * 10.0f) * shake_amplitude;
+		base_position.y += shake * delta_second;
 
-		// 部品のオフセットを縮めて寄せる
+		// ===== 部品を縮めて本体に寄せる =====
 		for (int i = 0; i < 6; ++i) {
 			float offset_ratio = Lerp(1.0f, 0.5f, eased_t);
 			Vector2D adjusted_offset = offsets_2[i] * offset_ratio;
 			part_positions[i] = location + adjusted_offset;
 		}
 
-		// ----- 爆発処理開始条件 -----
-		if (!explosions_started && crash_timer >= 3.0f) {
+		// ===== 爆発処理開始（初回だけ）=====
+		if (!explosions_started) {
 			explosions_started = true;
 			explosion_index = 0;
 			explosion_timer = 0.0f;
+
+			// 初回の爆発を即時生成
+			float offset_x = static_cast<float>(GetRand(200) - 100);
+			float offset_y = static_cast<float>(GetRand(200) - 100);
+			Vector2D random_pos = location + Vector2D(offset_x, offset_y);
+			float scale = 0.3f + (GetRand(200) / 200.0f); // 0.5 ～ 1.5
+
+			int id = AnimationManager::GetInstance()->PlayerAnimation(
+				EffectName::eExprotion2,
+				random_pos,
+				0.05f,
+				false
+			);
+			AnimationManager::GetInstance()->SetScale(id, scale);
+
+			explosion_index++; // 最初の爆発カウント
 		}
 
-		// ----- 時間差で爆発を生成 -----
+		// ===== 時間差で爆発を発生 =====
 		if (explosions_started) {
 			explosion_timer += delta_second;
 
+			// 複数爆発（最大数＆間隔）
 			if (explosion_index < max_explosions && explosion_timer >= explosion_interval) {
 				explosion_timer = 0.0f;
 
-				// ランダム位置（±100px）
 				float offset_x = static_cast<float>(GetRand(200) - 100);
 				float offset_y = static_cast<float>(GetRand(200) - 100);
 				Vector2D random_pos = location + Vector2D(offset_x, offset_y);
-
-				// ランダムなスケール（例：0.5?1.5倍）
 				float scale = 0.3f + (GetRand(200) / 200.0f); // 0.5 ～ 1.5
 
-				// アニメーション再生＋スケール指定
 				int id = AnimationManager::GetInstance()->PlayerAnimation(
 					EffectName::eExprotion2,
 					random_pos,
 					0.05f,
 					false
 				);
-
 				AnimationManager::GetInstance()->SetScale(id, scale);
 
 				explosion_index++;
 			}
 
-			// 全部爆発したら死亡
+			// 全爆発完了後に大爆発＆削除
 			if (explosion_index >= max_explosions) {
-				// アニメーション再生＋スケール指定
 				int id = AnimationManager::GetInstance()->PlayerAnimation(
 					EffectName::eExprotion2,
 					location,
 					0.07f,
 					false
 				);
-				AnimationManager::GetInstance()->SetScale(id, 3.0f);
+				AnimationManager::GetInstance()->SetScale(id, 3.5f);
+
 				id = AnimationManager::GetInstance()->PlayerAnimation(
 					EffectName::eExprotion2,
 					location,
 					0.07f,
 					false
 				);
-				AnimationManager::GetInstance()->SetScale(id, 2.0f);
+				AnimationManager::GetInstance()->SetScale(id, 2.5f);
+
 				is_alive = false;
 			}
 		}
 
 		return;
 	}
-
 
 	// 攻撃パターンを設定して弾を打つ
 	Shot(delta_second);

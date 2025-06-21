@@ -22,8 +22,10 @@ void GameMainScene::Initialize()
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
     player = objm->CreateObject<Player>(Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) + 220.0f));
 
+    AnimationManager* anim = Singleton<AnimationManager>::GetInstance();
+    anim->LoadAllEffects();
 
-    current_stage = new Stage1(player);
+    current_stage = new Stage3(player);
 
     current_stage->Initialize();
 
@@ -40,8 +42,6 @@ void GameMainScene::Initialize()
    // font_digital = CreateFontToHandle("Orbitron", 28, 6, DX_FONTTYPE_ANTIALIASING);
     //font_orbitron = CreateFontToHandle("Orbitron", 22, 6, DX_FONTTYPE_ANTIALIASING);
     font_orbitron = CreateFontToHandle("DS-Digital", 28, 6, DX_FONTTYPE_ANTIALIASING);
-    AnimationManager* anim = Singleton<AnimationManager>::GetInstance();
-    anim->LoadAllEffects();
 
     m_menuFontHandle = CreateFontToHandle("Orbitron", 36, 6); // メニュー専用フォント
 

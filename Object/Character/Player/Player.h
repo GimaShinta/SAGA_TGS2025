@@ -89,6 +89,7 @@ private:
 	int jet;
 	int shield;
 
+	float last_explosion_time = -999.0f; // ÅŒã‚É”š”­‚ğÄ¶‚µ‚½ŠÔ
 
 
 public:
