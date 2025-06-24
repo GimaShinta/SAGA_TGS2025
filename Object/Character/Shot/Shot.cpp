@@ -2,6 +2,7 @@
 #include "../../GameObjectManager.h"
 #include "../../../Utility/ProjectConfig.h"
 #include "../../../Utility/AnimationManager.h"
+#include"../../../Object/Character/Enemy/EnemyType/Stage2BOSS.h"
 
 Shot::Shot()
 {
@@ -139,8 +140,18 @@ void Shot::OnHitCollision(GameObjectBase* hit_object)
 		am->SetScale(anim_id, 0.2f);
 		is_destroy = true;
 	}
+	if (hit_object->GetCollision().object_type == eObjectType::eBoss2)
+	{
+		Stage2Boss* boss = dynamic_cast<Stage2Boss*>(hit_object);
+		if (boss)
+		{
+			boss->TakeDamage(10); // ƒ_ƒ[ƒW‚ğ—^‚¦‚é
+		}
 
+		is_destroy = true;
+	}
 
+	
 }
 
 void Shot::SetShotFlip(bool flip)

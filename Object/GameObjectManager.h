@@ -13,7 +13,7 @@ private:
 	std::vector<GameObjectBase*> create_object;     // 生成したいオブジェクトが入る配列（生成配列）
 	std::vector<GameObjectBase*> destroy_object;	// 破棄したいオブジェクトが入る配列（削除配列）
 	std::vector<GameObjectBase*> game_object;	    // インゲームに存在するオブジェクトが入る配列（インゲーム配列）
-
+	
 	Vector2D screen_offset;// スクリーンオフセットはウィンドウの0,0位置からどれだけ離れているのかを判定するのに使える
 
 public:
@@ -23,6 +23,10 @@ public:
 public:
 	// インスタンス（オブジェクトへの参照）の削除
 	static void DeleteInstance();
+	const std::vector<GameObjectBase*>& GetGameObjects() const
+	{
+		return game_object;
+	}
 
 public:
 	// 初期化処理
