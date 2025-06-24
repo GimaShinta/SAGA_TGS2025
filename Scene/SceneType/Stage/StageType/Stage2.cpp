@@ -120,7 +120,7 @@ void Stage2::Update(float delta)
     if (CheckHitKey(KEY_INPUT_I)) is_over = true;
 
     // タイムで自動クリア
-    if (stage_timer >= 20.0f)
+    if (stage_timer >= 90.0f)
 
     {
         is_clear = true;
@@ -322,7 +322,7 @@ void Stage2::EnemyAppearance(float delta)
         {
             stage2boss_spawned = true;
 
-            Stage2Boss* boss = objm->CreateObject<Stage2Boss>(Vector2D(640.0f, 360.0f));
+            Stage2Boss* boss = objm->CreateObject<Stage2Boss>(Vector2D(640.0f, 200.0f));
             boss->Initialize();
             boss->SetPlayer(player);
             enemy_list.push_back(boss);
