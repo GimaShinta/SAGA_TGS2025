@@ -73,6 +73,7 @@ void Stage3::Initialize()
     // font_digital = CreateFontToHandle("DS-Digital", 28, 6, DX_FONTTYPE_ANTIALIASING);
     font_digital = CreateFontToHandle("Orbitron", 28, 6, DX_FONTTYPE_ANTIALIASING);
     font_orbitron = CreateFontToHandle("Orbitron", 22, 6, DX_FONTTYPE_ANTIALIASING);
+    font_warning = CreateFontToHandle("Orbitron", 48, 6, DX_FONTTYPE_ANTIALIASING);
 
 }
 
@@ -180,36 +181,53 @@ void Stage3::Draw()
 {
     // 背景などの描画
     DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(255, 255, 255), TRUE);
-    DrawScrollBackground();
-    DrawBox(0, 0, (D_WIN_MAX_X / 2) - 350, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
-    DrawBox((D_WIN_MAX_X / 2) + 350, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
+    DrawScrollBackground(); // 背景 & 背面グリッド（奥）
 
-    // テキスト表示
-    DrawString(0, 0, "Stage3", GetColor(255, 255, 255));
-    DrawFormatString(0, 20, GetColor(255, 255, 0), "敵数: %d", enemy_list.size());
-
-    // 警告演出
-    if (stage <= 1 && is_warning)
-    {
-        SetDrawBlendMode(DX_BLENDMODE_ALPHA, brend);
-        DrawBox((D_WIN_MAX_X / 2) - 350, 0, (D_WIN_MAX_X / 2) + 350, D_WIN_MAX_Y, GetColor(255, 0, 0), TRUE);
-        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
-    }
-
-    // --- 描画順を制御 ---
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
     AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
 
     if (draw_animation_first)  // ← このフラグで順序を切り替える
     {
+        // グリッドの裏に描画するタイミング：未生成 or 墜落中
+        if (boss2 != nullptr && (!boss2->GetGenerate()))
+        {
+            objm->DrawBoss();
+        }
+
+        DrawFrontGrid();  // 前面グリッド
         manager->Draw();       // 先にアニメーション
-        objm->Draw();          // 後にオブジェクト
+
+        // 通常戦闘中：生成済み & 墜落していない → グリッドの前に描画
+        if (boss2 != nullptr && boss2->GetGenerate())
+        {
+            objm->DrawBoss();
+        }
+
+        // オブジェクト描画の前に必ずブレンドモードを戻す
+        SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+        objm->DrawWithoutBoss();      // プレイヤー・ザコなど
     }
     else
     {
-        objm->Draw();          // 先にオブジェクト
+        // グリッドの裏に描画するタイミング：未生成 or 墜落中
+        if (boss2 != nullptr && (!boss2->GetGenerate()))
+        {
+            objm->DrawBoss();
+        }
+
+        DrawFrontGrid();  // 前面グリッド
+
+        // 通常戦闘中：生成済み & 墜落していない → グリッドの前に描画
+        if (boss2 != nullptr && boss2->GetGenerate())
+        {
+            objm->DrawBoss();
+        }
+        // オブジェクト描画の前に必ずブレンドモードを戻す
+        SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+        objm->DrawWithoutBoss();      // プレイヤー・ザコなど
         manager->Draw();       // 後にアニメーション
     }
+
 
     // ゲームクリア描画
     if (is_clear)
@@ -233,6 +251,70 @@ void Stage3::Draw()
 
         DrawFormatStringToHandle((D_WIN_MAX_X / 2) - 100.0f, (D_WIN_MAX_Y / 2), GetColor(255, 255, 255), font_digital, "GAME OVER");
     }
+
+
+    if (warning_state != WarningState::None)
+    {
+        int y_top = static_cast<int>(band_center_y - band_half_height);
+        int y_bottom = static_cast<int>(band_center_y + band_half_height);
+
+
+        // ★ここでラインを band_half_height > 0 のときだけ描画
+        if (band_half_height > 1.0f)
+        {
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
+            DrawBox(0, y_top, 1280, y_bottom, GetColor(255, 0, 0), TRUE);
+            SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+            DrawLine(0, y_top, 1280, y_top, GetColor(255, 255, 255));
+            DrawLine(0, y_bottom, 1280, y_bottom, GetColor(255, 255, 255));
+        }
+
+        if (warning_state == WarningState::Displaying)
+        {
+            DrawStringToHandle(static_cast<int>(warning_text_x), band_center_y - 20,
+                "!! WARNING !!", GetColor(255, 255, 255), font_warning);
+        }
+    }
+
+    //if (is_warning_finished) return;
+
+    //const int cx = 640;  // 画面中央X
+    //const int cy = 360;  // 画面中央Y
+
+    //// ===== ノイズ背景（DrawBoxで表現）=====
+    //SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
+
+    //const int block_size = 4;  // 1セルのサイズ
+    //for (int y = 0; y < 720; y += block_size) {
+    //    for (int x = 0; x < 1280; x += block_size) {
+    //        int gray = GetRand(255);
+    //        int color = GetColor(gray, gray, gray);
+    //        DrawBox(x, y, x + block_size, y + block_size, color, TRUE);
+    //    }
+    //}
+
+    //SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+    //// ===== フェーズ分岐 =====
+    //if (warning_timer < 1.5f) {
+    //    // フェーズ1：システムアラート
+    //    DrawStringToHandle(cx - 200, cy - 40, ">> SYSTEM ALERT <<", GetColor(255, 255, 255), font_orbitron);
+    //}
+    //else if (warning_timer < 3.5f) {
+    //    // フェーズ2：WARNING点滅
+    //    if (((int)(warning_timer * 4)) % 2 == 0) {
+    //        DrawStringToHandle(cx - 160, cy - 40, "!! WARNING !!", GetColor(255, 0, 0), font_orbitron);
+    //    }
+    //}
+    //else if (warning_timer < 5.0f) {
+    //    // フェーズ3：ボス名タイプ風表示
+    //    std::string boss_name = "CODE-Ω: DATALORD";
+    //    int chars = (int)((warning_timer - 3.5f) * 15);
+    //    if (chars > boss_name.length()) chars = boss_name.length();
+
+    //    std::string visible = boss_name.substr(0, chars);
+    //    DrawStringToHandle(cx - 200, cy + 40, visible.c_str(), GetColor(0, 255, 255), font_orbitron );
+    //}
 }
 
 bool Stage3::IsFinished()
@@ -257,49 +339,44 @@ StageBase* Stage3::GetNextStage(Player* player)
 
 void Stage3::DisplayWarning(float delta_second)
 {
-    // 警告表示（赤く光る）
-    if (is_warning == true)
+    if (warning_state == WarningState::None) return;
+
+    warning_timer += delta_second;
+
+    switch (warning_state)
     {
-        // カウント加算
-        warning_timer += delta_second;
-        if (warning_timer >= 0.0005f)
+    case WarningState::Expanding:
+        band_half_height += band_expand_speed * delta_second;
+        if (band_half_height >= band_max_half_height)
         {
-            // 透明度を０から２５５まで加算減算を繰り返す
-            if (is_brend == false)
-            {
-                if (brend < 255)
-                {
-                    brend++;
-                }
-                else
-                {
-                    is_brend = true;
-                }
-            }
-            else
-            {
-                if (brend > 0)
-                {
-                    brend--;
-                }
-                else
-                {
-                    // 到達カウントを加算
-                    reach_count++;
-                    is_brend = false;
-                }
-            }
-            // カウントリセット
-            warning_timer = 0;
+            band_half_height = band_max_half_height;
+            warning_state = WarningState::Displaying;
+            warning_timer = 0.0f;
         }
-        // ３回警告が終わったら全てリセット
-        if (reach_count >= 3)
+        break;
+
+    case WarningState::Displaying:
+        warning_text_x -= warning_scroll_speed * delta_second;
+        if (warning_text_x < -200)
+            warning_text_x = 1020;
+        if (warning_timer >= warning_duration)
         {
-            is_warning = false;
-            brend = 255;
-            warning_timer = 0;
-            reach_count = 0;
+            warning_state = WarningState::Shrinking;
         }
+        break;
+
+    case WarningState::Shrinking:
+        band_half_height -= band_expand_speed * delta_second;
+        if (band_half_height <= 0.0f)
+        {
+            band_half_height = 0.0f;
+            warning_state = WarningState::None;
+            // ボス登場処理などへ
+        }
+        break;
+
+    default:
+        break;
     }
 }
 
@@ -386,7 +463,11 @@ void Stage3::EnemyAppearance(float delta)
     // 2. 各時間帯ごとの出現処理に分岐
     if (stage_timer < 5.0f)
     {
-        SpawnBossAndItems();
+        StartWarning();
+        //is_warning = true;
+        //SpawnBossAndItems();
+
+        //SpawnBossAndItems();
         HandleZako1_LR(delta);
     }
     else if (stage_timer < 10.0f)
@@ -835,16 +916,7 @@ void Stage3::DrawScrollBackground() const
         DrawLine(0, sy, D_WIN_MAX_X, sy, GetColor(100, 0, 100));
     }
 
-    // === 前面の太いグリッド ===
-    const int grid_size_front = 80;
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
-    for (int x = 0; x < D_WIN_MAX_X; x += grid_size_front)
-        DrawBox(x - 1, 0, x + 1, D_WIN_MAX_Y, GetColor(200, 40, 200), TRUE);
-
-    for (int y = -grid_size_front; y < D_WIN_MAX_Y + grid_size_front; y += grid_size_front) {
-        int sy = y - static_cast<int>(scroll_front) % grid_size_front;
-        DrawBox(0, sy - 1, D_WIN_MAX_X, sy + 1, GetColor(200, 40, 200), TRUE);
-    }
 
     // === 粒子描画 ===
     for (const auto& p : star_particles)
@@ -1005,12 +1077,34 @@ void Stage3::SpawnBossAndItems()
 
     if (boss2_spawned) return;
 
-    objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2 - 60, 120));
-    objm->CreateObject<Shield>(Vector2D(D_WIN_MAX_X / 2 + 60, 120));
+    objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2 - 60, 120))->SetPlayer(player);
+    objm->CreateObject<Shield>(Vector2D(D_WIN_MAX_X / 2 + 60, 120))->SetPlayer(player);
 
     boss2 = objm->CreateObject<Boss2>(Vector2D(670, -200));
     boss2_spawned = true;
     is_warning = false;
+}
+
+void Stage3::DrawFrontGrid() const
+{
+    const int grid_size_front = 80;
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
+    for (int x = 0; x < D_WIN_MAX_X; x += grid_size_front)
+        DrawBox(x - 1, 0, x + 1, D_WIN_MAX_Y, GetColor(200, 40, 200), TRUE);
+
+    for (int y = -grid_size_front; y < D_WIN_MAX_Y + grid_size_front; y += grid_size_front) {
+        int sy = y - static_cast<int>(scroll_front) % grid_size_front;
+        DrawBox(0, sy - 1, D_WIN_MAX_X, sy + 1, GetColor(200, 40, 200), TRUE);
+    }
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+}
+
+void Stage3::StartWarning()
+{
+    warning_state = WarningState::Expanding;
+    warning_timer = 0.0f;
+    warning_text_x = 1280.0f;
+    band_half_height = 0.0f;
 }
 
 

@@ -69,6 +69,34 @@ private:
 
 	bool draw_animation_first = false;  // デフォルトはfalse
 
+
+	bool is_warning_finished = false;
+
+	bool is_warning_active = false;
+	float warning_duration = 10.0f;
+
+	float warning_text_x = 1280.0f; // 初期は右端外
+	float warning_scroll_speed = 700.0f; // px/秒
+
+
+	// メンバ変数など
+	float band_center_y = 360;          // 画面中央の基準位置
+	float band_half_height = 0.0f;      // 帯の半分の高さ（0から最大まで変化）
+	const float band_max_half_height = 60.0f; // 帯の最大半分の高さ（つまり高さ120）
+	float band_expand_speed = 200.0f;   // 帯が広がる速度(px/s)
+	int font_warning;
+
+
+	enum class WarningState {
+		None,       // 無効
+		Expanding,  // 帯が広がっていく
+		Displaying, // 表示中（テキストスクロール）
+		Shrinking   // 帯が縮む
+	};
+
+	WarningState warning_state = WarningState::None;
+
+
 public:
 	Stage3(Player* player);
 	~Stage3();
@@ -101,8 +129,11 @@ private:
 	void HandleZako2_Upward(float delta);
 	void SpawnBossAndItems();
 
+	void DrawFrontGrid() const;
+
 	float zako2_spawn_timer = 0.0f;
 
+	void StartWarning();
 
 	//グリッド
 	mutable float scroll_back = 0.0f;
@@ -143,4 +174,12 @@ private:
 	{
 		return (a > b) ? a : b;
 	}
+
+	float Clamp(float value, float min, float max)
+	{
+		if (value < min) return min;
+		if (value > max) return max;
+		return value;
+	}
+
 };

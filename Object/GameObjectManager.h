@@ -99,6 +99,8 @@ public:
 
 	// 
 	const Vector2D GetScreenOffset() const;
+	void DrawBoss() const;
+	void DrawWithoutBoss() const;
 
 private:
 	// インゲームに存在する全てのオブジェクトを削除

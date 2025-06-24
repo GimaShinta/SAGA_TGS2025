@@ -239,6 +239,29 @@ const Vector2D GameObjectManager::GetScreenOffset() const
 	return screen_offset;
 }
 
+void GameObjectManager::DrawBoss() const
+{
+	for (GameObjectBase* obj : game_object)
+	{
+		if (obj && obj->IsBoss())  // ボス判定を追加
+		{
+			obj->Draw(screen_offset);
+		}
+	}
+}
+
+
+void GameObjectManager::DrawWithoutBoss() const
+{
+	for (GameObjectBase* obj : game_object)
+	{
+		if (obj && !obj->IsBoss())
+		{
+			obj->Draw(screen_offset);
+		}
+	}
+}
+
 // インゲーム配列にいるオブジェクトを全て削除
 void GameObjectManager::DestoryAllObject()
 {

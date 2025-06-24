@@ -135,7 +135,7 @@ public:
 
 	bool GetGenerate() const;
 	bool GetIsCrashing() const;
-
+	bool IsBoss() const override { return true; }
 	//template <typename T>
 	//T Clamp(T value, T min, T max) {
 	//	return (value < min) ? min : (value > max) ? max : value;

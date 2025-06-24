@@ -110,6 +110,7 @@ public:
 	int GetAttackPattrn() const;
 	int GetIsAlive() const;
 	bool GetIsCrashing() const;
+	bool IsBoss() const override { return true; }
 
 
 	float Clamp(float value, float min, float max)

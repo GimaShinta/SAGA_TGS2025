@@ -87,7 +87,7 @@ public:
 	void SetScroll(float scroll);	// スクロール量の設定
 	void SetDestroy();	// スクロール量の設定
 
-
+	virtual bool IsBoss() const { return false; };
 
 
 	Vector2D& GetBoxSize();                             // オブジェクトの大きさを取得する
