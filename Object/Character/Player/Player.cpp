@@ -18,6 +18,7 @@ void Player::Initialize()
 	velocity = 0;
 	box_size = 10;
 
+
 	// 当たり判定のオブジェクト設定
 	collision.is_blocking = true;
 	// 自分のオブジェクトタイプ
@@ -298,19 +299,23 @@ void Player::Movement(float delta_second)
 	// 入力方向があれば正規化
 	if (input_dir.Length() > 1.0f) input_dir.Normalize();
 
-	// ★ アニメーション状態を先に決定（速度制限や位置制限より前に）★
-	if (input_dir.x > 0.1f) {
-		anim_state = PlayerAnimState::TiltRight;
-		box_size = Vector2D(8, 10); // 右に傾いているときの当たり判定（少し大きめ）
-	}
-	else if (input_dir.x < -0.1f) {
-		anim_state = PlayerAnimState::TiltLeft;
-		box_size = Vector2D(8, 10); // 左に傾いているときの当たり判定
-	}
-	else {
+	if (force_neutral_anim)
+	{
 		anim_state = PlayerAnimState::Neutral;
-		box_size = 10; // 通常時の当たり判定
 	}
+	else
+	{
+		if (input_dir.x > 0.1f) {
+			anim_state = PlayerAnimState::TiltRight;
+		}
+		else if (input_dir.x < -0.1f) {
+			anim_state = PlayerAnimState::TiltLeft;
+		}
+		else {
+			anim_state = PlayerAnimState::Neutral;
+		}
+	}
+
 
 	// 仮の次の位置を計算
 	Vector2D next_location = location + (input_dir * max_speed * delta_second);
@@ -674,3 +679,8 @@ bool Player::GetShieldOn() const
 {
 	return is_shield;
 }
+void Player::ForceNeutralAnim(bool enable)
+{
+	force_neutral_anim = enable;
+}
+

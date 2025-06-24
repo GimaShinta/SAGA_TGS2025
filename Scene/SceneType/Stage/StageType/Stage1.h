@@ -46,7 +46,7 @@ private:
 	int bs_attack_pattrn = 0;  // ボスの攻撃パターン制御用インデックス
 	float shot_timer;          // ショット発射の間隔制御タイマー
 
-	float stage_timer = 40.0f;  // ステージの経過時間（秒単位）
+	float stage_timer = 0.0f;  // ステージの経過時間（秒単位）
 	bool item_spawned = false;  // ← 追加
 
 	float scene_timer = 0.0f;  // 演出や状態遷移用タイマー
@@ -116,5 +116,14 @@ private:
 	void DrawScrollBackground() const override; // 背景のスクロール描画
 
 	mutable std::vector<std::pair<Vector2D, float>> ripple_list; // 位置と時間
+
+
+	//登場用演出
+	bool is_player_entering = true;
+	float player_entry_timer = 0.0f;
+	Vector2D entry_start_pos;
+	Vector2D entry_end_pos;
+
+
 
 };

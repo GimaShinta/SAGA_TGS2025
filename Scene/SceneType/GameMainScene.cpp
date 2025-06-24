@@ -25,7 +25,7 @@ void GameMainScene::Initialize()
     AnimationManager* anim = Singleton<AnimationManager>::GetInstance();
     anim->LoadAllEffects();
 
-    current_stage = new Stage3(player);
+    current_stage = new Stage1(player);
 
     current_stage->Initialize();
 
@@ -428,7 +428,7 @@ void GameMainScene::Draw()
     if (player && player->CanUseSpecial())
     {
         Vector2D pos = player->GetLocation();
-        int ui_x = static_cast<int>(pos.x) - 40;  
+        int ui_x = static_cast<int>(pos.x) - 55;  
         int ui_y = static_cast<int>(pos.y) + 40;
         int pulse = static_cast<int>(GetNowCount() % 100) > 50 ? 255 : 100;
 

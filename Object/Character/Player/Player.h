@@ -151,5 +151,14 @@ public:
 	int GetPowerd() const;
 	bool GetShieldOn() const;
 
+public:
+	void SetLocation(const Vector2D& pos) { location = pos; }
+	void SetMobility(bool enable) { is_mobility = enable; }
+
+	void ForceNeutralAnim(bool enable); // 強制ニュートラル用
+private:
+	bool force_neutral_anim = false;
+
+
 };
 

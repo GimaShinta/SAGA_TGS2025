@@ -19,6 +19,8 @@ private:
     int wait_timer = 0;
     int start_time = 0;
     bool confirm_reset = false;
+    int cursor_index = 0;  // カーソル位置の追加
+
 
     bool LoadRankingFromFile();
     void SaveRankingToFile();

@@ -19,6 +19,9 @@ enum class ZakoPattern
     ArcMoveAndStop,
     DepthAppear,
     RetreatUp,     // ← 追加：上方向に退場
+    SlowDownThenMove,   // ← 新パターン
+    PauseThenRush,      // ← 新パターン
+    RotateAndShoot,
     Count
 };
 
@@ -75,6 +78,4 @@ private:
     //ヒット時
     int sound_hit = -1;
     int sound_destroy = -1;
-
-
 };

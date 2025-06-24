@@ -122,6 +122,8 @@ void Zako::Update(float delta_second)
                 scale = 2.0f;
             }
 
+            Shot(delta_second);
+
             break;
         }
 
@@ -168,6 +170,8 @@ void Zako::Update(float delta_second)
                 scale = 2.0f;
             }
 
+            Shot(delta_second);
+
             break;
         }
 
@@ -178,7 +182,7 @@ void Zako::Update(float delta_second)
         case ZakoPattern::ZIgzag:
             velocity.x = sinf(pattern_timer * 1.5f) * 320;
             velocity.y = 100;
-            Shot(delta_second);
+            //Shot(delta_second);
             break;
 
         case ZakoPattern::SideAppearAndShoot:
@@ -278,20 +282,21 @@ void Zako::Update(float delta_second)
 
         case ZakoPattern::ArcMoveAndStop:
         {
-            const float arc_duration = 5.0f;
-            if (pattern_timer < arc_duration)
-            {
-                float t = pattern_timer / arc_duration;
-                float angle = t * 3.1415f;
-                velocity.x = cosf(angle) * 150.0f;
-                velocity.y = -sinf(angle) * 150.0f;
+            const float stop_y = custom_stop_y; // ó·: 200
+            if (location.y < stop_y) {
+                velocity = { 0, 100 };  // ç~â∫
             }
-            else
-            {
+            else {
                 velocity = { 0, 0 };
+                if (pattern_timer > 1.0f) {
+                    Vector2D to_player = player->GetLocation() - location;
+                    to_player.Normalize();
+                    velocity = to_player * 250;
+                }
             }
             break;
         }
+
 
         case ZakoPattern::DepthAppear:
         {
@@ -345,6 +350,67 @@ void Zako::Update(float delta_second)
 
             break;
         }
+        case ZakoPattern::SlowDownThenMove:
+        {
+            const float decel_duration = 1.0f;
+            const float accel_duration = 1.0f;
+
+            if (pattern_timer < decel_duration) {
+                float t = pattern_timer / decel_duration;
+                velocity.y = 250.0f * (1.0f - t); // èôÅXÇ…å∏ë¨
+                scale = 1.0f + t * 0.5f;
+            }
+            else if (pattern_timer < decel_duration + accel_duration) {
+                float t = (pattern_timer - decel_duration) / accel_duration;
+                velocity.y = 100.0f + 200.0f * t; // èôÅXÇ…çƒâ¡ë¨
+                scale = 1.5f;
+            }
+            else {
+                velocity.y = 300.0f;
+                scale = 1.5f;
+            }
+
+            
+            break;
+        }
+
+        case ZakoPattern::PauseThenRush:
+        {
+            const float descend_duration = 0.8f;
+            const float pause_duration = 0.5f;
+
+            if (pattern_timer < descend_duration) {
+                velocity = { 0.0f, 150.0f }; // ç~â∫
+            }
+            else if (pattern_timer < descend_duration + pause_duration) {
+                velocity = { 0.0f, 0.0f }; // í‚é~
+            }
+            else {
+                Vector2D to_player = player->GetLocation() - location;
+                to_player.Normalize();
+                velocity = to_player * 350.0f; // ìÀêi
+            }
+            break;
+        }
+        case ZakoPattern::RotateAndShoot:
+        {
+            velocity = { 0.0f, 80.0f }; // Ç‰Ç¡Ç≠ÇËâ∫ç~
+
+            // àÍíËä‘äuÇ≈ï˙éÀèÛÇ…íeÇèoÇ∑
+            if (fmod(pattern_timer, 0.5f) < delta_second && player)
+            {
+                const float base_angle = pattern_timer * 2.0f;
+                for (int i = 0; i < 8; ++i)
+                {
+                    float angle = base_angle + i * DX_PI / 4.0f;
+                    Vector2D dir(cosf(angle), sinf(angle));
+                    auto shot = Singleton<GameObjectManager>::GetInstance()->CreateObject<EnemyShot2>(location);
+                    shot->SetVelocity(dir * 220.0f);
+                }
+            }
+            break;
+        }
+
 
 
 
@@ -413,7 +479,7 @@ void Zako::SetPattern(ZakoPattern new_pattern)
     switch (pattern)
     {
         case ZakoPattern::MoveStraight:
-            hp = 20;
+            hp = 10;
             images = images_b;
             anim_indices = { 0,1,2,3,4,5,6,7,8,9,10,11 };
             scale = 1.5f;
@@ -421,7 +487,7 @@ void Zako::SetPattern(ZakoPattern new_pattern)
 
         case ZakoPattern::RightMove:
         case ZakoPattern::LeftMove:
-            hp = 30;
+            hp = 20;
             images = images_a;
             anim_indices = { 0, 1, 2, 3 };
             scale = 1.5f;
@@ -429,7 +495,7 @@ void Zako::SetPattern(ZakoPattern new_pattern)
 
         case ZakoPattern::ZIgzag:
         case ZakoPattern::MoveThenDiagonal:
-            hp = 20;
+            hp = 10;
             images = images_b;
             anim_indices = { 0,1,2,3,4,5,6,7,8,9,10,11 };
             scale = 1.5f;
@@ -438,7 +504,7 @@ void Zako::SetPattern(ZakoPattern new_pattern)
         case ZakoPattern::MoveAndStopShoot:
         case ZakoPattern::Formation:
         case ZakoPattern::DiveOnce:
-            hp = 30;
+            hp = 20;
             images = images_a;
             anim_indices = { 0, 1, 2, 3 };
             scale = 1.5f;
@@ -446,7 +512,7 @@ void Zako::SetPattern(ZakoPattern new_pattern)
 
         case ZakoPattern::SideAppearAndShoot:
         case ZakoPattern::ArcMoveAndStop:
-            hp = 25;
+            hp = 20;
             images = images_b;
             anim_indices = { 0,1,2,3,4,5,6,7,8,9,10,11 };
             scale = 1.5f;
@@ -464,6 +530,13 @@ void Zako::SetPattern(ZakoPattern new_pattern)
             anim_indices = { 0, 1, 2, 3 };
             scale = 1.5f;
             break;
+        case ZakoPattern::RotateAndShoot:
+            hp = 30;
+            images = images_a;
+            anim_indices = { 0, 1, 2, 3 };
+            scale = 1.5f;
+            break;
+
 
     }
 
