@@ -17,10 +17,10 @@ void Boss2::Initialize()
 	enemy_type = ENE_BOSS2;
 	z_layer = 1;
 	box_size = 30;
-	hp = 10000;
+	hp = 20000;
 
 	// 攻撃パターンの設定
-	attack_pattrn_num = { 4, 5, 6, 7, 9, 10 };
+	attack_pattrn_num = { 4, 5, 10, 12 };
 
 
 	// 当たり判定のオブジェクト設定
@@ -979,7 +979,6 @@ void Boss2::Pattrn4(int bullet_num, float speed, float spiral_interval, float sp
 
 			EnemyShot4* e_shot4 = objm->CreateObject<EnemyShot4>(generate_location);
 			e_shot4->SetVelocity(velocity);
-			e_shot4->SetAttackPattrn(1);
 		}
 	}
 
@@ -1015,7 +1014,6 @@ void Boss2::Pattrn4_2(int bullet_num, float speed, float spiral_interval, float 
 
 			EnemyShot4* e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x - 170.0f, generate_location.y + 65.0f));
 			e_shot4->SetVelocity(velocity);
-			e_shot4->SetAttackPattrn(1);
 		}
 
 		for (int i = 0; i < bullet_num; i++)
@@ -1027,7 +1025,6 @@ void Boss2::Pattrn4_2(int bullet_num, float speed, float spiral_interval, float 
 
 			EnemyShot4* e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x + 170.0f, generate_location.y + 65.0f));
 			e_shot4->SetVelocity(velocity);
-			e_shot4->SetAttackPattrn(1);
 		}
 	}
 
@@ -1087,7 +1084,6 @@ void Boss2::Pattrn5(float spiral_interval, float spiral_duration_limit, float sp
 
 		EnemyShot4* shot = objm->CreateObject<EnemyShot4>(generate_location);
 		shot->SetVelocity(velocity);
-		shot->SetAttackPattrn(2);
 #endif
 
 
@@ -1158,7 +1154,6 @@ void Boss2::Pattrn5_2(float spiral_interval, float spiral_duration_limit, float 
 
 			EnemyShot4* shot = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x + 170.0f, generate_location.y + 65.0f));
 			shot->SetVelocity(velocity);
-			shot->SetAttackPattrn(2);
 		}
 
 		// 左側（反時計回り、上方向のみ）
@@ -1171,7 +1166,6 @@ void Boss2::Pattrn5_2(float spiral_interval, float spiral_duration_limit, float 
 
 			EnemyShot4* shot = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x - 170.0f, generate_location.y + 65.0f));
 			shot->SetVelocity(velocity);
-			shot->SetAttackPattrn(2);
 		}
 
 
@@ -1227,7 +1221,6 @@ void Boss2::Pattrn6(float fan_angle_range, float bullet_speed, float fan_interva
 
 		e_shot4 = objm->CreateObject<EnemyShot4>(generate_location);
 		e_shot4->SetVelocity(velocity);
-		e_shot4->SetAttackPattrn(1);
 		
 	}
 
@@ -1267,10 +1260,8 @@ void Boss2::Pattrn6_2(float fan_angle_range, float bullet_speed, float fan_inter
 
 		e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x + 170.0f, generate_location.y + 65.0f));
 		e_shot4->SetVelocity(velocity);
-		e_shot4->SetAttackPattrn(2);
 		e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x - 170.0f, generate_location.y + 65.0f));
 		e_shot4->SetVelocity(velocity);
-		e_shot4->SetAttackPattrn(2);
 	}
 
 	// 時間制限を超えたら終了（発射しない）
@@ -1318,7 +1309,6 @@ void Boss2::Pattrn7(float fan_angle_range, float bullet_speed, float fan_interva
 
 			e_shot4 = objm->CreateObject<EnemyShot4>(generate_location);
 			e_shot4->SetVelocity(velocity);
-			e_shot4->SetAttackPattrn(2);
 		}
 	}
 
@@ -1358,7 +1348,6 @@ void Boss2::Pattrn7_2(float fan_angle_range, float bullet_speed, float fan_inter
 
 			e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x + 170.0f, generate_location.y - 10.0f));
 			e_shot4->SetVelocity(velocity);
-			e_shot4->SetAttackPattrn(2);
 		}
 
 		for (int i = 0; i < bullet_count; ++i)
@@ -1371,7 +1360,6 @@ void Boss2::Pattrn7_2(float fan_angle_range, float bullet_speed, float fan_inter
 
 			e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x - 170.0f, generate_location.y - 10.0f));
 			e_shot4->SetVelocity(velocity);
-			e_shot4->SetAttackPattrn(2);
 		}
 	}
 
@@ -1485,7 +1473,6 @@ void Boss2::Pattrn9(int shot_count, float radius, float angular_speed, float bul
 			{
 				rotating_shots.push_back(e_shot4);  // 正しく生成されたら弾を保存
 				e_shot4->SetVelocity(Vector2D(0, 0)); // 回転だけなので弾速は0
-				e_shot4->SetAttackPattrn(1);
 			}
 		}
 	}
@@ -1679,7 +1666,6 @@ void Boss2::Pattrn10(int shot_count, float radius, float angular_speed, float ce
 				{
 					shot->SetVelocity(Vector2D(0, 0));
 					rotating_shots.push_back(shot);
-					e_shot4->SetAttackPattrn(1);
 				}
 			}
 
@@ -1752,7 +1738,6 @@ void Boss2::Pattrn10_2(int shot_count, float radius, float angular_speed, float 
 				if (shot_L)
 				{
 					shot_L->SetVelocity(Vector2D(0, 0));
-					shot_L->SetAttackPattrn(1);
 					shot_data_L.push_back({ shot_L, angle, offset, 0.0f, RotatingShotData::State::MoveToCircle });
 				}
 
@@ -1761,7 +1746,6 @@ void Boss2::Pattrn10_2(int shot_count, float radius, float angular_speed, float 
 				if (shot_R)
 				{
 					shot_R->SetVelocity(Vector2D(0, 0));
-					shot_R->SetAttackPattrn(1);
 					shot_data_R.push_back({ shot_R, angle, offset, 0.0f, RotatingShotData::State::MoveToCircle });
 				}
 			}
