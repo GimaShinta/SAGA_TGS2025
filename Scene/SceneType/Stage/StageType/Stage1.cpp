@@ -61,7 +61,8 @@ void Stage1::Initialize()
     player->ForceNeutralAnim(true); // ← アニメも固定
 
 
-
+    font_warning = CreateFontToHandle("Orbitron", 48, 6, DX_FONTTYPE_ANTIALIASING);
+    font_orbitron = CreateFontToHandle("Orbitron", 22, 6, DX_FONTTYPE_ANTIALIASING);
     font_digital = CreateFontToHandle("メイリオ", 28, 6, DX_FONTTYPE_ANTIALIASING);
 
     ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
@@ -228,6 +229,62 @@ void Stage1::Update(float delta)
     //スクロール
     scroll_y += 400.0f * delta;
 
+    // ミッションラベル演出（開始3秒間）
+   // ステージ開始演出（バンドと文字）
+    if (stage_timer < 5.0f && !warning_label_shown)
+    {
+        switch (warning_label_state)
+        {
+        case WarningLabelState::None:
+            warning_label_state = WarningLabelState::Expanding;
+            warning_label_timer = 0.0f;
+            warning_label_band_height = 0.0f;
+            slide_out_timer = 0.0f;
+            break;
+
+        case WarningLabelState::Expanding:
+            warning_label_band_height += warning_label_expand_speed * delta;
+            if (warning_label_band_height >= warning_label_max_height)
+            {
+                warning_label_band_height = warning_label_max_height;
+                warning_label_state = WarningLabelState::Displaying;
+                warning_label_timer = 0.0f;
+            }
+            break;
+
+        case WarningLabelState::Displaying:
+            warning_label_timer += delta;
+            if (warning_label_timer >= warning_label_display_duration)
+            {
+                warning_label_state = WarningLabelState::SlideOut;
+                slide_out_timer = 0.0f;
+            }
+            break;
+
+        case WarningLabelState::SlideOut:
+            slide_out_timer += delta;
+            if (slide_out_timer >= 0.5f) // スライドアウト完了
+            {
+                warning_label_state = WarningLabelState::Shrinking;
+            }
+            break;
+
+        case WarningLabelState::Shrinking:
+            warning_label_band_height -= warning_label_expand_speed * delta;
+            if (warning_label_band_height <= 0.0f)
+            {
+                warning_label_band_height = 0.0f;
+                warning_label_state = WarningLabelState::None;
+                warning_label_shown = true;
+            }
+            break;
+        }
+    }
+
+
+
+
+
     if (distance_timer >= 0.01f)
     {
         if (distance > 0)
@@ -253,10 +310,13 @@ void Stage1::Update(float delta)
         is_over = true; 
     }
 
-    // 敵の出現
-    EnemyAppearance(delta);
+    enemy_delay_timer += delta;
+    if (enemy_delay_timer >= 5.0f) // 0.5秒経過後に出現
+    {
+        EnemyAppearance(delta);
+        enemy_spawned = true;
+    }
 
-  
 
     //// 敵が倒された時は経験値を生成。
     //for (auto& enemy : enemy_list)
@@ -374,6 +434,69 @@ void Stage1::Draw()
     DrawFormatString(0, 20, GetColor(255, 255, 255), "Time: %.1f", stage_timer);
 
     DrawFadeOverlay();
+
+    // -------- ステージ演出：Neural Grid --------
+    if (warning_label_state != WarningLabelState::None && warning_label_band_height > 1.0f)
+    {
+        int y_top = static_cast<int>(360 - warning_label_band_height);
+        int y_bottom = static_cast<int>(360 + warning_label_band_height);
+
+        // パルスライティング（明滅ライン）
+        float pulse = (sinf(stage_timer * 6.0f) + 1.0f) * 0.5f; // 0.0?1.0
+        int pulse_alpha = static_cast<int>(pulse * 180);
+
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, pulse_alpha);
+        DrawLine(0, y_top, 1280, y_top, GetColor(120, 220, 255));
+        DrawLine(0, y_bottom, 1280, y_bottom, GetColor(120, 220, 255));
+        SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+        // グリッチ風のランダムスキャンライン（ちらつき演出）
+        for (int i = 0; i < 8; ++i)
+        {
+            int glitch_y = y_top + rand() % (2 * static_cast<int>(warning_label_band_height));
+            int glitch_len = 50 + rand() % 100;
+            int glitch_x = rand() % (1280 - glitch_len);
+
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100 + rand() % 100);
+            DrawBox(glitch_x, glitch_y, glitch_x + glitch_len, glitch_y + 2, GetColor(200, 255, 255), TRUE);
+            SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+        }
+
+
+
+
+        if (
+            warning_label_state == WarningLabelState::Displaying ||
+            warning_label_state == WarningLabelState::SlideOut
+            )
+        {
+            int center_x = D_WIN_MAX_X / 2;
+
+            // スライドイン
+            float slide_in_t = warning_label_timer / 0.5f;
+            if (slide_in_t > 1.0f) slide_in_t = 1.0f;
+            float slide_in = 1.0f - powf(1.0f - slide_in_t, 3.0f);
+
+            // スライドアウト（右→左）
+            float slide_out_t = slide_out_timer / 0.5f;
+            if (slide_out_t > 1.0f) slide_out_t = 1.0f;
+            float slide_out = 1.0f + slide_out_t;  // ? 左へ流す補正
+
+            float t = (warning_label_state == WarningLabelState::Displaying) ? slide_in : slide_out;
+
+            int stage_name_x = static_cast<int>((1.0f - t) * 1280 + t * (center_x - 150));
+            int sub_text_x = static_cast<int>((1.0f - t) * 1280 + t * (center_x - 150));
+
+            DrawStringToHandle(stage_name_x, 320,
+                "Neural Grid", GetColor(255, 255, 255), font_warning);
+
+            DrawStringToHandle(sub_text_x, 370,
+                "Eliminate all hostile units.", GetColor(120, 255, 255), font_orbitron);
+        }
+
+    }
+
+
 
     if (is_warning)
     {

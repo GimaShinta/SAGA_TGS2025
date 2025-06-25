@@ -25,30 +25,36 @@ void GameMainScene::Initialize()
     AnimationManager* anim = Singleton<AnimationManager>::GetInstance();
     anim->LoadAllEffects();
 
-    current_stage = new Stage2(player);
+    current_stage = new Stage1(player);
 
     current_stage->Initialize();
 
     // BGM読み込み（初回のみ）
     ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
-    stage_bgm1 = rm->GetSounds("Resource/sound/bgm/stage/Magical World.mp3");
-    stage_bgm3 = rm->GetSounds("Resource/sound/bgm/stage/Cryonic Pulse.mp3");
+    stage_bgm1 = rm->GetSounds("Resource/sound/bgm/stage/BGM_2.mp3");
+    stage_bgm3 = rm->GetSounds("Resource/sound/bgm/stage/Cybernetic.mp3");
+
+    se_charge = rm->GetSounds("Resource/sound/se/effect/audiostock_1133382.mp3");
+    ChangeVolumeSoundMem(255 * 100 / 100, se_charge);
+   
 
     //サイドパネル画像
     obi_handle = rm->GetImages("Resource/Image/BackGround/Main/Obi_1.png")[0];
 
     //フォント
-    font_digital = CreateFontToHandle("DS-Digital", 28, 6, DX_FONTTYPE_ANTIALIASING);
-   // font_digital = CreateFontToHandle("Orbitron", 28, 6, DX_FONTTYPE_ANTIALIASING);
-    //font_orbitron = CreateFontToHandle("Orbitron", 22, 6, DX_FONTTYPE_ANTIALIASING);
-    font_orbitron = CreateFontToHandle("DS-Digital", 28, 6, DX_FONTTYPE_ANTIALIASING);
+   // font_digital = CreateFontToHandle("DS-Digital", 28, 6, DX_FONTTYPE_ANTIALIASING);
+    font_digital = CreateFontToHandle("Orbitron", 28, 6, DX_FONTTYPE_ANTIALIASING);
+    font_orbitron = CreateFontToHandle("Orbitron", 22, 6, DX_FONTTYPE_ANTIALIASING);
+    //font_orbitron = CreateFontToHandle("DS-Digital", 28, 6, DX_FONTTYPE_ANTIALIASING);
 
     m_menuFontHandle = CreateFontToHandle("Orbitron", 36, 6); // メニュー専用フォント
 
 
     // ステージ1用BGMを再生
     current_bgm_handle = stage_bgm1;
-    ChangeVolumeSoundMem(255 * 60 / 100, current_bgm_handle);
+
+    ChangeVolumeSoundMem(255 * 70 / 100, current_bgm_handle);
+
     PlaySoundMem(current_bgm_handle, DX_PLAYTYPE_LOOP);
 }
 
@@ -100,7 +106,7 @@ eSceneType GameMainScene::Update(float delta_second)
                         {
                             StopSoundMem(current_bgm_handle); // 現在のBGMを停止
                             current_bgm_handle = stage_bgm3;  // ステージ3用BGMに切り替え
-                            ChangeVolumeSoundMem(255 * 60 / 100, current_bgm_handle);
+                            ChangeVolumeSoundMem(255 * 90 / 100, current_bgm_handle);
                             PlaySoundMem(current_bgm_handle, DX_PLAYTYPE_LOOP);
                         }
                     }
@@ -245,6 +251,8 @@ void GameMainScene::Draw()
     // === 右の黒帯（左右反転）===
     DrawTurnGraph(D_WIN_MAX_X - 290, 0, obi_handle, TRUE);
 
+  
+
 
     // === 左のサイドパネル（サイバー風） ===
     {
@@ -301,9 +309,17 @@ void GameMainScene::Draw()
         //DrawLine(right_x1, scan_y, right_x2, scan_y, GetColor(0, 150, 255));
     }
 
+    // Draw() のサイドパネル描画後に追加
+    for (int y = 0; y < 720; y += 4)
+    {
+        int alpha = (y % 8 == 0) ? 40 : 20;
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+        DrawBox(0, y, 290, y + 2, GetColor(100, 255, 255), TRUE); // 左パネル
+        DrawBox(990, y, 1280, y + 2, GetColor(100, 255, 255), TRUE); // 右パネル（例）
+    }
+    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
-
-    DrawFormatString(D_WIN_MAX_X - 140, 0, GetColor(255, 255, 255), "Life:%d", player->life);
+   // DrawFormatString(D_WIN_MAX_X - 140, 0, GetColor(255, 255, 255), "Life:%d", player->life);
 
     // ==== 合計スコア（キルログの上） ====
   {
@@ -427,6 +443,7 @@ void GameMainScene::Draw()
     // ==== SPECIAL READY UI（プレイヤー下に真ん中表示） ====
     if (player && player->CanUseSpecial())
     {
+        PlaySoundMem(se_charge, DX_PLAYTYPE_BACK);
         Vector2D pos = player->GetLocation();
         int ui_x = static_cast<int>(pos.x) - 55;  
         int ui_y = static_cast<int>(pos.y) + 40;

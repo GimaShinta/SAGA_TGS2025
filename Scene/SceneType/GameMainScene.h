@@ -26,6 +26,8 @@ private:
 	float pause_timer = 0.0f;
 	int transparent = 0.0f;
 
+	int se_charge;
+
 	// ↓ スコアログ処理用構造体と変数
 	struct ScoreLog 
 	{

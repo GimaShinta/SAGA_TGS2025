@@ -32,7 +32,7 @@ void Shot::Initialize()
 	is_mobility = true;
 
 	ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
-	se = rm->GetSounds("Resource/sound/se/shot/shot_01.mp3");
+	se = rm->GetSounds("Resource/sound/se/shot/shot_02.mp3");
 	image = rm->GetImages("Resource/Image/Object/Player/Shot/anime_effect16.png", 6, 6, 1, 8, 88)[0];
 
 	//AnimationManager* am = Singleton<AnimationManager>::GetInstance();
@@ -41,8 +41,9 @@ void Shot::Initialize()
 	//// ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì’Ç‰ÁÝ’è
 	//am->SetAlpha(anim_id, 122);       // ”¼“§–¾
 	//am->SetScale(anim_id, 0.1f);      // 1.5”{Šg‘å
-
-	ChangeVolumeSoundMem(255 * 30 / 100, se);
+	hit_se = rm->GetSounds("Resource/sound/se/se_effect/reaction.mp3");
+	ChangeVolumeSoundMem(255 * 110 / 100, hit_se);
+	ChangeVolumeSoundMem(255 * 60 / 100, se);
 	PlaySoundMem(se, DX_PLAYTYPE_BACK);
 }
 
@@ -105,6 +106,7 @@ void Shot::OnHitCollision(GameObjectBase* hit_object)
 		float random_x = static_cast<float>(GetRand(20));
 		if (GetRand(2) == 1)
 		{
+			PlaySoundMem(hit_se, DX_PLAYTYPE_BACK);
 			random_x *= -1;
 		}
 		float random_y = static_cast<float>(GetRand(15));
@@ -123,6 +125,7 @@ void Shot::OnHitCollision(GameObjectBase* hit_object)
 	if (hit_object->GetCollision().object_type == eObjectType::eBoss2 ||
 		hit_object->GetCollision().object_type == eObjectType::eBoss3)
 	{
+		PlaySoundMem(hit_se, DX_PLAYTYPE_BACK);
 		float random_x = static_cast<float>(GetRand(100));
 
 		anim_id = am->PlayerAnimation(EffectName::eExprotion2, Vector2D(location.x, location.y - random_x), 0.01f, false);

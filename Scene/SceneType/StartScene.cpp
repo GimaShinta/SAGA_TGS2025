@@ -7,6 +7,15 @@ StartScene::~StartScene() {}
 
 void StartScene::Initialize()
 {
+
+   // m_seTypeSound = LoadSoundMem("C:\PG\SAGA_TGS2025\Resource\sound\se\se_effect\tap.mp3"); // 任意のSEファイル
+
+    ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
+    m_seTypeSound = rm->GetSounds("Resource/sound/se/se_effect/tap.mp3");
+
+    m_nextCharDelay = 0.08f + (GetRand(120) / 1000.0f);  // → 0.08～0.2秒
+
+
     m_step = Step::WaitForInput;
     m_elapsedTime = 0.0f;
     m_displayCharCount = 0;
@@ -37,12 +46,19 @@ eSceneType StartScene::Update(float delta_second)
     case Step::IntroText:
     {
         int totalLength = (int)(std::strlen(m_introText[0]) + std::strlen(m_introText[1]));
-        if (m_displayCharCount < totalLength) {
-            if (m_elapsedTime > 0.04f) {
+        if (m_displayCharCount < totalLength)
+        {
+            if (m_elapsedTime > m_nextCharDelay)
+            {
+                PlaySoundMem(m_seTypeSound, DX_PLAYTYPE_BACK);
                 m_displayCharCount++;
                 m_elapsedTime = 0.0f;
+
+                // 次の文字表示までのディレイ（0.08?0.2秒）
+                m_nextCharDelay = 0.08f + (GetRand(120) / 1000.0f);
             }
         }
+
         else {
             m_step = Step::GoToTitle;
             m_elapsedTime = 0.0f;
@@ -120,6 +136,12 @@ void StartScene::Finalize()
         m_fontJP = -1;
 
     }
+
+    if (m_seTypeSound != -1) {
+        DeleteSoundMem(m_seTypeSound);
+        m_seTypeSound = -1;
+    }
+
 }
 
 eSceneType StartScene::GetNowSceneType() const { return eSceneType::eStart; }

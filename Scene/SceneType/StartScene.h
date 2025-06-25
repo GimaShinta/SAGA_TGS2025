@@ -22,6 +22,9 @@ private:
 	int m_fontDigital = -1;
 	int m_fontJP = -1;
 
+	int m_seTypeSound = -1;  // 1•¶Žš‚¸‚Â–Â‚éSE
+	float m_nextCharDelay = 0.0f; // ŽŸ‚Ì•¶Žš‚Ü‚Å‚Ìƒ‰ƒ“ƒ_ƒ€‘Ò‹@ŽžŠÔ
+
 
 public:
 	StartScene();

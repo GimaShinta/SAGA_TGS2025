@@ -86,6 +86,11 @@ private:
 	void EnemyAppearance(float delta);       // 敵の出現処理
 	void PlayerShot();
 
+	float enemy_delay_timer = 0.0f;
+	bool enemy_spawned = false;
+
+
+
 private:
 	bool finished = false;                   // ステージ終了フラグ
 
@@ -123,6 +128,29 @@ private:
 	float player_entry_timer = 0.0f;
 	Vector2D entry_start_pos;
 	Vector2D entry_end_pos;
+
+	// 警告ラベル演出用
+	enum class WarningLabelState {
+		None,
+		Expanding,
+		Displaying,
+		SlideOut,
+		Shrinking
+	};
+
+	WarningLabelState warning_label_state = WarningLabelState::None;
+	float warning_label_timer = 0.0f;
+	float warning_label_band_height = 0.0f;
+
+	const float warning_label_max_height = 60.0f;
+	const float warning_label_expand_speed = 200.0f;
+	const float warning_label_display_duration = 2.5f;
+
+	int font_warning = -1;
+	int font_orbitron = -1;
+	bool warning_label_shown = false;
+	int warning_label_alpha = 255; // 文字の透明度
+	float slide_out_timer = 0.0f;
 
 
 

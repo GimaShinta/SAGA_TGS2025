@@ -48,8 +48,9 @@ void Zako::Initialize()
     //SE
    // sound_hit = rm->GetSounds("Resource/Sound/reaction.mp3");
     sound_destroy = rm->GetSounds("Resource/sound/se/se_effect/kill_4.mp3");
-    ChangeVolumeSoundMem(255 * 50 / 100, sound_destroy);
-
+    se_start = rm->GetSounds("Resource/sound/se/effect/buon.mp3");
+    ChangeVolumeSoundMem(255 * 120 / 100, sound_destroy);
+    ChangeVolumeSoundMem(255 * 120 / 100, se_start);
     ChangePatternRandomly();
 }
 
@@ -77,6 +78,7 @@ void Zako::Update(float delta_second)
                 scale = 2.0f;
                 velocity = { 0, 180 };     // ’ÊíƒXƒP[ƒ‹•ˆÚ“®
             }
+            Shot(delta_second);
             break;
         }
 
@@ -487,6 +489,7 @@ void Zako::SetPattern(ZakoPattern new_pattern)
 
         case ZakoPattern::RightMove:
         case ZakoPattern::LeftMove:
+            PlaySoundMem(se_start, DX_PLAYTYPE_BACK);
             hp = 20;
             images = images_a;
             anim_indices = { 0, 1, 2, 3 };

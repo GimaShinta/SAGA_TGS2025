@@ -31,7 +31,7 @@ void Exp::Initialize()
     ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
 
     se = rm->GetSounds("Resource/sound/se/effect/audiostock_890909.mp3");
-    ChangeVolumeSoundMem(255 * 30 / 100, se);
+    ChangeVolumeSoundMem(255 * 80 / 100, se);
 
     images = rm->GetImages("Resource/Image/Effect/pipo-gate01c.png", 15, 5, 3, 480, 480);
     image = images[0];

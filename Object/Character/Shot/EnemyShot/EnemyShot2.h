@@ -3,6 +3,7 @@
 class EnemyShot2 :
 	public EnemyShotBase
 {
+
 public:
 	EnemyShot2();
 	~EnemyShot2();

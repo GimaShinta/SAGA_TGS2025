@@ -5,6 +5,7 @@ class EnemyShotBase : public CharacterBase
 {
 protected:
 	float move_time = 0.0f;
+	int se;
 
 public:
 	EnemyShotBase();

@@ -78,4 +78,5 @@ private:
     //ƒqƒbƒg
     int sound_hit = -1;
     int sound_destroy = -1;
+    int se_start = -1;
 };

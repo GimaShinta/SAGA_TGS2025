@@ -27,7 +27,10 @@ void EnemyShot2::Initialize()
 	is_mobility = true;
 
 	ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
-	image = rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime81.png", 6, 6, 1, 24, 24)[0];
+	image = rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/standard/bullet73.png")[0];
+	se = rm->GetSounds("Resource/sound/se/shot/shot_01.mp3");
+	ChangeVolumeSoundMem(255 * 90 / 100, se);
+	PlaySoundMem(se, DX_PLAYTYPE_BACK);
 
 }
 

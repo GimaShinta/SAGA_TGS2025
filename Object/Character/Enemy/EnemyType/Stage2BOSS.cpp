@@ -13,7 +13,7 @@ Stage2Boss::~Stage2Boss()
 
 void Stage2Boss::Initialize()
 {
-    hp = 3000;
+    hp = 10000;
     box_size = 50;
     z_layer = 2;
     enemy_type = ENE_ZAKO1;
