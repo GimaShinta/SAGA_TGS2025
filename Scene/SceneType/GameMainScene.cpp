@@ -66,9 +66,9 @@ void GameMainScene::Initialize()
 eSceneType GameMainScene::Update(float delta_second)
 {
     InputManager* input = Singleton<InputManager>::GetInstance();
-
+#if _DEBUG
     InputSePlay();
-
+#endif
     if (input->GetButtonDown(XINPUT_BUTTON_START) ||
         input->GetKeyDown(KEY_INPUT_P)) {
         isPaused = !isPaused;
@@ -356,6 +356,12 @@ void GameMainScene::Draw()
 
     // ’Êí•`‰æ‚É–ß‚·i”O‚Ì‚½‚ßj
     SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+#if _DEBUG
+    DrawFormatString(0, 0, GetColor(255, 255, 255), "se_volume : %d", vo);
+
+#endif // _DEBUG
+
    }
 
 
@@ -690,5 +696,27 @@ void GameMainScene::InputSePlay()
         se = rm->GetSounds("Resource/sound/se/effect/audiostock_1133382.mp3");
         PlaySoundMem(se, DX_PLAYTYPE_LOOP);
     }
+
+    if (input->GetKeyDown(KEY_INPUT_UP))
+    {
+        vo++;
+
+        if (vo > 100)
+        {
+            vo = 100;
+        }
+    }
+    else if (input->GetKeyDown(KEY_INPUT_DOWN))
+    {
+        vo--;
+
+        if (vo < 0)
+        {
+            vo = 0;
+        }
+    }
+
+    int volume = 255 * vo / 100;
+    ChangeVolumeSoundMem(volume, se);
 }
 

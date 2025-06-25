@@ -45,6 +45,8 @@ private:
 	int m_menuFontHandle;
 	float line_effect_timer = 0.0f; // ライン演出用の独自タイマー
 
+	int vo = 70;
+
 public:
 	GameMainScene();
 	virtual ~GameMainScene();
