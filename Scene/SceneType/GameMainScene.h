@@ -70,4 +70,6 @@ public:
 
 	// スコアログ追加関数
 	void AddScoreLog(const std::string& text);
+
+	void InputSePlay();
 };

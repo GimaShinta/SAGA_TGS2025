@@ -67,6 +67,8 @@ eSceneType GameMainScene::Update(float delta_second)
 {
     InputManager* input = Singleton<InputManager>::GetInstance();
 
+    InputSePlay();
+
     if (input->GetButtonDown(XINPUT_BUTTON_START) ||
         input->GetKeyDown(KEY_INPUT_P)) {
         isPaused = !isPaused;
@@ -650,5 +652,43 @@ void GameMainScene::AddScoreLog(const std::string& text)
     }
 
 
+}
+
+void GameMainScene::InputSePlay()
+{
+    InputManager* input = Singleton<InputManager>::GetInstance();
+    ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
+    int se = NULL;
+
+    if (input->GetKeyDown(KEY_INPUT_1))
+    {
+        se = rm->GetSounds("Resource/sound/se/effect/audiostock_1133382.mp3");
+        PlaySoundMem(se, DX_PLAYTYPE_LOOP);
+    }
+    if (input->GetKeyDown(KEY_INPUT_2))
+    {
+        se = rm->GetSounds("Resource/sound/se/effect/audiostock_1133382.mp3");
+        PlaySoundMem(se, DX_PLAYTYPE_LOOP);
+    }
+    if (input->GetKeyDown(KEY_INPUT_3))
+    {
+        se = rm->GetSounds("Resource/sound/se/effect/audiostock_1133382.mp3");
+        PlaySoundMem(se, DX_PLAYTYPE_LOOP);
+    }
+    if (input->GetKeyDown(KEY_INPUT_4))
+    {
+        se = rm->GetSounds("Resource/sound/se/effect/audiostock_1133382.mp3");
+        PlaySoundMem(se, DX_PLAYTYPE_LOOP);
+    }
+    if (input->GetKeyDown(KEY_INPUT_5))
+    {
+        se = rm->GetSounds("Resource/sound/se/effect/audiostock_1133382.mp3");
+        PlaySoundMem(se, DX_PLAYTYPE_LOOP);
+    }
+    if (input->GetKeyDown(KEY_INPUT_6))
+    {
+        se = rm->GetSounds("Resource/sound/se/effect/audiostock_1133382.mp3");
+        PlaySoundMem(se, DX_PLAYTYPE_LOOP);
+    }
 }
 
