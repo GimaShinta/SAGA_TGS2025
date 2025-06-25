@@ -17,7 +17,7 @@ void Boss3::Initialize()
 	enemy_type = ENE_BOSS3;
 	z_layer = 1;
 	box_size = 30;
-	hp = 100;
+	hp = 10000;
 
 	// 攻撃パターンの設定
 	attack_pattrn_num = { 11 };
@@ -104,93 +104,119 @@ void Boss3::Update(float delta_second)
 
 	// 部品の相対オフセット（左右に2個ずつ）
 	Vector2D offsets_2[11] = {
-		Vector2D(0, -100), // 左奥
-		Vector2D(0, 200), // 左手前
+		Vector2D(0, -60), // 顔
+		Vector2D(0, 120), // 目
 		Vector2D(-60,  0), // 右手前
-		Vector2D(-120, 250),  // 右奥
-		Vector2D(120, 250),  // 砲
-		Vector2D(-300, 100),  // 砲
-		Vector2D(300, 100),  // 砲
-		Vector2D(-350, -70),  // 砲
-		Vector2D(350, -70),  // 砲
+		Vector2D(-70, 150),  // 発射工左
+		Vector2D(70, 150),  // 砲
+		Vector2D(-150, 70),  // 砲
+		Vector2D(150, 70),  // 砲
+		Vector2D(-220, -50),  // 砲
+		Vector2D(220, -50),  // 砲
 		Vector2D(-60, 30)  // 砲
 	};
 
 	if (is_crashing) {
+		// 衝突処理は無効化
 		collision.object_type = eObjectType::eNone;
 		collision.hit_object_type.clear();
 
+		// タイマー加算
 		crash_timer += delta_second;
 
 		const float crash_duration = 10.0f;
 		float t = Clamp(crash_timer / crash_duration, 0.0f, 1.0f);
-		float eased_t = 1.0f - pow(1.0f - t, 3); // easeOutCubic
-		image_size = Lerp(3.5f, 1.0f, eased_t);
+		float eased_t = 1.0f - pow(1.0f - t, 3);
+		image_size = Lerp(2.0f, 1.0f, eased_t); // スケール縮小
 
-		// 横移動・振動処理
-		base_position.x += 200.0f * delta_second;
+		// ===== 放物線的な移動 =====
+		crash_velocity.y += gravity * delta_second;   // 重力で落下加速
+		base_position += crash_velocity * delta_second;
+
+		// ===== 振動演出 =====
 		float shake_amplitude = 20.0f * t;
-		base_position.y += sin(crash_timer * 10.0f) * shake_amplitude * delta_second;
+		float shake = sin(crash_timer * 10.0f) * shake_amplitude;
+		base_position.y += shake * delta_second;
 
-		// 部品のオフセットを縮めて寄せる
+		// ===== 部品を縮めて本体に寄せる =====
 		for (int i = 0; i < 11; ++i) {
-			float offset_ratio = Lerp(1.0f, 0.3f, eased_t);
+			float offset_ratio = Lerp(1.0f, 0.5f, eased_t);
 			Vector2D adjusted_offset = offsets_2[i] * offset_ratio;
 			part_positions[i] = location + adjusted_offset;
 		}
 
-		// ----- 爆発処理開始条件 -----
-		if (!explosions_started && crash_timer >= 10.0f) {
+		// ===== 爆発処理開始（初回だけ）=====
+		if (!explosions_started) {
 			explosions_started = true;
 			explosion_index = 0;
 			explosion_timer = 0.0f;
+
+			// 初回の爆発を即時生成
+			float offset_x = static_cast<float>(GetRand(200) - 100);
+			float offset_y = static_cast<float>(GetRand(200) - 100);
+			Vector2D random_pos = location + Vector2D(offset_x, offset_y);
+			float scale = 0.3f + (GetRand(200) / 200.0f); // 0.5 ～ 1.5
+
+			int id = AnimationManager::GetInstance()->PlayerAnimation(
+				EffectName::eExprotion2,
+				random_pos,
+				0.05f,
+				false
+			);
+			AnimationManager::GetInstance()->SetScale(id, scale);
+
+			explosion_index++; // 最初の爆発カウント
 		}
 
-		// ----- 時間差で爆発を生成 -----
+		// ===== 時間差で爆発を発生 =====
 		if (explosions_started) {
 			explosion_timer += delta_second;
 
+			// 複数爆発（最大数＆間隔）
 			if (explosion_index < max_explosions && explosion_timer >= explosion_interval) {
 				explosion_timer = 0.0f;
 
-				// ランダム位置（±100px）
 				float offset_x = static_cast<float>(GetRand(200) - 100);
 				float offset_y = static_cast<float>(GetRand(200) - 100);
 				Vector2D random_pos = location + Vector2D(offset_x, offset_y);
-
-				// ランダムなスケール（例：0.5?1.5倍）
 				float scale = 0.3f + (GetRand(200) / 200.0f); // 0.5 ～ 1.5
 
-				// アニメーション再生＋スケール指定
 				int id = AnimationManager::GetInstance()->PlayerAnimation(
 					EffectName::eExprotion2,
 					random_pos,
 					0.05f,
 					false
 				);
-
 				AnimationManager::GetInstance()->SetScale(id, scale);
 
 				explosion_index++;
 			}
 
-			// 全部爆発したら死亡
+			// 全爆発完了後に大爆発＆削除
 			if (explosion_index >= max_explosions) {
-				// アニメーション再生＋スケール指定
 				int id = AnimationManager::GetInstance()->PlayerAnimation(
 					EffectName::eExprotion2,
 					location,
-					0.07f,
+					0.08f,
 					false
 				);
-				AnimationManager::GetInstance()->SetScale(id, 3.0f);
-				id = AnimationManager::GetInstance()->PlayerAnimation(
-					EffectName::eExprotion2,
-					location,
-					0.07f,
-					false
-				);
-				AnimationManager::GetInstance()->SetScale(id, 2.0f);
+				AnimationManager::GetInstance()->SetScale(id, 6.0f);
+
+				//id = AnimationManager::GetInstance()->PlayerAnimation(
+				//	EffectName::eExprotion2,
+				//	location,
+				//	0.07f,
+				//	false
+				//);
+				//AnimationManager::GetInstance()->SetScale(id, 3.5f);
+				//id = AnimationManager::GetInstance()->PlayerAnimation(
+				//	EffectName::eExprotion2,
+				//	location,
+				//	0.07f,
+				//	false
+				//);
+				//AnimationManager::GetInstance()->SetScale(id, 2.5f);
+
 				is_alive = false;
 			}
 		}
@@ -295,9 +321,6 @@ void Boss3::Update(float delta_second)
 /// <param name="screen_offset"></param>
 void Boss3::Draw(const Vector2D& screen_offset) const
 {
-	//// 雑魚１を描画する
-	//DrawBox(location.x - box_size.x, location.y - box_size.y,
-	//	location.x + box_size.x, location.y + box_size.y, GetColor(0, 255, 0), TRUE);
 
 	DrawBoss3(location);
 
@@ -305,6 +328,9 @@ void Boss3::Draw(const Vector2D& screen_offset) const
 		// HPバーをまだ描画しない
 		return;
 	}
+	//// 雑魚１を描画する
+	//DrawBox(location.x - box_size.x, location.y - box_size.y,
+	//	location.x + box_size.x, location.y + box_size.y, GetColor(0, 255, 0), TRUE);
 
 	// フェードイン用透明度（0.0～1.0）
 	const float fade_alpha = hpbar_fade_timer;
@@ -415,9 +441,9 @@ void Boss3::Movement(float delta_second)
 	move_time += delta_second;
 
 	const float float_amplitude_y = 30.0f;
-	const float float_speed_y = 1.5f;
+	const float float_speed_y = 3.0f;
 	const float float_amplitude_x = 20.0f;
-	const float float_speed_x = 1.5f;
+	const float float_speed_x = 3.0f;
 	Vector2D float_offset;
 	float_offset.y = sinf(move_time * float_speed_y) * float_amplitude_y;
 	float_offset.x = cosf(move_time * float_speed_x) * float_amplitude_x;
@@ -453,17 +479,17 @@ void Boss3::Movement(float delta_second)
 			switch (chenge)
 			{
 			case 1:
-				box_size = Vector2D(350, 150);
+				box_size = Vector2D(250, 70);
 				chenge++;
 				is_weakness = false;
 				break;
 			case 2:
-				box_size = Vector2D(230, 250);
+				box_size = Vector2D(180, 100);
 				chenge++;
 				is_weakness = false;
 				break;
 			case 3:
-				box_size = Vector2D(140, 350);
+				box_size = Vector2D(80, 200);
 				chenge++;
 				is_weakness = true;
 				break;
@@ -483,7 +509,7 @@ void Boss3::Movement(float delta_second)
 			//	box_size = Vector2D(160, 350);
 			//	check = false;
 			//}
-			image_size =3.5f;
+			image_size = 2.0f;
 		}
 		else
 		{
@@ -567,8 +593,8 @@ void Boss3::DrawBoss3(const Vector2D position) const
 	//DrawRotaGraph(part_positions[1].x, part_positions[1].y, image_size, angle, boss3_image[3], TRUE); // 右手前
 	DrawRotaGraph(part_positions[5].x, part_positions[5].y, image_size, angle, boss3_image[6], TRUE);
 	DrawRotaGraph(part_positions[3].x, part_positions[3].y, image_size, angle, boss3_image[4], TRUE); // 右手前
-	DrawRotaGraph(part_positions[4].x, part_positions[4].y, image_size, angle, boss3_image[5], TRUE); // 右奥
 	DrawRotaGraph(part_positions[6].x, part_positions[6].y, image_size, angle, boss3_image[7], TRUE);
+	DrawRotaGraph(part_positions[4].x, part_positions[4].y, image_size, angle, boss3_image[5], TRUE); // 右奥
 	//DrawRotaGraph(part_positions[1].x, part_positions[1].y, image_size, angle, boss3_image[10], TRUE);
 
 	//if (generate == false)
@@ -1271,7 +1297,7 @@ void Boss3::Pattrn11(float offsets_x)
 		b = objm->CreateObject<EnemyBeam1>(
 			Vector2D(
 				location.x + offsets_x,
-				(location.y + 300.0f) - box_size.y
+				(location.y + 190.0f) - box_size.y
 			));
 		b->SetBoss3(this);
 		beam_on = true;
@@ -1283,7 +1309,7 @@ void Boss3::Pattrn11(float offsets_x)
 		b->SetLocation(
 			Vector2D(
 				location.x + offsets_x,
-				(location.y + 300.0f) + b->GetBoxSize().y
+				(location.y + 190.0f) + b->GetBoxSize().y
 			));
 	}
 

@@ -85,9 +85,9 @@ void Stage3::Finalize()
     {
         enemy->SetDestroy();
     }
-    enemy_list.clear();
-    AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
-    manager->RemoveAnimation(anim_id);
+    //enemy_list.clear();
+    //AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+    //manager->RemoveAnimation(anim_id);
 }
 
 void Stage3::Update(float delta)
@@ -146,7 +146,7 @@ void Stage3::Update(float delta)
     // 毎フレーム
     manager->Update(delta);       // 更新（deltaTimeは前のフレームとの経過時間）
 
-    // アニメーションが終了したか確認（削除が必要な場合）
+     //アニメーションが終了したか確認（削除が必要な場合）
     if (manager->GetAnimationFinished(anim_id) == true)
     {
         manager->RemoveAnimation(anim_id);  // 不要になったら削除
@@ -492,6 +492,7 @@ void Stage3::EnemyAppearance(float delta)
                 auto zako = objm->CreateObject<Zako6>(Vector2D(x, base_y));
                 zako->SetMode(ZakoMode::Zako7);
                 zako->SetAppearParams(Vector2D(x, base_y), Vector2D(x, target_y), delay, true);
+                zako->SetPlayer(player);
             }
 
             // 右に3体（→中央→右上）
@@ -504,6 +505,7 @@ void Stage3::EnemyAppearance(float delta)
                 auto zako = objm->CreateObject<Zako6>(Vector2D(x, base_y));
                 zako->SetMode(ZakoMode::Zako7);
                 zako->SetAppearParams(Vector2D(x, base_y), Vector2D(x, target_y), delay, false);
+                zako->SetPlayer(player);
             }
 
             is_zako7_group_spawned = true;
@@ -542,6 +544,7 @@ void Stage3::EnemyAppearance(float delta)
             auto zako = objm->CreateObject<Zako6>(appear_pos);
             zako->SetMode(ZakoMode::Zako2);
             zako->SetAppearParams(appear_pos, target_pos - (50.0f * i), delay, true);
+            zako->SetPlayer(player);
         }
 
         zako2_spawn_timer = 0.0f;
@@ -570,6 +573,7 @@ void Stage3::EnemyAppearance(float delta)
             auto zako = objm->CreateObject<Zako6>(appear_pos);
             zako->SetMode(ZakoMode::Zako2);
             zako->SetAppearParams(appear_pos, target_pos - (50.0f * i), delay, true);
+            zako->SetPlayer(player);
         }
 
         zako2_spawn_timer = 0.0f;
@@ -603,6 +607,8 @@ void Stage3::EnemyAppearance(float delta)
         //    auto zako = objm->CreateObject<Zako6>(appear_pos);
         //    zako->SetMode(ZakoMode::Zako3);
         //    zako->SetAppearParams(appear_pos, end_pos, 1.3f + delay, from_left);
+        //    zako->SetPlayer(player);
+
         //}
 
         //enemy_group_index++;
@@ -1040,6 +1046,8 @@ void Stage3::HandleZako1_LR(float delta)
         auto zako = objm->CreateObject<Zako6>(appear_pos);
         zako->SetMode(ZakoMode::Zako3);
         zako->SetAppearParams(appear_pos, end_pos, 1.3f + delay, from_left);
+        zako->SetPlayer(player);
+
     }
 
     enemy_group_index++;
@@ -1073,6 +1081,7 @@ void Stage3::HandleZako1_Center(float delta)
         auto zako = objm->CreateObject<Zako6>(appear_pos);
         zako->SetMode(ZakoMode::Zako3);
         zako->SetAppearParams(appear_pos, end_pos, 1.3f + delay, true);
+        zako->SetPlayer(player);
     }
 
     enemy_group_index++;
@@ -1105,6 +1114,7 @@ void Stage3::HandleZako2_Upward(float delta)
         auto zako = objm->CreateObject<Zako6>(appear_pos);
         zako->SetMode(ZakoMode::Zako2);
         zako->SetAppearParams(appear_pos, target_pos, delay, true);
+        zako->SetPlayer(player);
     }
 
     zako2_spawn_timer = 0.0f;
@@ -1119,6 +1129,7 @@ void Stage3::SpawnBossAndItems()
     objm->CreateObject<Shield>(Vector2D(D_WIN_MAX_X / 2 + 60, 120))->SetPlayer(player);
 
     boss2 = objm->CreateObject<Boss2>(Vector2D(670, -200));
+    boss2->SetPlayer(player);
     boss2_spawned = true;
     is_warning = false;
 }

@@ -45,10 +45,22 @@ private:
 			: id(id_), image_handles(handles), position(pos), frame_time(frame_time_sec), loop(loop_flag) {}
 	};
 
+	enum class SE_NAME
+	{
+		Shot,
+		Reaction,
+		Explosion,
+		// 必要に応じて追加
+	};
+
+
 public:
 	AnimationManager() = default;
 
 	void LoadAllEffects();
+	void LoadSE();
+	void WarmUpSE();
+	void PlaySE(SE_NAME name);
 
 	/// <summary>
 	/// アニメーション再生
@@ -105,4 +117,7 @@ private:
 	std::unordered_map<AnimationID, std::unique_ptr<Animation>> animations;
 
 	std::map<int, std::vector<int>> effect_images;
+
+private:
+	std::map<SE_NAME, int> se_handles; // SEのハンドルマップ
 };

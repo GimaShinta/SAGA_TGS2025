@@ -21,6 +21,46 @@ void AnimationManager::LoadAllEffects()
 	effect_images[EffectName::eChenge] = charge_2;
 }
 
+void AnimationManager::LoadSE()
+{
+	ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
+
+	se_handles[SE_NAME::Shot] = rm->GetSounds("Resource/sound/se/shot/shot_02.mp3");
+	se_handles[SE_NAME::Reaction] = rm->GetSounds("Resource/sound/se/se_effect/reaction.mp3");
+	se_handles[SE_NAME::Explosion] = rm->GetSounds("Resource/sound/se/se_effect/explosion.mp3"); // 仮に追加
+}
+
+void AnimationManager::WarmUpSE()
+{
+	for (auto it = se_handles.begin(); it != se_handles.end(); ++it)
+	{
+		SE_NAME name = it->first;
+		int handle = it->second;
+
+		PlaySoundMem(handle, DX_PLAYTYPE_BACK);
+		StopSoundMem(handle);
+	}
+
+#ifndef NDEBUG
+	printfDx("SEウォームアップ完了（%d種）\n", (int)se_handles.size());
+#endif
+
+}
+
+void AnimationManager::PlaySE(SE_NAME name)
+{
+	if (se_handles.count(name))
+	{
+		PlaySoundMem(se_handles[name], DX_PLAYTYPE_BACK);
+	}
+#ifndef NDEBUG
+	else
+	{
+		printfDx("未登録のSEが呼ばれました: %d\n", static_cast<int>(name));
+	}
+#endif
+}
+
 // アニメーションを再生する
 AnimationID AnimationManager::PlayerAnimation(const std::vector<int>& image_handles, const Vector2D& position, float frame_time_sec, bool loop)
 {

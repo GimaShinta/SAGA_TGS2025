@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Object\Item\MaxCharge\MaxCharge.cpp" />
     <ClCompile Include="Object\Character\Enemy\EnemyType\Boss3.cpp" />
     <ClCompile Include="Object\Character\Enemy\EnemyType\BossRotatingPart.cpp" />
     <ClCompile Include="Object\Character\Enemy\EnemyType\Stage2BOSS.cpp" />
@@ -187,6 +188,7 @@
     <ClCompile Include="Object\Character\Enemy\EnemyType\Zako6.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Object\Item\MaxCharge\MaxCharge.h" />
     <ClInclude Include="Object\Character\Enemy\EnemyType\Boss3.h" />
     <ClInclude Include="Object\Character\Enemy\EnemyType\BossRotatingPart.h" />
     <ClInclude Include="Object\Character\Enemy\EnemyType\Stage2BOSS.h" />

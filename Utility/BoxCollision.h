@@ -20,6 +20,7 @@ enum eObjectType
     eExp,
     ePowerUp,
     eShield,
+    eMaxCharge,
     eItem,
     eNum
 };

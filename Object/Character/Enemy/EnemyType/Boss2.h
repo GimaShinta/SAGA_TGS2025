@@ -76,6 +76,18 @@ private:
 	float fall_speed_y = 0.0f; // 落下速度（初期は0）
 	Vector2D crash_velocity = Vector2D(100.0f, -200.0f); // 初速度（右へ + 上に少し浮いてから落下）
 	float gravity = 200.0f; // 重力加速度（Y方向）
+
+	struct Ripple {
+		Vector2D pos;
+		float timer;
+		bool active;
+	};
+
+	Ripple ripples[5]; // 最大5つ
+
+	float ripple_spawn_timer = 0.0f;
+	int ripple_spawn_count = 0;
+	bool ripple_start = false; // 波紋出現を開始するフラグ
 public:
 	Boss2();
 	~Boss2();
@@ -133,11 +145,11 @@ public:
 		return (a < b) ? a : b;
 	}
 
-	template <typename T>
-	T Lerp(T a, T b, float t)
-	{
-		return a + (b - a) * t;
-	}
+	//template <typename T>
+	//T Lerp(T a, T b, float t)
+	//{
+	//	return a + (b - a) * t;
+	//}
 
 	bool GetGenerate() const;
 	bool GetIsCrashing() const;

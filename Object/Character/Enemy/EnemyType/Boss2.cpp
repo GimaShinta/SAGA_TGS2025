@@ -3,6 +3,12 @@
 #include "../../../../Utility/AnimationManager.h"
 #include "../../Shot/EnemyBeam1.h"
 
+// 線形補間
+float Lerp(float a, float b, float t)
+{
+	return a + (b - a) * t;
+}
+
 Boss2::Boss2()
 {
 }
@@ -20,7 +26,7 @@ void Boss2::Initialize()
 	hp = 20000;
 
 	// 攻撃パターンの設定
-	attack_pattrn_num = { 4, 5, 10, 12 };
+	attack_pattrn_num = { 5 };
 
 
 	// 当たり判定のオブジェクト設定
@@ -62,13 +68,18 @@ void Boss2::Initialize()
 	boss2_jet = rm->GetImages("Resource/Image/Effect/exhaust_03_spritesheet.png", 24, 8, 3, 128, 200);
 	jet = boss2_jet[0];
 
-	se_beam = rm->GetSounds("Resource/sound/se/effect/audiostock_1090663.mp3");
-	ChangeVolumeSoundMem(255 * 60 / 100, se_beam);
+	//se_beam = rm->GetSounds("Resource/sound/se/effect/audiostock_1090663.mp3");
+	//ChangeVolumeSoundMem(255 * 60 / 100, se_beam);
 
 	// 最初は本体の位置に固定
 	for (int i = 0; i < 6; ++i)
 	{
 		part_positions[i] = location;
+	}
+
+	for (int i = 0; i < 5; ++i) {
+		ripples[i].active = false;
+		ripples[i].timer = 0.0f;
 	}
 }
 
@@ -219,6 +230,7 @@ void Boss2::Update(float delta_second)
 		}
 
 	}
+
 	//// 攻撃パターン変更時に時間リセット
 	//if (attack_pattrn != prev_attack_pattrn)
 	//{
@@ -343,6 +355,16 @@ void Boss2::Update(float delta_second)
 			if (hpbar_fade_timer > 1.0f) hpbar_fade_timer = 1.0f;
 		}
 	}
+
+
+	for (int i = 0; i < 5; ++i) {
+		if (ripples[i].active) {
+			ripples[i].timer += delta_second;
+			if (ripples[i].timer >= 0.5f) { // 0.5秒で消滅
+				ripples[i].active = false;
+			}
+		}
+	}
 	// 親クラスの更新処理を呼び出す
 	__super::Update(delta_second);
 }
@@ -436,13 +458,18 @@ void Boss2::OnHitCollision(GameObjectBase* hit_object)
 			{
 				if (is_weakness == true)
 				{
-					hp -= 30;
+					hp -= 50;
 				}
 				else
 				{
 					hp -= 10;
 				}
 				on_hit = true;
+
+				if (GetRand(70) == 1)
+				{
+					DropItems();
+				}
 			}
 			else
 			{
@@ -458,13 +485,18 @@ void Boss2::OnHitCollision(GameObjectBase* hit_object)
 		{
 			if (is_weakness == true)
 			{
-				hp -= 30;
+				hp -= 50;
 			}
 			else
 			{
 				hp -= 10;
 			}
 			beam_damage_timer = 0;
+
+			if (GetRand(70) == 1)
+			{
+				DropItems();
+			}
 		}
 	}
 }
@@ -594,11 +626,49 @@ void Boss2::Movement(float delta_second)
 void Boss2::Shot(float delta_second)
 {
 	// 次の攻撃パターン変更までの時間
-	const int shot_interval = 0.1f;
+	const int shot_interval = 1.0f;
 
 	// 時間経過したら攻撃パターンを変更して弾を発射
 	if (generate2 == true && is_shot == false)
 	{
+
+		// 波紋を2つ（左右）発生させる
+		for (int i = 0; i < 5; ++i)
+		{
+			if (!ripples[i].active)
+			{
+				ripples[i].active = true;
+				ripples[i].timer = 0.0f;
+
+				if (attack_pattrn != 12)
+				{
+					ripples[i].pos = Vector2D(location.x - 160.0f, location.y + 100.0f); // 左砲口
+				}
+				else
+				{
+					ripples[i].pos = Vector2D(location.x - 100.0f, location.y + 40.0f); // 左砲口
+				}
+				break;
+			}
+		}
+		for (int i = 0; i < 5; ++i)
+		{
+			if (!ripples[i].active)
+			{
+				ripples[i].active = true;
+				ripples[i].timer = 0.0f;
+				if (attack_pattrn != 12)
+				{
+					ripples[i].pos = Vector2D(location.x + 160.0f, location.y + 100.0f); // 左砲口
+				}
+				else
+				{
+					ripples[i].pos = Vector2D(location.x + 100.0f, location.y + 40.0f); // 左砲口
+				}
+				break;
+			}
+		}
+
 		shot_timer += delta_second;
 		if (shot_timer >= shot_interval)
 		{
@@ -692,6 +762,26 @@ void Boss2::DrawBoss2(const Vector2D position) const
 	//DrawBox(location.x - box_size.x, location.y - box_size.y,
 	//	location.x + box_size.x, location.y + box_size.y, GetColor(0, 255, 0), TRUE);
 
+
+
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255); // アルファブレンドON
+
+	for (int i = 0; i < 5; ++i) {
+		if (!ripples[i].active) continue;
+
+		float t = ripples[i].timer / 0.5f; // 0.0～1.0
+		float radius = Lerp(0.0f, 80.0f, t); // 半径0→80に拡大
+		int alpha = static_cast<int>(Lerp(255.0f, 200.0f, t)); // 不透明→透明へ
+
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+		DrawCircle(static_cast<int>(ripples[i].pos.x),
+			static_cast<int>(ripples[i].pos.y),
+			static_cast<int>(radius),
+			GetColor(150, 255, 150),
+			FALSE);
+	}
+
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0); // ブレンド無効化
 }
 
 int Boss2::GetAttackPattrn() const
