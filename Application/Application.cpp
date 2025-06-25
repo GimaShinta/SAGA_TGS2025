@@ -1,5 +1,6 @@
 #include "Application.h"
 #include "DxLib.h"
+#include <Windows.h>
 
 // ’è”‚Ì—˜—p
 #include "../Utility/ProjectConfig.h"

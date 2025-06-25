@@ -71,7 +71,7 @@ private:
 	int engen_count = 0;
 
 	bool is_shot_anim = false;
-
+	int se_shot;
 
 	float shield_time = 0.0f;
 	int shield_count = 0;

@@ -28,12 +28,15 @@ void TitleScene::Initialize()
     m_logoScale = 1.3f; // ←控えめな拡大率に
     m_logoAlpha = 0;
 
+    ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
+    logo_se = rm->GetSounds("Resource/sound/se/battle/audiostock_1498491.mp3");
+
+    ChangeVolumeSoundMem(255 * 60 / 100, logo_se);
 
 
 
 
     // ロゴ画像読み込み（透過PNG）
-    ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
     m_logoHandle = rm->GetImages("Resource/Image/BackGround/Title/DigitalNexus.png")[0];
 
     m_logoScale = 1.5f;   // 拡大から始まる
@@ -103,12 +106,10 @@ eSceneType TitleScene::Update(float delta_second)
     }
 
 
-
     // ロゴ演出（ゆっくり縮小＆透明度アップ）
     if (!m_logoAppeared)
     {
         m_logoAppearTimer += delta_second;
-
         float t = m_logoAppearTimer / 1.0f;
         if (t >= 1.0f)
         {

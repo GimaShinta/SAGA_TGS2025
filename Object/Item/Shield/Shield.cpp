@@ -20,7 +20,7 @@ void Shield::Initialize()
     image = images[0];
 
     se = rm->GetSounds("Resource/sound/se/effect/audiostock_1090663.mp3");
-    ChangeVolumeSoundMem(255 * 70 / 100, se);
+    ChangeVolumeSoundMem(255 * 100 / 100, se);
 }
 
 void Shield::Update(float delta)

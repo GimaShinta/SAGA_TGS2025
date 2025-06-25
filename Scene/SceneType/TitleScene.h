@@ -19,7 +19,7 @@ private:
 	float m_logoAppearTimer = 0.0f;
 	bool m_logoAppeared = false;
 
-
+	int logo_se;
 
 	int drawY;
 	float m_cursorY; // カーソルY座標
