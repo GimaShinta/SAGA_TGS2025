@@ -46,6 +46,10 @@ void Player::Initialize()
 
 	shields2 = rm->GetImages("Resource/Image/Object/Item/Shield/pipo-btleffect206_480.png", 20, 5, 4, 480, 480);
 	shields = rm->GetImages("Resource/Image/Object/Item/Shield/pipo-btleffect206h_480.png", 15, 5, 3, 480, 480);
+
+	se_shot = rm->GetSounds("Resource/sound/se/shot/shot_02.mp3");
+	ChangeVolumeSoundMem(255 * 60 / 100, se_shot);
+
 }
 
 /// <summary>
@@ -378,6 +382,7 @@ void Player::Shot(float delta_second)
 	if (input->GetKeyDown(KEY_INPUT_SPACE) ||
 		input->GetButtonDown(XINPUT_BUTTON_A))
 	{
+		PlaySoundMem(se_shot, DX_PLAYTYPE_BACK);
 		// ‰½‚à‘Å‚Á‚Ä‚È‚©‚Á‚½‚ç‘Å‚Ä‚é‚æ‚¤‚É‚·‚é
 		if (stop == false)
 		{
@@ -390,6 +395,7 @@ void Player::Shot(float delta_second)
 	else if (input->GetKey(KEY_INPUT_SPACE) ||
 		     input->GetButton(XINPUT_BUTTON_A))
 	{
+		
 		// ‰½‚à‘Å‚Á‚Ä‚È‚©‚Á‚½‚ç‘Å‚Ä‚é‚æ‚¤‚É‚·‚é
 		if (stop == false)
 		{
@@ -399,6 +405,7 @@ void Player::Shot(float delta_second)
 				is_shot_anim = true;
 				is_shot = true;
 				shot_timer = 0.0f;
+				PlaySoundMem(se_shot, DX_PLAYTYPE_BACK);
 			}
 		}
 	}

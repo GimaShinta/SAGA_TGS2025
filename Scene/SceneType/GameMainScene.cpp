@@ -56,6 +56,56 @@ void GameMainScene::Initialize()
     ChangeVolumeSoundMem(255 * 70 / 100, current_bgm_handle);
 
     PlaySoundMem(current_bgm_handle, DX_PLAYTYPE_LOOP);
+
+    // =====================
+    // プレロード処理（遅延防止）
+    // =====================
+
+
+    //AnimationManager による事前アニメ再生（0.01秒、画面外で一度だけ再生）
+    anim->LoadAllEffects(); // ★ここで明示的に画像を先読みさせる！
+
+    // 仮にエフェクト2つを登録済みなら
+    anim->PlayerAnimation(EffectName::eExprotion, Vector2D(-999, -999), 0.01f, false);
+    anim->PlayerAnimation(EffectName::eExprotion2, Vector2D(-999, -999), 0.01f, false);
+
+
+    // ● フォント描画（初回だけ隠れて描画してフォント展開を済ませる）
+    DrawStringToHandle(-999, -999, "PRELOAD", GetColor(0, 0, 0), font_digital);
+    DrawStringToHandle(-999, -999, "PRELOAD", GetColor(0, 0, 0), font_orbitron);
+    DrawStringToHandle(-999, -999, "PRELOAD", GetColor(0, 0, 0), m_menuFontHandle);
+
+    // ● ショット音／ヒット音を読み込み＆ダミー再生でバッファ展開
+    int preload_se1 = rm->GetSounds("Resource/sound/se/shot/shot_02.mp3");
+    int preload_se2 = rm->GetSounds("Resource/sound/se/se_effect/reaction.mp3");
+
+    PlaySoundMem(preload_se1, DX_PLAYTYPE_BACK, TRUE);
+    StopSoundMem(preload_se1);
+    PlaySoundMem(preload_se2, DX_PLAYTYPE_BACK, TRUE);
+    StopSoundMem(preload_se2);
+
+    // ● チャージSEもバッファ化
+    PlaySoundMem(se_charge, DX_PLAYTYPE_BACK, TRUE);
+    StopSoundMem(se_charge);
+
+    // === 敵用画像（想定ファイル名）をプリロード ===
+    int preload_img1 = LoadGraph("Resource/Image/Enemy/enemy1.png");
+    int preload_img2 = LoadGraph("Resource/Image/Enemy/enemy2.png");
+
+    // 必要に応じて複数
+    DrawGraph(-999, -999, preload_img1, FALSE);
+    DrawGraph(-999, -999, preload_img2, FALSE);
+
+    // === 敵用効果音のバッファ確保 ===
+    int preload_hit = LoadSoundMem("Resource/sound/se/se_effect/reaction.mp3");
+    PlaySoundMem(preload_hit, DX_PLAYTYPE_BACK, TRUE);
+    StopSoundMem(preload_hit);
+
+    // === 敵が使うアニメーションも画面外でダミー生成 ===
+    anim->PlayerAnimation(EffectName::eExprotion, Vector2D(-999, -999), 0.01f, false);
+    anim->PlayerAnimation(EffectName::eExprotion2, Vector2D(-999, -999), 0.01f, false);
+
+
 }
 
 /// <summary>
@@ -382,11 +432,6 @@ void GameMainScene::Draw()
         int life_box_w = 200;
         int life_box_h = 60;
 
-        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
-        DrawBox(life_box_x, life_box_y, life_box_x + life_box_w, life_box_y + life_box_h, GetColor(10, 10, 30), TRUE);
-        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
-        DrawBox(life_box_x, life_box_y, life_box_x + life_box_w, life_box_y + life_box_h, GetColor(0, 255, 255), FALSE);
-
         // ラベル
         DrawStringToHandle(life_box_x + 10, life_box_y + 4, "LIFE - STOCK", GetColor(0, 255, 255), font_orbitron);
 
@@ -410,6 +455,66 @@ void GameMainScene::Draw()
         }
     }
 
+   // PlaySoundMem(se_charge, DX_PLAYTYPE_BACK);
+
+    if (player)
+    {
+        int power_box_x = D_WIN_MAX_X - 230;
+        int power_box_y = 150 + 60 + 10; // LIFE-STOCKの下
+        int power_box_w = 200;
+        int power_box_h = 50;
+
+        DrawStringToHandle(power_box_x + 10, power_box_y + 2, "POWER UP", GetColor(0, 255, 255), font_orbitron);
+
+        int level = player->GetPowerd();
+        for (int i = 0; i < level; ++i)
+        {
+            int x = power_box_x + 20 + i * 20;
+            int y = power_box_y + 25;
+            DrawBox(x, y, x + 14, y + 14, GetColor(255, 255, 100), TRUE); // 黄色の小ブロック
+        }
+    }
+
+    if (player)
+    {
+        int shield_box_x = D_WIN_MAX_X - 230;
+        int shield_box_y = 150 + 60 + 10 + 60; // PowerUPの下
+        int shield_box_w = 200;
+        int shield_box_h = 50;
+
+        DrawStringToHandle(shield_box_x + 10, shield_box_y + 2, "SHIELD", GetColor(0, 255, 255), font_orbitron);
+
+        const char* shield_text = player->GetShieldOn() ? "ON" : "OFF";
+        int color = player->GetShieldOn() ? GetColor(0, 255, 100) : GetColor(255, 100, 100);
+        DrawStringToHandle(shield_box_x + 20, shield_box_y + 25, shield_text, color, font_digital);
+        if (player->GetShieldOn())
+        {
+            float t = sinf(GetNowCount() / 30.0f) * 5 + 15; // 半径変動
+            int cx = shield_box_x + 150;
+            int cy = shield_box_y + 35;
+            DrawCircle(cx, cy, static_cast<int>(t), GetColor(0, 255, 180), FALSE);
+        }
+
+    }
+
+
+    if (player)
+    {
+        int exp_box_x = 30;
+        int exp_box_y = D_WIN_MAX_Y - 580; // TOTAL SCORE の少し下
+        int exp_box_w = 220;
+        int exp_box_h = 40;
+
+        ScoreData* score = Singleton<ScoreData>::GetInstance();
+        const auto& all_scores = score->GetScoreData();
+        float total_score = 0.0f;
+        for (float s : all_scores)
+            total_score += s;
+
+        DrawStringToHandle(exp_box_x + 10, exp_box_y + 4, "EXP", GetColor(0, 255, 255), font_orbitron);
+        DrawFormatStringToHandle(exp_box_x + 80, exp_box_y + 8, GetColor(0, 255, 180), font_digital, "%.0f", total_score * 0.1f);
+    }
+
 
     // ==== 必殺技ゲージ（LIFEの下、点滅＆レイアウト調整済） ====
     if (player)
@@ -419,11 +524,6 @@ void GameMainScene::Draw()
         int gauge_y = 150; 
         int gauge_w = 200;
         int gauge_h = 50;
-
-        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
-        DrawBox(gauge_x, gauge_y, gauge_x + gauge_w, gauge_y + gauge_h, GetColor(10, 10, 30), TRUE);
-        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
-        DrawBox(gauge_x, gauge_y, gauge_x + gauge_w, gauge_y + gauge_h, GetColor(0, 255, 255), FALSE);
 
         DrawStringToHandle(gauge_x + 10, gauge_y + 2, "CHARGE", GetColor(0, 255, 255), font_orbitron);
 
@@ -435,15 +535,26 @@ void GameMainScene::Draw()
         int fill_color = player->CanUseSpecial()
             ? GetColor(0, (GetNowCount() % 100 > 50) ? 255 : 100, 255)  // 点滅
             : GetColor(0, 255, 255); // 通常色
-
+      
         DrawBox(bar_x, bar_y, bar_x + bar_w, bar_y + bar_h, GetColor(30, 30, 30), TRUE); // 背景
         DrawBox(bar_x, bar_y, bar_x + static_cast<int>(bar_w * rate), bar_y + bar_h, fill_color, TRUE); // 本体
+
+        if (player->CanUseSpecial())
+        {
+            for (int i = 0; i < 5; ++i)
+            {
+                int x1 = bar_x + GetRand(bar_w);
+                int x2 = x1 + GetRand(10);
+                DrawLine(x1, bar_y, x2, bar_y + bar_h, GetColor(100, 255, 255));
+            }
+        }
+
     }
 
     // ==== SPECIAL READY UI（プレイヤー下に真ん中表示） ====
     if (player && player->CanUseSpecial())
     {
-        PlaySoundMem(se_charge, DX_PLAYTYPE_BACK);
+        
         Vector2D pos = player->GetLocation();
         int ui_x = static_cast<int>(pos.x) - 55;  
         int ui_y = static_cast<int>(pos.y) + 40;
@@ -451,6 +562,18 @@ void GameMainScene::Draw()
 
         SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
         DrawFormatStringToHandle(ui_x, ui_y, GetColor(255, pulse, pulse), font_orbitron, "Press B!!");
+    }
+    if (player && player->CanUseSpecial())
+    {
+        int gauge_x = D_WIN_MAX_X - 260;
+        int gauge_y = 150;
+
+        int text_x = gauge_x + 140;
+        int text_y = gauge_y + 30;
+        int pulse = (GetNowCount() % 100 > 50) ? 255 : 100;
+
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+        DrawStringToHandle(text_x, text_y, "Press B!!", GetColor(255, pulse, pulse), font_orbitron);
     }
 
 

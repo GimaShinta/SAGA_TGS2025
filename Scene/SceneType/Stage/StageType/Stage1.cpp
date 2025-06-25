@@ -65,8 +65,8 @@ void Stage1::Initialize()
     font_orbitron = CreateFontToHandle("Orbitron", 22, 6, DX_FONTTYPE_ANTIALIASING);
     font_digital = CreateFontToHandle("メイリオ", 28, 6, DX_FONTTYPE_ANTIALIASING);
 
-    ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
-    bg_image = rm->GetImages("Resource/Image/BackGround/Main/Stage1/bg_01.png")[0];
+   // ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
+   // bg_image = rm->GetImages("Resource/Image/BackGround/Main/Stage1/bg_01.png")[0];
 }
 
 void Stage1::Finalize()
@@ -401,8 +401,6 @@ void Stage1::Draw()
     DrawBox(panel_x, panel_y, panel_x + panel_w, panel_y + panel_h, GetColor(0, 0, 0), TRUE);
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 
-
-
     AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
     manager->Draw();
 
@@ -461,10 +459,6 @@ void Stage1::Draw()
             DrawBox(glitch_x, glitch_y, glitch_x + glitch_len, glitch_y + 2, GetColor(200, 255, 255), TRUE);
             SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
         }
-
-
-
-
         if (
             warning_label_state == WarningLabelState::Displaying ||
             warning_label_state == WarningLabelState::SlideOut
@@ -570,7 +564,7 @@ bool Stage1::IsOver()
 
 StageBase* Stage1::GetNextStage(Player* player)
 {
-    return new Stage2(player); // 次のステージへ
+    return new Stage3(player); // 次のステージへ
 }
 
 //void Stage1::EnemyAppearance(float delta)
@@ -845,8 +839,8 @@ void Stage1::EnemyAppearance(float delta)
         {
             if (!boss_spawned)
             {
-                objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2 - 60, 120));
-                objm->CreateObject<Shield>(Vector2D(D_WIN_MAX_X / 2 + 60, 120));
+                objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2 - 60, 120))->SetPlayer(player);
+                objm->CreateObject<Shield>(Vector2D(D_WIN_MAX_X / 2 + 60, 120))->SetPlayer(player);
 
                 boss1 = objm->CreateObject<Stage1Boss>(Vector2D(670, -200));
                 boss1->SetPattern(BossPattern::Entrance);

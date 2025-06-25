@@ -6,6 +6,12 @@
 
 Shot::Shot()
 {
+	// Shot::Initialize ÇÃç≈å„Ç†ÇΩÇËÇ…í«â¡
+	PlaySoundMem(se, DX_PLAYTYPE_BACK, TRUE);  // TRUEÇ≈ë¶éûçƒê∂
+	StopSoundMem(se);  // Ç∑ÇÆí‚é~ÇµÇƒÇ®Ç≠
+
+	PlaySoundMem(hit_se, DX_PLAYTYPE_BACK, TRUE);
+	StopSoundMem(hit_se);
 }
 
 Shot::~Shot()
@@ -32,7 +38,7 @@ void Shot::Initialize()
 	is_mobility = true;
 
 	ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
-	se = rm->GetSounds("Resource/sound/se/shot/shot_02.mp3");
+	//se = rm->GetSounds("Resource/sound/se/shot/shot_02.mp3");
 	image = rm->GetImages("Resource/Image/Object/Player/Shot/anime_effect16.png", 6, 6, 1, 8, 88)[0];
 
 	//AnimationManager* am = Singleton<AnimationManager>::GetInstance();
@@ -42,9 +48,10 @@ void Shot::Initialize()
 	//am->SetAlpha(anim_id, 122);       // îºìßñæ
 	//am->SetScale(anim_id, 0.1f);      // 1.5î{ägëÂ
 	hit_se = rm->GetSounds("Resource/sound/se/se_effect/reaction.mp3");
-	ChangeVolumeSoundMem(255 * 110 / 100, hit_se);
-	ChangeVolumeSoundMem(255 * 60 / 100, se);
-	PlaySoundMem(se, DX_PLAYTYPE_BACK);
+	//ChangeVolumeSoundMem(255 * 110 / 100, hit_se);
+	//ChangeVolumeSoundMem(255 * 60 / 100, se);
+	//PlaySoundMem(se, DX_PLAYTYPE_BACK);
+
 }
 
 /// <summary>
