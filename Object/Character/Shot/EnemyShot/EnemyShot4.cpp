@@ -232,7 +232,7 @@ void EnemyShot4::Draw(const Vector2D& screen_offset) const
 	//DrawTriangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, color, TRUE);
 	//DrawTriangle(p1.x, p1.y, p3.x, p3.y, p4.x, p4.y, color, TRUE);
 
-	DrawRotaGraph(location.x, location.y, 1.0f, angle, image, TRUE);
+	DrawRotaGraph(location.x, location.y, 0.7f, angle, image, TRUE);
 }
 
 // èIóπéûèàóù
