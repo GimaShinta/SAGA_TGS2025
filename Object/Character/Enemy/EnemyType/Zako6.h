@@ -3,7 +3,8 @@
 
 enum class ZakoMode {
     Zako2,
-    Zako3
+    Zako3,
+    Zako7
 };
 
 enum class ZakoState {
@@ -11,7 +12,8 @@ enum class ZakoState {
     Descending,           // Zako2スタイル
     Appearing,            // Zako3スタイル
     Floating,              // 共通
-    Leaving
+    Leaving,
+    Redirecting,
 };
 
 class Zako6 : public EnemyBase {
@@ -57,8 +59,18 @@ private:
     Vector2D descend_pos;
     Vector2D base_location;
 
+    std::vector<int> zako2_images;
+    std::vector<int> zako3_images;
+
     int zako2_image;
     int zako3_image;
+    int zako7_image;
+    int zako8_image;
+
+    std::vector<int> enemy_jet;
+    int jet;
+    float jet_time = 0.0f;
+    int jet_count = 0;
 
     template <typename T>
     T my_min(T a, T b) {

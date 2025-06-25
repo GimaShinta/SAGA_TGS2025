@@ -17,10 +17,10 @@ void Boss2::Initialize()
 	enemy_type = ENE_BOSS2;
 	z_layer = 1;
 	box_size = 30;
-	hp = 1000;
+	hp = 10000;
 
 	// 攻撃パターンの設定
-	attack_pattrn_num = { 7 };
+	attack_pattrn_num = { 4, 5, 6, 7, 9, 10 };
 
 
 	// 当たり判定のオブジェクト設定
@@ -39,7 +39,7 @@ void Boss2::Initialize()
 	is_mobility = true;
 
 	// 戦闘中の中心座標
-	base_position = Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) - 75);
+	base_position = Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) - 100);
 
 	// 登場時の中心座標
 	generate_base_position = Vector2D(D_WIN_MAX_X / 2 + 150, D_WIN_MAX_Y + 200);
@@ -335,15 +335,14 @@ void Boss2::Update(float delta_second)
 		jet = boss2_jet[jet_num[jet_count]];
 	}
 
-	if (generate) { // 登場演出が終わったら
+	if (generate) {
 		show_hpbar = true;
 
-		if (hpbar_fade_timer < 1.0f) { // 1秒かけてフェード
+		if (hpbar_fade_timer < 1.0f) {
 			hpbar_fade_timer += delta_second;
 			if (hpbar_fade_timer > 1.0f) hpbar_fade_timer = 1.0f;
 		}
 	}
-
 	// 親クラスの更新処理を呼び出す
 	__super::Update(delta_second);
 }
@@ -358,59 +357,67 @@ void Boss2::Draw(const Vector2D& screen_offset) const
 	//DrawBox(location.x - box_size.x, location.y - box_size.y,
 	//	location.x + box_size.x, location.y + box_size.y, GetColor(0, 255, 0), TRUE);
 
-	DrawBoss2(location);
+	//DrawBoss2(location);
 
 	if (!show_hpbar) {
-		// HPバーをまだ描画しない
+		DrawBoss2(location);
 		return;
 	}
 
+	// ボス本体描画
+	DrawBoss2(location);
 
+	// フェード＋スケール率（0.0?1.0）
+	const float t = hpbar_fade_timer;
+	float scale = t;
+	if (scale < 0.0f) scale = 0.0f;
+	if (scale > 1.0f) scale = 1.0f;
+	const int alpha = static_cast<int>(scale * 255);
 
-	// フェードイン用透明度（0.0～1.0）
-	const float fade_alpha = hpbar_fade_timer;
-	int alpha = static_cast<int>(fade_alpha * 255); // 0～255
-
-	// アルファブレンド設定
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
 
-
+	// スケーリング付き描画
 	const float max_hp = 20000.0f;
-	const float bar_width = 650.0f;   // 中心から左右で350
-	const float bar_height = 4.0f;   // 細め
-	const float x = D_WIN_MAX_X / 2 - bar_width / 2;
-	const float y = 15.0f;
+	const float bar_width_full = 650.0f;
+	const float bar_height = 8.0f;
+	const float x_center = D_WIN_MAX_X / 2;
+	const float y = 30.0f;
 
-	// 背景（枠）
-	DrawBox(x - 2, y - 2, x + bar_width + 2, y + bar_height + 2, GetColor(255, 255, 255), TRUE);
-	// 枠（白線）
-	DrawBox(x, y, x + bar_width, y + bar_height, GetColor(0, 0, 0), TRUE);
+	// 実際の描画幅（縮小→拡大）
+	const float current_bar_width = bar_width_full * scale;
+	const float x = x_center - current_bar_width / 2;
 
-	// 内部の赤いバー（残り体力）
-	// 内部の赤いバー（残り体力）
-	float hp_ratio = hp / max_hp;
+	float hp_ratio = (float)hp / (float)max_hp;
 	if (hp_ratio < 0.0f) hp_ratio = 0.0f;
 	if (hp_ratio > 1.0f) hp_ratio = 1.0f;
-	DrawBox(x, y, x + bar_width * hp_ratio, y + bar_height, GetColor(255, 200, 0), TRUE);
 
 
-	if (hp_ratio < 0.2f) {
-		float wave_offset = sin(GetNowCount() / 50.0f) * 2.0f;
-		DrawBox(x + wave_offset, y, x + bar_width * hp_ratio + wave_offset, y + bar_height, GetColor(255, 0, 0), TRUE);
-	}
 
-	// ?? 追加：第二形態の目印（くぼみ）
-	const float notch_x = x + bar_width * 0.5f;  // 50%位置
-	const float notch_width = 2.0f;
-	const float notch_height = bar_height + 4.0f; // 少し上にはみ出す
-	DrawBox(
-		notch_x - notch_width / 2,
-		y - 2.0f,
-		notch_x + notch_width / 2,
-		y + bar_height + 2.0f,
-		GetColor(255, 255, 0), TRUE // 黄色など目立つ色
-	);
+	//float hp_ratio = Clamp(hp / max_hp, 0.0f, 1.0f);
+	const float filled_width = current_bar_width * hp_ratio;
 
+	// 色（例：50%以下で濃いオレンジ）
+	unsigned int bar_color = (hp_ratio > 0.5f)
+		? GetColor(255, 0, 0)
+		: GetColor(255, 100, 0);
+
+	// 背景
+	DrawBox(x - 2, y - 2, x + current_bar_width + 2, y + bar_height + 2, GetColor(0, 0, 0), TRUE);
+
+	// HPバー本体
+	DrawBox(x, y, x + filled_width, y + bar_height, bar_color, TRUE);
+
+	// 白枠
+	DrawBox(x, y, x + current_bar_width, y + bar_height, GetColor(255, 255, 255), FALSE);
+
+	// くぼみ（第二形態位置）
+	float notch_x = x + current_bar_width / 2;
+	DrawBox(notch_x - 1, y - 2, notch_x + 1, y + bar_height + 2, GetColor(255, 255, 0), TRUE);
+
+	// HP数値
+	//DrawFormatString(x + current_bar_width + 10, y - 2, GetColor(255, 255, 255), "HP: %.0f", hp);
+
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
 }
 
@@ -470,10 +477,10 @@ void Boss2::Movement(float delta_second)
 {
 	move_time += delta_second;
 
-	const float float_amplitude_y = 30.0f;
-	const float float_speed_y = 1.5f;
-	const float float_amplitude_x = 20.0f;
-	const float float_speed_x = 1.5f;
+	const float float_amplitude_y = 15.0f;
+	const float float_speed_y = 2.7f;
+	const float float_amplitude_x = 25.0f;
+	const float float_speed_x = 2.7f;
 	Vector2D float_offset;
 	float_offset.y = sinf(move_time * float_speed_y) * float_amplitude_y;
 	float_offset.x = cosf(move_time * float_speed_x) * float_amplitude_x;
@@ -602,7 +609,7 @@ void Boss2::Shot(float delta_second)
 			attack_pattrn = 5;
 	#else
 			// HPが減ったら攻撃パターンを変更（オーバーフロー防止に合わせてリセット）
-			if (hp <= 10000 && attack_pattrn_num != std::vector<int>{7, 8})
+			if (hp <= 1000 && attack_pattrn_num != std::vector<int>{7, 8})
 			{
 				attack_pattrn_num = { 7, 8 };
 				attack_count = 0; // 安全にリセット
@@ -797,7 +804,7 @@ void Boss2::Attack(float delta_second)
 			/// <param name="spiral_duration_limit">攻撃する時間</param>
 			/// <param name="generate_location">生成する位置</param>
 			/// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
-			Pattrn4(20, 300.0f, 1.0f, 5.0f, location, delta_second);
+			Pattrn4_2(6, 300.0f, 1.0f, 5.0f, location, delta_second);
 			break;
 		case 5:
 #if 0
@@ -838,7 +845,8 @@ void Boss2::Attack(float delta_second)
 			/// <param name="spiral_speed">弾の速度</param>
 			/// <param name="generate_location">生成する位置</param>
 			/// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
-			Pattrn5(0.1f, 5.0f, 300.0f, location, delta_second);
+			Pattrn5_2(0.05f, 5.0f, 300.0f, location, delta_second);
+			//Pattrn5(0.08f, 5.0f, 300.0f, location, delta_second);
 #endif
 			break;
 		case 6:
@@ -851,7 +859,7 @@ void Boss2::Attack(float delta_second)
 			/// <param name="fan_duration_limit">攻撃する時間</param>
 			/// <param name="generate_location">生成する位置</param>
 			/// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
-			Pattrn6(100.0f, 300.0f, 0.15f, 10.0f, location, delta_second);
+			Pattrn6_2(100.0f, 300.0f, 0.15f, 10.0f, location, delta_second);
 
 			break;
 		case 7:
@@ -864,7 +872,7 @@ void Boss2::Attack(float delta_second)
 			/// <param name="fan_duration_limit">攻撃時間</param>
 			/// <param name="generate_location">生成する位置</param>
 			/// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
-			Pattrn7(150.0f, 300.0f, 0.5f, 10.0f, Vector2D(location.x, location.y + 100.0f), delta_second);
+			Pattrn7_2(150.0f, 500.0f, 0.2f, 10.0f, Vector2D(location.x, location.y + 100.0f), delta_second);
 
 			break;
 		case 8:
@@ -889,7 +897,7 @@ void Boss2::Attack(float delta_second)
 			/// <param name="rotation_timer">回転の時間計測</param>
 			/// <param name="generate_location">生成する位置</param>
 			/// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
-			Pattrn9(27, 250.0f, 90.0f, 0.0f, location, delta_second);
+			Pattrn9_2(27, 250.0f, 90.0f, 0.0f, location, delta_second);
 
 			/// <summary>
 			/// 攻撃パターン11（一本ビーム）
@@ -910,7 +918,7 @@ void Boss2::Attack(float delta_second)
 			/// <param name="center_location">生成する場所</param>
 			/// <param name="generate_location">生成する場所</param>
 			/// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
-			Pattrn10(8, 120.0f, 350.0f, 300.0f, 5.0f, location, delta_second);
+			Pattrn10_2(8, 120.0f, 550.0f, 450.0f, 5.0f, location, delta_second);
 
 			break;
 		case 11:
@@ -983,6 +991,54 @@ void Boss2::Pattrn4(int bullet_num, float speed, float spiral_interval, float sp
 	}
 }
 
+void Boss2::Pattrn4_2(int bullet_num, float speed, float spiral_interval, float spiral_duration_limit, const Vector2D& generate_location, float delta_second)
+{
+	// オブジェクト管理クラスのインスタンスを取得
+	GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+
+	static float spiral_timer = 0.0f;
+	static float spiral_total_time = 0.0f;
+
+	spiral_timer += delta_second;
+	spiral_total_time += delta_second;
+
+	if (spiral_timer >= spiral_interval)
+	{
+		spiral_timer = 0.0f;
+
+		for (int i = 0; i < bullet_num; i++)
+		{
+			float angle = (360.0f / bullet_num) * i;
+			float rad = angle * DX_PI / 180.0f;
+
+			Vector2D velocity(cos(rad) * speed, sin(rad) * speed);
+
+			EnemyShot4* e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x - 170.0f, generate_location.y + 65.0f));
+			e_shot4->SetVelocity(velocity);
+			e_shot4->SetAttackPattrn(1);
+		}
+
+		for (int i = 0; i < bullet_num; i++)
+		{
+			float angle = (360.0f / bullet_num) * i;
+			float rad = angle * DX_PI / 180.0f;
+
+			Vector2D velocity(cos(rad) * speed, sin(rad) * speed);
+
+			EnemyShot4* e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x + 170.0f, generate_location.y + 65.0f));
+			e_shot4->SetVelocity(velocity);
+			e_shot4->SetAttackPattrn(1);
+		}
+	}
+
+	// 時間制限を超えたら終了（発射しない）
+	if (spiral_total_time >= spiral_duration_limit)
+	{
+		spiral_total_time = 0.0f;
+		is_shot = false;
+	}
+}
+
 /// <summary>
 /// 攻撃パターン５
 /// </summary>
@@ -1007,6 +1063,8 @@ void Boss2::Pattrn5(float spiral_interval, float spiral_duration_limit, float sp
 	{
 		spiral_timer = 0.0f;
 
+#if 0
+		// 上下二方向に出す
 		for (int dir = 0; dir < 2; dir++)
 		{
 			float base_angle = (dir == 0) ? 90.0f : 270.0f;
@@ -1019,6 +1077,106 @@ void Boss2::Pattrn5(float spiral_interval, float spiral_duration_limit, float sp
 			shot->SetVelocity(velocity);
 			shot->SetAttackPattrn(2);
 		}
+#else
+		// 一方向
+		float base_angle = 90.0f; // 上方向
+		float current_angle = base_angle + spiral_angle;
+
+		float rad = current_angle * DX_PI / 180.0f;
+		Vector2D velocity(cos(rad) * spiral_speed, sin(rad) * spiral_speed);
+
+		EnemyShot4* shot = objm->CreateObject<EnemyShot4>(generate_location);
+		shot->SetVelocity(velocity);
+		shot->SetAttackPattrn(2);
+#endif
+
+
+		spiral_angle += 40.0f;
+		if (spiral_angle >= 360.0f) spiral_angle -= 360.0f;
+	}
+
+	// 時間制限を超えたら終了（発射しない）
+	if (spiral_total_time >= spiral_duration_limit)
+	{
+		spiral_total_time = 0.0f;
+		is_shot = false;
+	}
+}
+
+void Boss2::Pattrn5_2(float spiral_interval, float spiral_duration_limit, float spiral_speed, const Vector2D& generate_location, float delta_second)
+{
+	// オブジェクト管理クラスのインスタンスを取得
+	GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+
+	static float spiral_timer = 0.0f;
+	static float spiral_angle = 0.0f;
+	static float spiral_total_time = 0.0f;
+
+	spiral_timer += delta_second;
+	spiral_total_time += delta_second;
+
+	if (spiral_timer >= spiral_interval)
+	{
+		spiral_timer = 0.0f;
+
+#if 0
+		for (int dir = 0; dir < 2; dir++)
+		{
+			float base_angle = (dir == 0) ? 90.0f : 270.0f;
+			float current_angle = base_angle + spiral_angle;
+
+			float rad = current_angle * DX_PI / 180.0f;
+			Vector2D velocity(cos(rad) * spiral_speed, sin(rad) * spiral_speed);
+
+			EnemyShot4* shot = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x + 170.0f, generate_location.y + 65.0f));
+			shot->SetVelocity(velocity);
+			shot->SetAttackPattrn(2);
+		}
+
+		for (int dir = 0; dir < 2; dir++)
+		{
+			float base_angle = (dir == 0) ? 90.0f : 270.0f;
+			float current_angle = base_angle - spiral_angle; // ← 逆回転にする
+
+			float rad = current_angle * DX_PI / 180.0f;
+			Vector2D velocity(cos(rad) * spiral_speed, sin(rad) * spiral_speed);
+
+			EnemyShot4* shot = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x - 170.0f, generate_location.y + 65.0f));
+			shot->SetVelocity(velocity);
+			shot->SetAttackPattrn(2);
+		}
+#else
+
+		// 右側（時計回り、上方向のみ）
+		{
+			float base_angle = 90.0f;
+			// マイナスにしたら回転が反転する
+			float current_angle = base_angle + spiral_angle;
+
+			float rad = current_angle * DX_PI / 180.0f;
+			Vector2D velocity(cos(rad) * spiral_speed, sin(rad) * spiral_speed);
+
+			EnemyShot4* shot = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x + 170.0f, generate_location.y + 65.0f));
+			shot->SetVelocity(velocity);
+			shot->SetAttackPattrn(2);
+		}
+
+		// 左側（反時計回り、上方向のみ）
+		{
+			float base_angle = 90.0f;
+			float current_angle = base_angle + spiral_angle;
+
+			float rad = current_angle * DX_PI / 180.0f;
+			Vector2D velocity(cos(rad) * spiral_speed, sin(rad) * spiral_speed);
+
+			EnemyShot4* shot = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x - 170.0f, generate_location.y + 65.0f));
+			shot->SetVelocity(velocity);
+			shot->SetAttackPattrn(2);
+		}
+
+
+#endif
+
 
 		spiral_angle += 40.0f;
 		if (spiral_angle >= 360.0f) spiral_angle -= 360.0f;
@@ -1081,6 +1239,48 @@ void Boss2::Pattrn6(float fan_angle_range, float bullet_speed, float fan_interva
 	}
 }
 
+void Boss2::Pattrn6_2(float fan_angle_range, float bullet_speed, float fan_interval, float fan_duration_limit, const Vector2D& generate_location, float delta_second)
+{
+	// オブジェクト管理クラスのインスタンスを取得
+	GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+
+	// 攻撃持続用 static 変数
+	static float fan_timer = 0.0f;
+	static float fan_total_time = 0.0f;
+
+	// 攻撃パターンが変更されたらリセットしたい → boss2側で状態持たせるのもあり
+
+	fan_timer += delta_second;
+	fan_total_time += delta_second;
+
+	// 一定間隔ごとに発射
+	if (fan_timer >= fan_interval)
+	{
+		fan_timer = 0.0f;
+
+		// ランダムな角度（中心±60°）
+		float base_angle = 90.0f; // 下方向中心
+		float random_angle = base_angle - fan_angle_range / 2.0f + (rand() % (int)fan_angle_range);
+
+		float rad = random_angle * DX_PI / 180.0f;
+		Vector2D velocity(cos(rad) * bullet_speed, sin(rad) * bullet_speed);
+
+		e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x + 170.0f, generate_location.y + 65.0f));
+		e_shot4->SetVelocity(velocity);
+		e_shot4->SetAttackPattrn(2);
+		e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x - 170.0f, generate_location.y + 65.0f));
+		e_shot4->SetVelocity(velocity);
+		e_shot4->SetAttackPattrn(2);
+	}
+
+	// 時間制限を超えたら終了（発射しない）
+	if (fan_total_time >= fan_duration_limit)
+	{
+		fan_total_time = 0.0f;
+		is_shot = false;
+	}
+}
+
 /// <summary>
 /// 攻撃パターン７
 /// </summary>
@@ -1091,6 +1291,46 @@ void Boss2::Pattrn6(float fan_angle_range, float bullet_speed, float fan_interva
 /// <param name="generate_location">生成する場所</param>
 /// <param name="delta_second">１フレームあたりの時間</param>
 void Boss2::Pattrn7(float fan_angle_range, float bullet_speed, float fan_interval, float fan_duration_limit, const Vector2D& generate_location, float delta_second)
+{
+	// オブジェクト管理クラスのインスタンスを取得
+	GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+
+	static float fan_timer = 0.0f;
+	static float fan_total_time = 0.0f;
+
+	fan_timer += delta_second;
+	fan_total_time += delta_second;
+
+	if (fan_timer >= fan_interval)
+	{
+		fan_timer = 0.0f;
+
+		int bullet_count = 4;
+		float base_angle = 90.0f; // 中心下方向
+
+		for (int i = 0; i < bullet_count; ++i)
+		{
+			float angle = base_angle - fan_angle_range / 2.0f +
+				(fan_angle_range / (bullet_count - 1)) * i;
+
+			float rad = angle * DX_PI / 180.0f;
+			Vector2D velocity(cos(rad) * bullet_speed, sin(rad) * bullet_speed);
+
+			e_shot4 = objm->CreateObject<EnemyShot4>(generate_location);
+			e_shot4->SetVelocity(velocity);
+			e_shot4->SetAttackPattrn(2);
+		}
+	}
+
+	// 一定時間経過したら終了
+	if (fan_total_time >= fan_duration_limit)
+	{
+		fan_total_time = 0.0f;
+		is_shot = false;
+	}
+}
+
+void Boss2::Pattrn7_2(float fan_angle_range, float bullet_speed, float fan_interval, float fan_duration_limit, const Vector2D& generate_location, float delta_second)
 {
 	// オブジェクト管理クラスのインスタンスを取得
 	GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
@@ -1116,7 +1356,20 @@ void Boss2::Pattrn7(float fan_angle_range, float bullet_speed, float fan_interva
 			float rad = angle * DX_PI / 180.0f;
 			Vector2D velocity(cos(rad) * bullet_speed, sin(rad) * bullet_speed);
 
-			e_shot4 = objm->CreateObject<EnemyShot4>(generate_location);
+			e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x + 170.0f, generate_location.y - 10.0f));
+			e_shot4->SetVelocity(velocity);
+			e_shot4->SetAttackPattrn(2);
+		}
+
+		for (int i = 0; i < bullet_count; ++i)
+		{
+			float angle = base_angle - fan_angle_range / 2.0f +
+				(fan_angle_range / (bullet_count - 1)) * i;
+
+			float rad = angle * DX_PI / 180.0f;
+			Vector2D velocity(cos(rad) * bullet_speed, sin(rad) * bullet_speed);
+
+			e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x - 170.0f, generate_location.y - 10.0f));
 			e_shot4->SetVelocity(velocity);
 			e_shot4->SetAttackPattrn(2);
 		}
@@ -1278,6 +1531,109 @@ void Boss2::Pattrn9(int shot_count, float radius, float angular_speed, float bul
 	}
 }
 
+void Boss2::Pattrn9_2(int shot_count, float radius, float angular_speed, float bullet_speed, const Vector2D& generate_location, float delta_second)
+{
+	GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+
+	static std::vector<float> angles_left;
+	static std::vector<float> angles_right;
+	static std::vector<EnemyShot4*> shots_left;
+	static std::vector<EnemyShot4*> shots_right;
+
+	static float rotation_timer = 0.0f;
+	rotation_timer += delta_second;
+
+	const float offset_x = 180.0f; // ボスの中心から左右にずらす距離
+	Vector2D left_center = generate_location + Vector2D(-offset_x, 0);
+	Vector2D right_center = generate_location + Vector2D(+offset_x, 0);
+
+	// 初期化
+	if (angles_left.empty() && angles_right.empty())
+	{
+		shots_left.clear();
+		shots_right.clear();
+
+		for (int i = 0; i < shot_count; ++i)
+		{
+			float angle = 360.0f / shot_count * i;
+			EnemyShot4* e_shot4 = nullptr;
+
+			if (i % 2 == 0)
+			{
+				angles_left.push_back(angle);
+				e_shot4 = objm->CreateObject<EnemyShot4>(left_center);
+				if (e_shot4)
+				{
+					shots_left.push_back(e_shot4);
+					e_shot4->SetVelocity(Vector2D(0, 0));
+					//e_shot4->SetAttackPattrn(1);
+				}
+			}
+			else
+			{
+				angles_right.push_back(angle);
+				e_shot4 = objm->CreateObject<EnemyShot4>(right_center);
+				if (e_shot4)
+				{
+					shots_right.push_back(e_shot4);
+					e_shot4->SetVelocity(Vector2D(0, 0));
+					//e_shot4->SetAttackPattrn(1);
+				}
+			}
+		}
+	}
+
+	// 左側の弾を更新
+	for (size_t i = 0; i < angles_left.size(); ++i)
+	{
+		angles_left[i] += angular_speed * delta_second;
+		if (angles_left[i] >= 360.0f) angles_left[i] -= 360.0f;
+
+		float rad = angles_left[i] * DX_PI / 180.0f;
+		Vector2D new_pos = left_center + Vector2D(cos(rad) * radius, sin(rad) * radius);
+
+		if (i < shots_left.size() && shots_left[i])
+		{
+			shots_left[i]->SetLocation(new_pos);
+			shots_left[i]->SetVelocity(Vector2D(0, 0));
+		}
+	}
+
+	// 右側の弾を更新
+	for (size_t i = 0; i < angles_right.size(); ++i)
+	{
+		angles_right[i] += angular_speed * delta_second;
+		if (angles_right[i] >= 360.0f) angles_right[i] -= 360.0f;
+
+		float rad = angles_right[i] * DX_PI / 180.0f;
+		Vector2D new_pos = right_center + Vector2D(cos(rad) * radius, sin(rad) * radius);
+
+		if (i < shots_right.size() && shots_right[i])
+		{
+			shots_right[i]->SetLocation(new_pos);
+			shots_right[i]->SetVelocity(Vector2D(0, 0));
+		}
+	}
+
+	// 攻撃終了処理（5秒経過で削除）
+	static float duration_timer = 0.0f;
+	duration_timer += delta_second;
+	if (duration_timer >= 5.0f)
+	{
+		for (auto& s : shots_left)
+			if (s) s->SetDestroy();
+		for (auto& s : shots_right)
+			if (s) s->SetDestroy();
+
+		angles_left.clear();
+		angles_right.clear();
+		shots_left.clear();
+		shots_right.clear();
+		duration_timer = 0.0f;
+		is_shot = false;
+	}
+}
+
 /// <summary>
 /// 攻撃パターン１０
 /// </summary>
@@ -1354,6 +1710,130 @@ void Boss2::Pattrn10(int shot_count, float radius, float angular_speed, float ce
 		duration_timer = 0.0f;
 		is_shot = false;
 		initialized = false;  // 初期化フラグをリセット
+	}
+}
+
+void Boss2::Pattrn10_2(int shot_count, float radius, float angular_speed, float center_speed, float duration_limit, const Vector2D& center_location, float delta_second)
+{
+	GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+
+	static float duration_timer = 0.0f;
+	static Vector2D center_pos_L, center_pos_R;
+	static Vector2D center_velocity;
+	static std::vector<RotatingShotData> shot_data_L, shot_data_R;
+	static bool initialized = false;
+	static float arrival_phase_timer = 0.0f;
+	static bool all_arrived = false;
+
+
+	duration_timer += delta_second;
+
+	if (duration_timer < duration_limit)
+	{
+		if (!initialized)
+		{
+			const float offset_x = 170.0f;
+
+			center_pos_L = center_location + Vector2D(-offset_x, 50);
+			center_pos_R = center_location + Vector2D(+offset_x, 50);
+			center_velocity = Vector2D(0.0f, center_speed);
+
+			shot_data_L.clear();
+			shot_data_R.clear();
+
+			for (int i = 0; i < shot_count; ++i)
+			{
+				float angle = 360.0f / shot_count * i;
+				float rad = angle * DX_PI / 180.0f;
+				Vector2D offset(cos(rad) * radius, sin(rad) * radius);
+
+				// 左側の弾
+				EnemyShot4* shot_L = objm->CreateObject<EnemyShot4>(center_pos_L);
+				if (shot_L)
+				{
+					shot_L->SetVelocity(Vector2D(0, 0));
+					shot_L->SetAttackPattrn(1);
+					shot_data_L.push_back({ shot_L, angle, offset, 0.0f, RotatingShotData::State::MoveToCircle });
+				}
+
+				// 右側の弾
+				EnemyShot4* shot_R = objm->CreateObject<EnemyShot4>(center_pos_R);
+				if (shot_R)
+				{
+					shot_R->SetVelocity(Vector2D(0, 0));
+					shot_R->SetAttackPattrn(1);
+					shot_data_R.push_back({ shot_R, angle, offset, 0.0f, RotatingShotData::State::MoveToCircle });
+				}
+			}
+
+			initialized = true;
+		}
+
+		// 中心移動
+		if (all_arrived)
+		{
+			center_pos_L += center_velocity * delta_second;
+			center_pos_R += center_velocity * delta_second;
+		}
+
+		auto update_shots = [&](std::vector<RotatingShotData>& shot_data, const Vector2D& center_pos)
+			{
+				for (auto& data : shot_data)
+				{
+					if (!data.shot) continue;
+
+					switch (data.state)
+					{
+					case RotatingShotData::State::MoveToCircle:
+					{
+						data.arrival_timer += delta_second;
+						float t = Min(data.arrival_timer / 1.0f, 1.0f);
+						float eased = 1.0f - pow(1.0f - t, 2.0f); // easeOut
+
+						Vector2D pos = center_pos + data.target_offset * eased;
+						data.shot->SetLocation(pos);
+
+						if (t >= 1.0f)
+							data.state = RotatingShotData::State::Rotate;
+
+						bool all_ready = true;
+						for (auto& d : shot_data_L) if (d.state != RotatingShotData::State::Rotate) all_ready = false;
+						for (auto& d : shot_data_R) if (d.state != RotatingShotData::State::Rotate) all_ready = false;
+
+						if (all_ready) all_arrived = true;
+						break;
+					}
+					case RotatingShotData::State::Rotate:
+					{
+						data.angle_deg += angular_speed * delta_second;
+						if (data.angle_deg >= 360.0f) data.angle_deg -= 360.0f;
+
+						float rad = data.angle_deg * DX_PI / 180.0f;
+						Vector2D offset(cos(rad) * radius, sin(rad) * radius);
+						data.shot->SetLocation(center_pos + offset);
+						break;
+					}
+					}
+				}
+			};
+
+		// 左右の弾更新
+		update_shots(shot_data_L, center_pos_L);
+		update_shots(shot_data_R, center_pos_R);
+	}
+	else
+	{
+		// 攻撃終了処理
+		for (auto& d : shot_data_L) if (d.shot) d.shot->SetDestroy();
+		for (auto& d : shot_data_R) if (d.shot) d.shot->SetDestroy();
+
+		shot_data_L.clear();
+		shot_data_R.clear();
+		initialized = false;
+		all_arrived = false;              // ← これが大事
+		duration_timer = 0.0f;
+		arrival_phase_timer = 0.0f;       // ← 使っているなら
+		is_shot = false;
 	}
 }
 

@@ -96,7 +96,8 @@ private:
 
 	WarningState warning_state = WarningState::None;
 
-
+	// Stage3.h ‚ÉˆÈ‰º‚Ìƒƒ“ƒo•Ï”‚ğ’Ç‰Á
+	bool is_zako7_group_spawned = false;
 public:
 	Stage3(Player* player);
 	~Stage3();

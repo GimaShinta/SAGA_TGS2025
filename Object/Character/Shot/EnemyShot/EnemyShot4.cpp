@@ -35,53 +35,61 @@ void EnemyShot4::Initialize()
 	
 	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime81.png", 6, 6, 1, 24, 24));
 	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/standard/anime81.png", 6, 6, 1, 24, 24));
+	
 	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime89.png", 4, 4, 1, 16, 32));
 	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime89.png", 4, 4, 1, 16, 32));
 
+	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime01.png", 8, 8, 1, 16, 16));
 	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime01.png", 8, 8, 1, 16, 16));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime02.png", 6, 6, 1, 16, 16));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime03.png", 8, 8, 1, 24, 24));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime04.png", 7, 7, 1, 24, 24));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime05.png", 7, 7, 1, 16, 16));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime06.png", 6, 6, 1, 16, 16));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime07.png", 6, 6, 1, 16, 16));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime11.png", 4, 4, 1, 16, 16));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime12.png", 4, 4, 1, 16, 16));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime13.png", 4, 4, 1, 16, 16));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime14.png", 4, 4, 1, 16, 16));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime15.png", 4, 4, 1, 16, 16));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime16.png", 4, 4, 1, 16, 16));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime17.png", 4, 4, 1, 16, 16));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime18.png", 4, 4, 1, 16, 16));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime19.png", 4, 4, 1, 24, 24));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime29.png", 4, 4, 1, 16, 16));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime30.png", 6, 6, 1, 16, 16));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime32.png", 6, 6, 1, 16, 32));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime42.png", 5, 5, 1, 16, 16));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime43.png", 6, 6, 1, 16, 16));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime44.png", 4, 4, 1, 16, 16));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime45.png", 4, 4, 1, 16, 16));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime46.png", 4, 4, 1, 16, 16));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime48.png", 5, 5, 1, 16, 24));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime49.png", 5, 5, 1, 16, 16));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime50.png", 4, 4, 1, 16, 24));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime51.png", 4, 4, 1, 16, 16));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime74.png", 4, 4, 1, 48, 48));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime75.png", 4, 4, 1, 32, 64));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime76.png", 4, 4, 1, 48, 96));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime77.png", 4, 4, 1, 24, 24));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime78.png", 6, 6, 1, 24, 24));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime79.png", 4, 4, 1, 32, 32));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime80.png", 6, 6, 1, 32, 32));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime81.png", 6, 6, 1, 24, 24));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime82.png", 6, 6, 1, 24, 24));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime83.png", 6, 6, 1, 32, 32));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime84.png", 6, 6, 1, 32, 32));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime85.png", 6, 6, 1, 32, 32));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime86.png", 6, 6, 1, 32, 32));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime87.png", 6, 6, 1, 32, 32));
+
+
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime02.png", 6, 6, 1, 16, 16));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime03.png", 8, 8, 1, 24, 24));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime04.png", 7, 7, 1, 24, 24));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime05.png", 7, 7, 1, 16, 16));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime06.png", 6, 6, 1, 16, 16));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime07.png", 6, 6, 1, 16, 16));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime11.png", 4, 4, 1, 16, 16));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime12.png", 4, 4, 1, 16, 16));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime13.png", 4, 4, 1, 16, 16));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime14.png", 4, 4, 1, 16, 16));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime15.png", 4, 4, 1, 16, 16));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime16.png", 4, 4, 1, 16, 16));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime17.png", 4, 4, 1, 16, 16));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime18.png", 4, 4, 1, 16, 16));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime19.png", 4, 4, 1, 24, 24));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime29.png", 4, 4, 1, 16, 16));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime30.png", 6, 6, 1, 16, 16));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime32.png", 6, 6, 1, 16, 32));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime42.png", 5, 5, 1, 16, 16));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime43.png", 6, 6, 1, 16, 16));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime44.png", 4, 4, 1, 16, 16));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime45.png", 4, 4, 1, 16, 16));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime46.png", 4, 4, 1, 16, 16));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime48.png", 5, 5, 1, 16, 24));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime49.png", 5, 5, 1, 16, 16));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime50.png", 4, 4, 1, 16, 24));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime51.png", 4, 4, 1, 16, 16));
+	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/Standard/anime74.png", 4, 4, 1, 48, 48));
+	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Pink/Bullet/anime74.png", 4, 4, 1, 48, 48));	
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime75.png", 4, 4, 1, 32, 64));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime76.png", 4, 4, 1, 48, 96));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime77.png", 4, 4, 1, 24, 24));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime78.png", 6, 6, 1, 24, 24));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime79.png", 4, 4, 1, 32, 32));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime80.png", 6, 6, 1, 32, 32));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime81.png", 6, 6, 1, 24, 24));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime82.png", 6, 6, 1, 24, 24));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime83.png", 6, 6, 1, 32, 32));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime84.png", 6, 6, 1, 32, 32));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime85.png", 6, 6, 1, 32, 32));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime86.png", 6, 6, 1, 32, 32));
+	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime87.png", 6, 6, 1, 32, 32));
 	
 
+	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime92.png", 4, 4, 1, 32, 32));
+	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime94.png", 6, 6, 1, 32, 32));
+	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime93.png", 6, 6, 1, 32, 32));
 
 	//bullet[7] = rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime08.png", 7, 7, 1, 16, 24);
 	//bullet[8] = rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime09.png", 8, 8, 1, 24, 24);
@@ -132,9 +140,6 @@ void EnemyShot4::Initialize()
 	//bullet[88] = rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime89.png", 4, 4, 1, 16, 32);
 	//bullet[89] = rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime90.png", 4, 4, 1, 16, 32);
 	//bullet[90] = rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime91.png", 4, 4, 1, 16, 32);
-	//bullet[91] = rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime92.png", 4, 4, 1, 16, 32);
-	//bullet[92] = rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime93.png", 4, 4, 1, 16, 32);
-	//bullet[93] = rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime94.png", 4, 4, 1, 16, 32);
 	//bullet[94] = rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime95.png", 4, 4, 1, 16, 32);
 	//bullet[95] = rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime96.png", 4, 4, 1, 16, 32);
 	//bullet[96] = rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime97.png", 4, 4, 1, 16, 32);
@@ -167,11 +172,13 @@ void EnemyShot4::Update(float delta_second)
 		is_destroy = true;
 	}
 
-	std::vector<int> animation_num = { 0, 1 };
+	bullet = { bullets[6][0], bullets[7][0],  bullets[6][1],  bullets[7][1],  bullets[6][2],  bullets[7][2],  bullets[6][3],  bullets[7][3], };
+
+	std::vector<int> animation_num = { 0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1 };
 	//フレームレートで時間を計測
 	animation_time += delta_second;
 	//8秒経ったら画像を切り替える
-	if (animation_time >= 0.02f)
+	if (animation_time >= 0.05f)
 	{
 		//計測時間の初期化
 		animation_time = 0.0f;
@@ -184,7 +191,7 @@ void EnemyShot4::Update(float delta_second)
 			animation_count = 0;
 		}
 		// アニメーションが順番に代入される
-		image = bullets[2][animation_num[animation_count]];
+		image = bullet[animation_num[animation_count]];
 	}
 
 
@@ -225,7 +232,7 @@ void EnemyShot4::Draw(const Vector2D& screen_offset) const
 	//DrawTriangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, color, TRUE);
 	//DrawTriangle(p1.x, p1.y, p3.x, p3.y, p4.x, p4.y, color, TRUE);
 
-	DrawRotaGraph(location.x, location.y, 1.9f, angle, image, TRUE);
+	DrawRotaGraph(location.x, location.y, 1.0f, angle, image, TRUE);
 }
 
 // 終了時処理

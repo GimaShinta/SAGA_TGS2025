@@ -181,13 +181,17 @@ void Stage3::Draw()
 {
     // 背景などの描画
     DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(255, 255, 255), TRUE);
-    DrawScrollBackground(); // 背景 & 背面グリッド（奥）
 
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
     AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
 
+    // === 背景の塗りつぶし ===
+    DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(20, 5, 30), TRUE);
+
     if (draw_animation_first)  // ← このフラグで順序を切り替える
     {
+        DrawScrollBackground(); // 背景 & 背面グリッド（奥）
+
         // グリッドの裏に描画するタイミング：未生成 or 墜落中
         if (boss2 != nullptr && (!boss2->GetGenerate()))
         {
@@ -209,11 +213,14 @@ void Stage3::Draw()
     }
     else
     {
+
         // グリッドの裏に描画するタイミング：未生成 or 墜落中
         if (boss2 != nullptr && (!boss2->GetGenerate()))
         {
             objm->DrawBoss();
         }
+
+        DrawScrollBackground(); // 背景 & 背面グリッド（奥）
 
         DrawFrontGrid();  // 前面グリッド
 
@@ -460,14 +467,47 @@ void Stage3::EnemyAppearance(float delta)
     // 1. ボスが出ていればZakoは出現しない
     if (boss2_spawned) return;
 
-    // 2. 各時間帯ごとの出現処理に分岐
     if (stage_timer < 5.0f)
     {
-        StartWarning();
-        //is_warning = true;
-        //SpawnBossAndItems();
+        SpawnBossAndItems();
 
-        //SpawnBossAndItems();
+        if (!is_zako7_group_spawned)
+        {
+            const float base_y = -50.0f;
+            const float center_y = 320.0f;         // 中央基準（少し上に変更して階段の効果を出す）
+            const float delay_step = 0.3f;
+            const float step_y = 50.0f;            // 1段あたりのY段差（好きな値に調整可）
+
+            const float left_start_x = 490.0f;
+            const float right_start_x = 790.0f;
+            const float spacing_x = 30.0f;
+
+            // 左に3体（→中央→左上）
+            for (int i = 0; i < 3; ++i)
+            {
+                float x = left_start_x + spacing_x * i;
+                float delay = 1.0f + delay_step * i;
+                float target_y = center_y + i * step_y;  // ← 階段状に下へ
+
+                auto zako = objm->CreateObject<Zako6>(Vector2D(x, base_y));
+                zako->SetMode(ZakoMode::Zako7);
+                zako->SetAppearParams(Vector2D(x, base_y), Vector2D(x, target_y), delay, true);
+            }
+
+            // 右に3体（→中央→右上）
+            for (int i = 0; i < 3; ++i)
+            {
+                float x = right_start_x - spacing_x * i;
+                float delay = 1.0f + delay_step * i;
+                float target_y = center_y + i * step_y;
+
+                auto zako = objm->CreateObject<Zako6>(Vector2D(x, base_y));
+                zako->SetMode(ZakoMode::Zako7);
+                zako->SetAppearParams(Vector2D(x, base_y), Vector2D(x, target_y), delay, false);
+            }
+
+            is_zako7_group_spawned = true;
+        }
         HandleZako1_LR(delta);
     }
     else if (stage_timer < 10.0f)
@@ -902,8 +942,6 @@ void Stage3::ResultDraw(float delta)
 
 void Stage3::DrawScrollBackground() const
 {
-    // === 背景の塗りつぶし ===
-    DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(20, 5, 30), TRUE);
 
     // === 奥のグリッド描画 ===
     const int grid_size_back = 40;
@@ -946,7 +984,7 @@ void Stage3::DrawScrollBackground() const
 void Stage3::ScrollEffectUpdate(float delta)
 {
         scroll_back -= delta * 220.2f;   // 奥グリッドは遅く
-        scroll_front -= delta * 420.0f;  // 前面グリッドは速く
+        scroll_front -= delta * 620.0f;  // 前面グリッドは速く
         time += delta;                 // ノイズ等に使うタイマー
 
         // 粒子の更新
