@@ -154,6 +154,9 @@ private:
 	int warning_label_alpha = 255; // •¶Žš‚Ì“§–¾“x
 	float slide_out_timer = 0.0f;
 
+	bool preload_done = false;
+	float entry_timer = 0.0f;
+
 
 
 };

@@ -65,10 +65,27 @@ void Stage1::Initialize()
     font_orbitron = CreateFontToHandle("Orbitron", 22, 6, DX_FONTTYPE_ANTIALIASING);
     font_digital = CreateFontToHandle("メイリオ", 28, 6, DX_FONTTYPE_ANTIALIASING);
 
+
     stage_id = StageID::Stage1;
 
    // ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
    // bg_image = rm->GetImages("Resource/Image/BackGround/Main/Stage1/bg_01.png")[0];
+
+    ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
+
+    // ======== Zako（雑魚敵）リソースのプリロード ========
+    // アニメーション画像（パターンA・B）
+    rm->GetImages("Resource/Image/Object/Enemy/Zako1/anime_enemy30_a.png", 4, 4, 1, 32, 32);
+    rm->GetImages("Resource/Image/Object/Enemy/Zako1/anime_enemy30_b.png", 12, 12, 1, 24, 24);
+
+    // サウンド（死亡音・登場音）
+    rm->GetSounds("Resource/sound/se/se_effect/kill_4.mp3");
+    rm->GetSounds("Resource/sound/se/effect/buon.mp3");
+
+    preload_done = false;  // 初期化時にリセット
+
+    // =====================================================
+
 }
 
 void Stage1::Finalize()
@@ -91,6 +108,20 @@ void Stage1::Finalize()
 
 void Stage1::Update(float delta)
 {
+    // フェードイン中に一度だけ処理
+    if (is_fading_in && !preload_done)
+    {
+        preload_done = true;
+
+        // 爆発エフェクト・ショット演出を事前呼び出し
+        auto anim = Singleton<AnimationManager>::GetInstance();
+
+        // 画面外に弾と敵を仮に生成（非表示）
+        auto objm = Singleton<GameObjectManager>::GetInstance();
+
+        player->SetIsShot();  // アニメ用フラグ（アニメだけ再生）
+    }
+
     UpdateBackgroundScroll(delta);
 
     if (is_player_entering)
@@ -868,109 +899,160 @@ void Stage1::EnemyAppearance(float delta)
 }
 
 
+//void Stage1::DrawScrollBackground() const
+//{
+//    // === 背景色：やや明るめに変更 ===
+//    DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(30, 30, 60), TRUE);
+//
+//    // ==== グラデーション背景（紫寄り） + 簡易ゆらぎノイズ ====
+//    for (int y = 0; y < D_WIN_MAX_Y; ++y)
+//    {
+//        int grad = 40 + (y * 80 / D_WIN_MAX_Y); // 下に行くほど明るく
+//        int r = grad / 2 + GetRand(5); // ランダムでゆらぎを追加
+//        int g = 0;
+//        int b = grad + GetRand(5);     // 紫寄りに青を強く
+//
+//        DrawLine(0, y, D_WIN_MAX_X, y, GetColor(r, g, b));
+//    }
+//
+//    // === データ文字列（薄め・少なめ） ===
+//    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 90); // 透過度さらに薄く
+//
+//    static std::vector<float> data_cols;
+//    static std::vector<float> scale_factors;
+//    static std::vector<float> fall_speeds;
+//
+//    const int data_interval = 80;               // 列の間隔を広げて数を減らす
+//    const int base_line_height = 30;
+//    const int string_len = 10;                  // 文字列も少し短め
+//
+//    if (data_cols.empty()) {
+//        for (int x = 0; x < D_WIN_MAX_X; x += data_interval) {
+//            data_cols.push_back(static_cast<float>(GetRand(D_WIN_MAX_Y)));
+//            scale_factors.push_back(0.9f + GetRand(50) / 100.0f);  // 0.9?1.4倍
+//            fall_speeds.push_back(0.04f + GetRand(20) / 300.0f);   // 0.04?0.1くらい
+//        }
+//    }
+//
+//    for (size_t i = 0; i < data_cols.size(); ++i)
+//    {
+//        int x = static_cast<int>(i) * data_interval;
+//        float& y = data_cols[i];
+//        float scale = scale_factors[i];
+//        float speed = fall_speeds[i];
+//
+//        y += speed;
+//        if (y > D_WIN_MAX_Y + string_len * base_line_height * scale)
+//            y = -GetRand(200);
+//
+//        for (int j = 0; j < string_len; ++j)
+//        {
+//            char str[2] = { '0' + GetRand(1), '\0' };
+//
+//            int draw_y = static_cast<int>(y) - j * static_cast<int>(base_line_height * scale);
+//            if (draw_y < 0 || draw_y > D_WIN_MAX_Y) continue;
+//
+//            int g = 130 - j * (60 / string_len);  // 薄く（グリーン控えめ）
+//            int b = 160;
+//
+//            DrawExtendStringToHandle(
+//                x, draw_y,
+//                scale, scale,
+//                str,
+//                GetColor(0, g, b),
+//                font_digital
+//            );
+//        }
+//    }
+//
+//    // ==== 奥のグリッド（スクロール）====
+//    static float grid_scroll_back = 0.0f;
+//    grid_scroll_back += 0.1f; // ゆっくり動く
+//    const int grid_size_back = 80;
+//    int offset_back = static_cast<int>(grid_scroll_back) % grid_size_back;
+//
+//    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 60); // かなり薄く
+//
+//    for (int x = -grid_size_back; x < D_WIN_MAX_X + grid_size_back; x += grid_size_back)
+//        DrawLine(x, 0, x, D_WIN_MAX_Y, GetColor(180, 100, 255)); // 淡い紫
+//
+//    for (int y = -grid_size_back + offset_back; y < D_WIN_MAX_Y; y += grid_size_back)
+//        DrawLine(0, y, D_WIN_MAX_X, y, GetColor(180, 100, 255));
+//
+//    // ==== 手前のグリッド（中速スクロール）====
+//    static float grid_scroll_front = 0.0f;
+//    grid_scroll_front += 0.25f;
+//    const int grid_size_front = 40;
+//    int offset_front = static_cast<int>(grid_scroll_front) % grid_size_front;
+//
+//    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100); // やや濃いめ
+//
+//    for (int x = -grid_size_front; x < D_WIN_MAX_X + grid_size_front; x += grid_size_front)
+//        DrawLine(x, 0, x, D_WIN_MAX_Y, GetColor(255, 150, 255)); // ピンク寄り
+//
+//    for (int y = -grid_size_front + offset_front; y < D_WIN_MAX_Y; y += grid_size_front)
+//        DrawLine(0, y, D_WIN_MAX_X, y, GetColor(255, 150, 255));
+//
+//    // === ハイライトライン ===
+//    if (GetNowCount() % 120 < 60)
+//    {
+//        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 120);
+//        int flash_y = 40 + (GetNowCount() / 2) % (D_WIN_MAX_Y - 80);
+//        DrawLine(0, flash_y, D_WIN_MAX_X, flash_y, GetColor(100, 255, 255));
+//    }
+//
+//    // === 粒子生成 ===
+//    while (star_particles.size() < 100)
+//    {
+//        StarParticle p;
+//        p.pos = Vector2D(GetRand(D_WIN_MAX_X), GetRand(D_WIN_MAX_Y));
+//        p.velocity = Vector2D(0, 40.0f + GetRand(60)); // やや速め
+//        p.alpha = 150.0f + GetRand(100); // より光る
+//        p.length = 10.0f + GetRand(10);
+//        p.life = 2.0f + (GetRand(100) / 50.0f);
+//        star_particles.push_back(p);
+//    }
+//
+//    // === 粒子描画 ===
+//    for (auto& p : star_particles)
+//    {
+//        p.pos.y += p.velocity.y * 0.016f;
+//        p.alpha -= 0.5f;
+//
+//        if (p.length > 0.0f)
+//        {
+//            int a = static_cast<int>(p.alpha);
+//            if (a < 0) a = 0;
+//            if (a > 255) a = 255;
+//
+//            SetDrawBlendMode(DX_BLENDMODE_ALPHA, a);
+//
+//            // より明るい色
+//            DrawLine(static_cast<int>(p.pos.x),
+//                static_cast<int>(p.pos.y),
+//                static_cast<int>(p.pos.x),
+//                static_cast<int>(p.pos.y + p.length),
+//                GetColor(200, 255, 255));
+//        }
+//    }
+//
+//    star_particles.erase(
+//        std::remove_if(star_particles.begin(), star_particles.end(), [](const StarParticle& p)
+//            {
+//                return (p.pos.y > D_WIN_MAX_Y || p.alpha <= 0);
+//            }),
+//        star_particles.end()
+//    );
+//    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255); 
+//
+//}
+
+
 void Stage1::DrawScrollBackground() const
 {
-    // === 背景色：やや明るめに変更 ===
-    DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(30, 30, 60), TRUE);
+    DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(20, 20, 40), TRUE);
 
-    // ==== グラデーション背景（紫寄り） + 簡易ゆらぎノイズ ====
-    for (int y = 0; y < D_WIN_MAX_Y; ++y)
-    {
-        int grad = 40 + (y * 80 / D_WIN_MAX_Y); // 下に行くほど明るく
-        int r = grad / 2 + GetRand(5); // ランダムでゆらぎを追加
-        int g = 0;
-        int b = grad + GetRand(5);     // 紫寄りに青を強く
-
-        DrawLine(0, y, D_WIN_MAX_X, y, GetColor(r, g, b));
-    }
-
-    // === データ文字列（薄め・少なめ） ===
-    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 90); // 透過度さらに薄く
-
-    static std::vector<float> data_cols;
-    static std::vector<float> scale_factors;
-    static std::vector<float> fall_speeds;
-
-    const int data_interval = 80;               // 列の間隔を広げて数を減らす
-    const int base_line_height = 30;
-    const int string_len = 10;                  // 文字列も少し短め
-
-    if (data_cols.empty()) {
-        for (int x = 0; x < D_WIN_MAX_X; x += data_interval) {
-            data_cols.push_back(static_cast<float>(GetRand(D_WIN_MAX_Y)));
-            scale_factors.push_back(0.9f + GetRand(50) / 100.0f);  // 0.9?1.4倍
-            fall_speeds.push_back(0.04f + GetRand(20) / 300.0f);   // 0.04?0.1くらい
-        }
-    }
-
-    for (size_t i = 0; i < data_cols.size(); ++i)
-    {
-        int x = static_cast<int>(i) * data_interval;
-        float& y = data_cols[i];
-        float scale = scale_factors[i];
-        float speed = fall_speeds[i];
-
-        y += speed;
-        if (y > D_WIN_MAX_Y + string_len * base_line_height * scale)
-            y = -GetRand(200);
-
-        for (int j = 0; j < string_len; ++j)
-        {
-            char str[2] = { '0' + GetRand(1), '\0' };
-
-            int draw_y = static_cast<int>(y) - j * static_cast<int>(base_line_height * scale);
-            if (draw_y < 0 || draw_y > D_WIN_MAX_Y) continue;
-
-            int g = 130 - j * (60 / string_len);  // 薄く（グリーン控えめ）
-            int b = 160;
-
-            DrawExtendStringToHandle(
-                x, draw_y,
-                scale, scale,
-                str,
-                GetColor(0, g, b),
-                font_digital
-            );
-        }
-    }
-
-    // ==== 奥のグリッド（スクロール）====
-    static float grid_scroll_back = 0.0f;
-    grid_scroll_back += 0.1f; // ゆっくり動く
-    const int grid_size_back = 80;
-    int offset_back = static_cast<int>(grid_scroll_back) % grid_size_back;
-
-    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 60); // かなり薄く
-
-    for (int x = -grid_size_back; x < D_WIN_MAX_X + grid_size_back; x += grid_size_back)
-        DrawLine(x, 0, x, D_WIN_MAX_Y, GetColor(180, 100, 255)); // 淡い紫
-
-    for (int y = -grid_size_back + offset_back; y < D_WIN_MAX_Y; y += grid_size_back)
-        DrawLine(0, y, D_WIN_MAX_X, y, GetColor(180, 100, 255));
-
-    // ==== 手前のグリッド（中速スクロール）====
-    static float grid_scroll_front = 0.0f;
-    grid_scroll_front += 0.25f;
-    const int grid_size_front = 40;
-    int offset_front = static_cast<int>(grid_scroll_front) % grid_size_front;
-
-    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100); // やや濃いめ
-
-    for (int x = -grid_size_front; x < D_WIN_MAX_X + grid_size_front; x += grid_size_front)
-        DrawLine(x, 0, x, D_WIN_MAX_Y, GetColor(255, 150, 255)); // ピンク寄り
-
-    for (int y = -grid_size_front + offset_front; y < D_WIN_MAX_Y; y += grid_size_front)
-        DrawLine(0, y, D_WIN_MAX_X, y, GetColor(255, 150, 255));
-
-    // === ハイライトライン ===
-    if (GetNowCount() % 120 < 60)
-    {
-        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 120);
-        int flash_y = 40 + (GetNowCount() / 2) % (D_WIN_MAX_Y - 80);
-        DrawLine(0, flash_y, D_WIN_MAX_X, flash_y, GetColor(100, 255, 255));
-    }
-
-    // === 粒子生成 ===
+        // === 粒子生成 ===
     while (star_particles.size() < 100)
     {
         StarParticle p;
@@ -1012,12 +1094,29 @@ void Stage1::DrawScrollBackground() const
             }),
         star_particles.end()
     );
-    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255); 
 
+    const int grid_size_back = 40;
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
+    for (int x = 0; x < D_WIN_MAX_X; x += grid_size_back)
+        DrawLine(x, 0, x, D_WIN_MAX_Y, GetColor(0, 100, 255));
+    for (int y = -grid_size_back; y < D_WIN_MAX_Y + grid_size_back; y += grid_size_back)
+    {
+        int sy = y - static_cast<int>(bg_scroll_offset_layer1) % grid_size_back;
+        DrawLine(0, sy, D_WIN_MAX_X, sy, GetColor(0, 100, 255));
+    }
+
+    const int grid_size_front = 80;
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 120);
+    for (int x = 0; x < D_WIN_MAX_X; x += grid_size_front)
+        DrawBox(x - 1, 0, x + 1, D_WIN_MAX_Y, GetColor(180, 0, 255), TRUE);
+    for (int y = -grid_size_front; y < D_WIN_MAX_Y + grid_size_front; y += grid_size_front)
+    {
+        int sy = y - static_cast<int>(bg_scroll_offset_layer2) % grid_size_front;
+        DrawBox(0, sy - 1, D_WIN_MAX_X, sy + 1, GetColor(180, 0, 255), TRUE);
+    }
+
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 }
-
-
-
 
 
 

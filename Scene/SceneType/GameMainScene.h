@@ -45,7 +45,17 @@ private:
 	int m_menuFontHandle;
 	float line_effect_timer = 0.0f; // ライン演出用の独自タイマー
 
+	// --- フィルター演出用 ---
+	bool effect_shield_on = false;
+	bool effect_shield_off = false;
+	bool effect_powerup = false;
+	float effect_timer = 0.0f;
+	const float effect_duration = 0.4f;
+
+
+
 	int vo = 70;
+
 
 	bool black_fade_started = false;
 	float black_fade_timer = 0.0f;
@@ -73,6 +83,7 @@ private:
 	};
 
 	WarningState warning_state = WarningState::None;
+
 
 public:
 	GameMainScene();

@@ -23,7 +23,7 @@ void GameMainScene::Initialize()
     player = objm->CreateObject<Player>(Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) + 220.0f));
 
     AnimationManager* anim = Singleton<AnimationManager>::GetInstance();
-    anim->LoadAllEffects();
+    //anim->LoadAllEffects();
 
     current_stage = new Stage1(player);
 
@@ -64,13 +64,17 @@ void GameMainScene::Initialize()
 
 
     //AnimationManager による事前アニメ再生（0.01秒、画面外で一度だけ再生）
+
     anim->LoadAllEffects(); // ★ここで明示的に画像を先読みさせる！
     anim->LoadSE();
 
 
+   // anim->LoadAllEffects(); // ★ここで明示的に画像を先読みさせる！
+
+
     // 仮にエフェクト2つを登録済みなら
-    anim->PlayerAnimation(EffectName::eExprotion, Vector2D(-999, -999), 0.01f, false);
-    anim->PlayerAnimation(EffectName::eExprotion2, Vector2D(-999, -999), 0.01f, false);
+    //anim->PlayerAnimation(EffectName::eExprotion, Vector2D(-999, -999), 0.01f, false);
+    //anim->PlayerAnimation(EffectName::eExprotion2, Vector2D(-999, -999), 0.01f, false);
 
 
     // ● フォント描画（初回だけ隠れて描画してフォント展開を済ませる）
@@ -105,8 +109,8 @@ void GameMainScene::Initialize()
     StopSoundMem(preload_hit);
 
     // === 敵が使うアニメーションも画面外でダミー生成 ===
-    anim->PlayerAnimation(EffectName::eExprotion, Vector2D(-999, -999), 0.01f, false);
-    anim->PlayerAnimation(EffectName::eExprotion2, Vector2D(-999, -999), 0.01f, false);
+    //anim->PlayerAnimation(EffectName::eExprotion, Vector2D(-999, -999), 0.01f, false);
+    //anim->PlayerAnimation(EffectName::eExprotion2, Vector2D(-999, -999), 0.01f, false);
 
 
 }
@@ -375,6 +379,34 @@ eSceneType GameMainScene::Update(float delta_second)
         score_logs.push_back(new_log);
 
         previous_score_count += 1.0f;
+    }
+
+    // シールドON検出
+    static bool prev_shield = false;
+    bool now_shield = player->GetShieldOn();
+    if (!prev_shield && now_shield) {
+        effect_shield_on = true;
+        effect_timer = 0.0f;
+    }
+    if (prev_shield && !now_shield) {
+        effect_shield_off = true;
+        effect_timer = 0.0f;
+    }
+    prev_shield = now_shield;
+
+    // パワーアップ検出（1フレームのみ）
+    static int prev_power = 1;
+    int now_power = player->GetPowerd();
+    if (now_power > prev_power) {
+        effect_powerup = true;
+        effect_timer = 0.0f;
+    }
+    prev_power = now_power;
+
+    // タイマー進行
+    effect_timer += delta_second;
+    if (effect_timer > effect_duration) {
+        effect_shield_on = effect_shield_off = effect_powerup = false;
     }
 
 
@@ -969,7 +1001,108 @@ void GameMainScene::DrawUI()
         }
     }
 
+
+    if (isPaused)
+    {
+        const int cx = D_WIN_MAX_X / 2;
+        const int cy = D_WIN_MAX_Y / 2 - 20;
+
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, transparent);
+        DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
+        //DrawBox(400, 200, 880, D_WIN_MAX_Y - 200, GetColor(255, 255, 255), FALSE);
+        SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+
+        const char* menuItems[] = {
+            "START GAME",
+            "BACK TITLE",
+                };
+
+        for (int i = 0; i < 2; ++i)
+        {
+            int y = 300 + i * 50;
+            int textWidth = GetDrawStringWidthToHandle(menuItems[i], strlen(menuItems[i]), m_menuFontHandle);
+            int x = (D_WIN_MAX_X - textWidth) / 2;
+
+            if (i == m_selectedIndex)
+            {
+                // =========================
+                // 背景ハイライトバー（画面端まで）
+                // =========================
+                int barHeight = 40;
+                int barAlpha = 120 + (int)(sinf(GetNowCount() / 60.0f) * 50); // パルス
+                SetDrawBlendMode(DX_BLENDMODE_ALPHA, barAlpha);
+                DrawBox(
+                    0, y - 5,
+                    D_WIN_MAX_X, y + barHeight,
+                    GetColor(0, 200, 255), TRUE
+                );
+
+                // =========================
+                // 両端のエッジエフェクト（流れる光）
+                // =========================
+                int edgeWidth = 80;
+                int edgeHeight = 4;
+                int scrollSpeed = 2;
+                int edgeOffset = (GetNowCount() * scrollSpeed) % (D_WIN_MAX_X + edgeWidth * 2);
+
+                // 左から右へ流れる（2個表示してループ感を出す）
+                for (int j = 0; j < 2; ++j)
+                {
+                    int edgeX = edgeOffset - edgeWidth * j;
+                    SetDrawBlendMode(DX_BLENDMODE_ADD, 50);
+                    DrawBox(
+                        edgeX, y + 10,
+                        edgeX + edgeWidth, y + 10 + edgeHeight,
+                        GetColor(200, 255, 255), TRUE
+                    );
+                    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+                }
+
+                // =========================
+                // テキスト（アウトライン＋グロー）
+                // =========================
+                int offsetX = (rand() % 3) - 1;
+                int offsetY = (rand() % 3) - 1;
+
+                DrawStringToHandle(x + offsetX - 1, y + offsetY, menuItems[i], GetColor(0, 0, 0), m_menuFontHandle);
+                DrawStringToHandle(x + offsetX + 1, y + offsetY, menuItems[i], GetColor(0, 0, 0), m_menuFontHandle);
+                DrawStringToHandle(x + offsetX, y + offsetY - 1, menuItems[i], GetColor(0, 0, 0), m_menuFontHandle);
+                DrawStringToHandle(x + offsetX, y + offsetY + 1, menuItems[i], GetColor(0, 0, 0), m_menuFontHandle);
+
+                int glow = (int)((sinf(GetNowCount() / 30.0f) + 1.0f) * 127);
+                DrawStringToHandle(x + offsetX, y + offsetY, menuItems[i], GetColor(100 + glow, 255, 255), m_menuFontHandle);
+            }
+            else
+            {
+                DrawStringToHandle(x, y, menuItems[i], GetColor(180, 180, 180), m_menuFontHandle);
+            }
+        }
+
+
+    }
+
+    if (effect_shield_on || effect_shield_off || effect_powerup)
+    {
+        int alpha = static_cast<int>(100 * (1.0f - (effect_timer / effect_duration))); // 最大100に抑える
+
+        int color = GetColor(0, 0, 0); // デフォルト（透明黒）
+
+        if (effect_shield_on)
+            color = GetColor(0, 255, 180); // 緑系（シールドON）
+        else if (effect_shield_off)
+            color = GetColor(255, 50, 50); // 赤系（シールド破壊）
+        else if (effect_powerup)
+            color = GetColor(255, 255, 100); // 黄系（パワーアップ）
+
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+        DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, color, TRUE);
+        SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+    }
+
 }
+
+
 
 void GameMainScene::InputSePlay()
 {
