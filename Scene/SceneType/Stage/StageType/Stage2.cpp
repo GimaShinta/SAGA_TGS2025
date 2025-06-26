@@ -135,7 +135,7 @@ void Stage2::Update(float delta)
 
     // タイムで自動クリア
 
-    if (stage_timer >= 5.0f)
+    if (stage_timer >= 50.0f)
     {
         is_clear = true;
     }
@@ -157,19 +157,6 @@ void Stage2::Update(float delta)
         auto* anim_mgr = Singleton<AnimationManager>::GetInstance();
         anim_mgr->PlayerAnimation(EffectName::eExprotion, player->GetLocation(), 0.1f, false);
     }
-
-
-    // 敵が倒された時に経験値を生成
-    for (auto& enemy : enemy_list)
-    {
-        if (enemy->is_destroy == true && !enemy->is_exp_generated)
-        {
-            Exp* exp = Singleton<GameObjectManager>::GetInstance()->CreateObject<Exp>(enemy->GetLocation());
-            exp->SetPlayer(player);
-            enemy->is_exp_generated = true;
-        }
-    }
-
 
     // ステージ終了処理
     if (is_clear || is_over)
@@ -315,14 +302,17 @@ void Stage2::EnemyAppearance(float delta)
 
             Zako* zako_top = objm->CreateObject<Zako>(Vector2D(base_x, base_y - offset_y));
             zako_top->SetPattern(ZakoPattern::MoveStraight);
+            zako_top->SetPlayer(player);
             enemy_list.push_back(zako_top);
 
             Zako* zako_left = objm->CreateObject<Zako>(Vector2D(base_x - offset_x, base_y + offset_y));
             zako_left->SetPattern(ZakoPattern::MoveStraight);
+            zako_left->SetPlayer(player);
             enemy_list.push_back(zako_left);
 
             Zako* zako_right = objm->CreateObject<Zako>(Vector2D(base_x + offset_x, base_y + offset_y));
             zako_right->SetPattern(ZakoPattern::MoveStraight);
+            zako_right->SetPlayer(player);
             enemy_list.push_back(zako_right);
         }
     }
