@@ -70,8 +70,8 @@ void EnemyShot4::Initialize()
 	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime49.png", 5, 5, 1, 16, 16));
 	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime50.png", 4, 4, 1, 16, 24));
 	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime51.png", 4, 4, 1, 16, 16));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/Standard/anime74.png", 4, 4, 1, 48, 48));
-	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Pink/Bullet/anime74.png", 4, 4, 1, 48, 48));	
+	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime74.png", 4, 4, 1, 48, 48));
+	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange_p/Standard/anime74.png", 4, 4, 1, 48, 48));	
 	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime75.png", 4, 4, 1, 32, 64));
 	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime76.png", 4, 4, 1, 48, 96));
 	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime77.png", 4, 4, 1, 24, 24));

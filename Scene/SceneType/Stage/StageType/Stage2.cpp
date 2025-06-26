@@ -135,7 +135,7 @@ void Stage2::Update(float delta)
 
     // タイムで自動クリア
 
-    if (stage_timer >= 50.0f)
+    if (stage_timer >= 5.0f)
     {
         is_clear = true;
     }
@@ -172,12 +172,12 @@ void Stage2::Update(float delta)
         {
             is_fading_out = true;
         }
-
         scene_timer += delta;
         if (fade_alpha >= 255.0f && scene_timer >= 1.5f)
         {
             finished = true;
         }
+
     }
 
     // 死亡後の遷移タイマー処理

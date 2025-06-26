@@ -3,6 +3,7 @@
 #include "../../Item/Exp/Exp.h"
 #include "../../Item/PowerUp/PowerUp.h"
 #include "../../Item/Shield/Shield.h"
+#include "../../Item/MaxCharge/MaxCharge.h"
 
 EnemyBase::EnemyBase() : hp(0.0f), on_hit(false), is_shot(false), shot_timer(0.0f), enemy_type(ENE_NONE)
 {
@@ -119,10 +120,11 @@ void EnemyBase::DropItems()
 	auto exp = manager.CreateObject<Exp>(location);
 	exp->SetPlayer(player);
 
-	// 1%でPowerUpドロップ
-	//if (rand() % 100 < 1) {
-	//	manager.CreateObject<PowerUp>(location);
-	//}
+	 //1%でPowerUpドロップ
+	if (rand() % 100 < 2) {
+		auto charge = manager.CreateObject<MaxCharge>(location);
+		charge->SetPlayer(player);
+	}
 
 	// 5%でShieldドロップ
 	if (rand() % 100 < 2) {
