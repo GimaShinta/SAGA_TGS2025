@@ -26,11 +26,15 @@ Stage2::~Stage2()
 void Stage2::Initialize()
 {
     std::srand(static_cast<unsigned int>(std::time(nullptr)));  // ランダムシード設定
-    stage_timer = 50.0f;
+    stage_timer = 0.0f;
     enemy_spawn_timer = 0.0f;
     zako5_spawned = false;
 
     stage_id = StageID::Stage2;
+
+    //GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+    //boss = objm->CreateObject<Stage2Boss>(Vector2D(640.0f, -200.0f)); // 高所
+    fade_alpha = 0.0f;
 
 }
 
@@ -131,7 +135,7 @@ void Stage2::Update(float delta)
 
     // タイムで自動クリア
 
-    if (stage_timer >= 120.0f)
+    if (stage_timer >= 5.0f)
     {
         is_clear = true;
     }
@@ -175,6 +179,12 @@ void Stage2::Update(float delta)
             enemy->SetDestroy();
         }
         enemy_list.clear();
+
+        // フェードアウトを明示的に開始（← これが重要）
+        if (!is_fading_out)
+        {
+            is_fading_out = true;
+        }
 
         scene_timer += delta;
         if (fade_alpha >= 255.0f && scene_timer >= 1.5f)
@@ -246,10 +256,11 @@ void Stage2::Draw()
     DrawBox(panel_x, panel_y, panel_x + panel_w, panel_y + panel_h, GetColor(0, 0, 0), TRUE);
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 
-    DrawFadeOverlay();
-
     AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
     manager->Draw();
+
+    DrawFormatString(100, 100, GetColor(255, 255, 255), "fade_alpha: %.1f", fade_alpha);
+
 
 }
 

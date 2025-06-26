@@ -22,6 +22,14 @@ private:
 	int current_bgm_handle = -1;
 	int stage_bgm1 = -1; // ステージ1,2の共通BGM
 	int stage_bgm3 = -1; // ステージ3用BGM
+	int stage_bgm4 = -1;
+	int se_warning = -1;
+
+	float stage3_bgm_volume = 255.0f;
+	bool stage3_bgm_fadeout = false;
+	bool stage4_bgm_pending = false;
+	float se_warning_timer = 0.0f;
+
 
 	float pause_timer = 0.0f;
 	int transparent = 0.0f;
@@ -71,7 +79,7 @@ private:
 	float warning_text_x = 1280.0f; // 初期は右端外
 	float warning_timer = 0.0f;
 	float warning_scroll_speed = 700.0f; // px/秒
-	float warning_duration = 5.0f;
+	float warning_duration = 11.0f;
 
 	bool is_none = false;
 

@@ -177,6 +177,14 @@ private:
 
 	const float black_fade_duration = 60.0f; // 60フレーム（＝1秒）程度
 
+	public:
+	int se_warning = -1;       // 警告SEのハンドル
+	bool se_warning_played = false; // 一度だけ鳴らす用フラグ
+	bool request_play_warning_se = false;  // 警告音を鳴らす要求
+	bool request_stop_bgm = false;         // BGM停止要求
+	bool request_play_stage4_bgm = false;
+
+
 	template <typename T>
 	T my_max(const T& a, const T& b)
 	{

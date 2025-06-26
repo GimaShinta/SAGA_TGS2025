@@ -34,9 +34,11 @@ void GameMainScene::Initialize()
     stage_bgm1 = rm->GetSounds("Resource/sound/bgm/stage/BGM_2.mp3");
     stage_bgm3 = rm->GetSounds("Resource/sound/bgm/stage/Cybernetic.mp3");
 
+    stage_bgm4 = rm->GetSounds("Resource/sound/bgm/stage/Last_Boss.mp3"); // 任意のファイル
+    se_warning = rm->GetSounds("Resource/sound/se/battle/Warning.mp3");       // 警告音SE
+
     se_charge = rm->GetSounds("Resource/sound/se/effect/audiostock_1133382.mp3");
     ChangeVolumeSoundMem(255 * 100 / 100, se_charge);
-   
 
     //サイドパネル画像
     obi_handle = rm->GetImages("Resource/Image/BackGround/Main/Obi_1.png")[0];
@@ -54,7 +56,8 @@ void GameMainScene::Initialize()
     // ステージ1用BGMを再生
     current_bgm_handle = stage_bgm1;
 
-    ChangeVolumeSoundMem(255 * 10 / 100, current_bgm_handle);
+    ChangeVolumeSoundMem(255 * 50 / 100, current_bgm_handle); 
+    ChangeVolumeSoundMem(255 * 20 / 100, stage_bgm1);
 
     PlaySoundMem(current_bgm_handle, DX_PLAYTYPE_LOOP);
 
@@ -144,9 +147,29 @@ eSceneType GameMainScene::Update(float delta_second)
             anim->Update(delta_second);
 
             current_stage->Update(delta_second);
+            if (current_stage && current_stage->GetStageID() == StageID::Stage3)
+            {
+                Stage3* stage3 = dynamic_cast<Stage3*>(current_stage);
+                if (stage3 != nullptr)
+                {
+                    if (stage3->request_stop_bgm)
+                    {
+                        StopSoundMem(current_bgm_handle);
+                        stage3->request_stop_bgm = false;
+                    }
+                     // BGM停止リクエスト（フェード後に止める）
+                    //StopSoundMem(stage_bgm3);
+                    //if (stage3->request_play_warning_se)
+                    //{
+                    //    PlaySoundMem(se_warning, DX_PLAYTYPE_BACK);
+                    //    stage3->request_play_warning_se = false;
+                    //}
+                }
+            }
 
             if (current_stage->GetStageID() == StageID::Stage4)
             {
+
                 if (warning_state == WarningState::None && is_none == false)
                 {
                     // 条件に応じて（例：一定時間経過後など）
@@ -158,6 +181,7 @@ eSceneType GameMainScene::Update(float delta_second)
                         band_half_height = 0.0f; // 念のため初期化
                         warning_text_x = 1020;   // 文字位置初期化（右端から流す場合）
                     }
+
                 }
 
 
@@ -174,13 +198,21 @@ eSceneType GameMainScene::Update(float delta_second)
                         band_half_height = band_max_half_height;
                         warning_state = WarningState::Displaying;
                         warning_timer = 0.0f;
+
+                        // 警告SE再生
+                        PlaySoundMem(se_warning, DX_PLAYTYPE_BACK);
+
+                       
                     }
                     break;
 
                 case WarningState::Displaying:
                     warning_text_x -= warning_scroll_speed * delta_second;
+                    warning_timer += delta_second;
+
                     if (warning_text_x < -200)
                         warning_text_x = 1020;
+
                     if (warning_timer >= warning_duration)
                     {
                         warning_state = WarningState::Shrinking;
@@ -192,14 +224,16 @@ eSceneType GameMainScene::Update(float delta_second)
                     if (band_half_height <= 0.0f)
                     {
                         band_half_height = 0.0f;
-                        warning_state = WarningState::None;
-                        // ボス登場処理などへ
+                        warning_state = WarningState::None;  
                     }
+                    // ステージ4のBGM再生
+                    PlaySoundMem(stage_bgm4, DX_PLAYTYPE_LOOP);
                     break;
 
                 default:
                     break;
                 }
+
 
             }
 
@@ -208,41 +242,38 @@ eSceneType GameMainScene::Update(float delta_second)
             if (current_stage->IsFinished())
             {
                 if (current_stage->IsClear() == true)
-                {
-
+                {        
                     if (current_stage->GetStageID() == StageID::Stage3)
                     {
-                        black_fade_timer += delta_second;
-                        if (alpha >= 255)
-                        {
-                            StageBase* next_stage = current_stage->GetNextStage(player);
-
-                            current_stage->Finalize();
-                            delete current_stage;
-                            current_stage = nullptr;
-
-                            if (next_stage != nullptr)
-                            {
-                                // === ステージの切替とBGM処理 ===
-                                current_stage = next_stage;
-                                current_stage->Initialize();
-
-                                // ステージ3に到達した場合のみBGM切替
-                                if (dynamic_cast<Stage3*>(current_stage) != nullptr)
+                          black_fade_timer += delta_second;
+                                if (alpha >= 255)
                                 {
-                                    StopSoundMem(current_bgm_handle); // 現在のBGMを停止
-                                    current_bgm_handle = stage_bgm3;  // ステージ3用BGMに切り替え
-                                    ChangeVolumeSoundMem(255 * 90 / 100, current_bgm_handle);
-                                    PlaySoundMem(current_bgm_handle, DX_PLAYTYPE_LOOP);
-                                }
-                            }
-                            else
-                            {
-                                return eSceneType::eTitle;
-                            }
+                                    StageBase* next_stage = current_stage->GetNextStage(player);
 
-                        }
-                    }
+                                    current_stage->Finalize();
+                                    delete current_stage;
+                                    current_stage = nullptr;
+
+                                    if (next_stage != nullptr)
+                                    {
+                                        current_stage = next_stage;
+                                        current_stage->Initialize();
+
+                                        // ステージ4用のBGMを再生（必要なら stage_bgm4 を定義）
+                                        current_bgm_handle = stage_bgm4;  // または stage_bgm4
+                                        ChangeVolumeSoundMem(255 * 90 / 100, current_bgm_handle);
+                                      //  PlaySoundMem(current_bgm_handle, DX_PLAYTYPE_LOOP);
+                                    }
+                                    else
+                                    {
+                                        return eSceneType::eTitle;
+                                    }
+                                }
+
+                     }
+                        
+                    
+
                     else
                     {
                         StageBase* next_stage = current_stage->GetNextStage(player);

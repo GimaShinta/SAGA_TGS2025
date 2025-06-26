@@ -46,6 +46,9 @@ void Stage3::Initialize()
     //GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
     //objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) + 100.0f));
 
+    ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
+    se_warning = rm->GetSounds("Resource/sound/se/battle/Warning.mp3"); // 任意の警告音
+
 
 #if 0
     //-----------アニメーション生成パターン１-----------
@@ -175,6 +178,30 @@ void Stage3::Update(float delta)
             ResultDraw(delta);  
         }
     }
+
+    if (is_clear && result_ended && !se_warning_played)
+    {
+        request_stop_bgm = true;
+        request_play_warning_se = true;
+        se_warning_played = true;
+    }
+
+    //if (boss2->is_destroy && boss2 != nullptr)
+    //{
+   
+    //}
+
+    // 遷移タイマー
+    //if (se_warning_played && !finished)
+    //{
+    //    post_result_wait_timer += delta;
+
+    //    if (post_result_wait_timer >= 5.0f)
+    //    {
+    //        SetFinished();  
+    //    }
+    //}
+
 
 }
 
@@ -839,7 +866,7 @@ void Stage3::ResultDraw(float delta)
     SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
     // フェード／スライド定数
-    const int fade_duration = 30;
+    const int fade_duration = 60;
     const int slide_distance = 60;
 
     // 表示補助関数
