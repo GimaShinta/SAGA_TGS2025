@@ -23,8 +23,10 @@ void Stage2Boss::Initialize()
     collision.hit_object_type.push_back(eObjectType::eShot);
     collision.hit_object_type.push_back(eObjectType::eBeam);
 
-    location = { 640.0f, 250.0f };
+    location = { 640.0f, -200.0f };  // 上から登場
     velocity = { 0.0f, 0.0f };
+    pattern = Stage2BossPattern::Entrance;
+    pattern_timer = 0.0f;
 
     ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
     images_a = rm->GetImages("Resource/Image/Object/Enemy/Boss/s1_Boss/anime_enemy74_b.png", 6, 6, 1, 48, 48);
@@ -41,7 +43,6 @@ void Stage2Boss::Initialize()
         part->SetUp(this, 300.0f, offset);
         part->SetGroupID(i % 2);
 
-        // 青と赤で交互に設定
         if (i % 2 == 0)
             part->SetPartType(BossRotatingPart::PartType::Red);
         else
@@ -49,7 +50,6 @@ void Stage2Boss::Initialize()
 
         rotating_parts.push_back(part);
     }
-
 
     for (auto& part : rotating_parts)
     {
@@ -62,147 +62,187 @@ void Stage2Boss::Initialize()
 
 void Stage2Boss::Update(float delta_second)
 {
-    life_timer += delta_second;
+    pattern_timer += delta_second;
 
-    if (!is_transformed && hp < 5000)
+    switch (pattern)
     {
-        is_transforming = true;
-        is_transformed = true;
-        transform_timer = 0.0f;
-        flash_timer = 0.3f;
-        visible = true;
-        is_flashing = true;
-        is_screen_flash = true;
-        screen_flash_timer = screen_flash_duration;
-    }
-
-    if (is_transforming)
-    {
-        transform_timer += delta_second;
-        flash_timer += delta_second;
-
-        if (flash_timer >= flash_interval)
+        case Stage2BossPattern::Entrance:
         {
-            flash_timer = 0.0f;
-            visible = !visible;
+            float target_y = 150.0f;
+            float speed = 100.0f;
+
+            if (location.y < target_y)
+            {
+                velocity = { 0, speed };
+                location += velocity * delta_second;
+                if (location.y >= target_y)
+                {
+                    location.y = target_y;
+                    pattern = Stage2BossPattern::Idle;
+                    pattern_timer = 0.0f;
+                }
+            }
+            break;
+        }
+        case Stage2BossPattern::Idle:
+        {
+            velocity = { 0, 0 };
+            wait_after_entry_timer += delta_second;
+
+            if (wait_after_entry_timer >= 2.0f) // 2秒停止後に回転開始
+            {
+                for (auto& part : rotating_parts)
+                {
+                    part->SetRotationDirection(1.0f); // 時計回り
+                }
+                pattern = Stage2BossPattern::RotateStart;
+                wait_after_entry_timer = 0.0f; // タイマーリセット
+            }
+            break;
+        }
+        case Stage2BossPattern::RotateStart:
+        {
+            wait_after_entry_timer += delta_second;
+
+            // 攻撃開始までさらに2秒待つ
+            if (wait_after_entry_timer >= 2.0f)
+            {
+                pattern = Stage2BossPattern::AttackPhase;
+                pattern_timer = 0.0f;
+            }
+            break;
         }
 
-        velocity = { 0, 0 };
 
-        if (transform_timer >= transform_duration)
+        case Stage2BossPattern::AttackPhase:
         {
-            // 変身完了！
-            is_transforming = false;
-            visible = true;
-            images = images_a;
-            image = images[0];
+            life_timer += delta_second;
 
-            // ★逆回転処理：1回だけ全パーツに指示
-            for (auto& part : rotating_parts)
+            if (!is_transformed && hp < 5000)
             {
-                part->SetRotationDirection(-1.0f);
+                is_transforming = true;
+                is_transformed = true;
+                transform_timer = 0.0f;
+                flash_timer = 0.3f;
+                visible = true;
+                is_flashing = true;
+                is_screen_flash = true;
+                screen_flash_timer = screen_flash_duration;
             }
 
-            return; // ← ここで1回だけ抜ける
-        }
-
-        return; // ← まだ変身中の間はここで抜ける
-    }
-
-
-    if (is_flashing)
-    {
-        flash_timer -= delta_second;
-        if (flash_timer <= 0.0f)
-        {
-            is_flashing = false;
-            flash_timer = 0.0f;
-        }
-    }
-
-    if (is_screen_flash)
-    {
-        screen_flash_timer -= delta_second;
-        if (screen_flash_timer <= 0.0f)
-        {
-            is_screen_flash = false;
-        }
-    }
-
-    if (hp <= 0)
-    {
-        is_alive = false;
-        is_destroy = true;
-
-        auto* manager = Singleton<AnimationManager>::GetInstance();
-        int anim_id = manager->PlayerAnimation(EffectName::eExprotion, location, 0.05f, false);
-        manager->SetScale(anim_id, 1.0f);
-    }
-
-    // アニメーション処理（Stage1Boss と同様に image を更新）
-    static float anim_timer = 0.0f;
-    static int anim_index = 0;
-
-    if (!anim_indices.empty() && !images.empty())
-    {
-        anim_timer += delta_second;
-        if (anim_timer >= 0.1f)  // アニメ速度調整
-        {
-            anim_timer = 0.0f;
-            anim_index = (anim_index + 1) % anim_indices.size();
-            int idx = anim_indices[anim_index];
-            if (idx >= 0 && idx < (int)images.size())
+            if (is_transforming)
             {
-                image = images[idx];
+                transform_timer += delta_second;
+                flash_timer += delta_second;
+
+                if (flash_timer >= flash_interval)
+                {
+                    flash_timer = 0.0f;
+                    visible = !visible;
+                }
+
+                velocity = { 0, 0 };
+
+                if (transform_timer >= transform_duration)
+                {
+                    is_transforming = false;
+                    visible = true;
+                    images = images_a;
+                    image = images[0];
+
+                    for (auto& part : rotating_parts)
+                    {
+                        part->SetRotationDirection(-1.0f);
+                    }
+
+                    return;
+                }
+
+                return;
             }
-        }
-    }
 
-
-    part_attack_timer += delta_second;
-    if (part_attack_timer >= 4.0f)
-    {
-        part_attack_timer = 0.0f;
-        active_group_id = 1 - active_group_id;
-
-        // Inward/Outwardは常に交互に撃たせる（基本ビーム）
-        if (main_attack_type == BossRotatingPart::AttackDirectionType::Inward)
-            main_attack_type = BossRotatingPart::AttackDirectionType::Outward;
-        else
-            main_attack_type = BossRotatingPart::AttackDirectionType::Inward;
-
-        for (auto& part : rotating_parts)
-        {
-            // 常時ビーム（基本攻撃）
-            if (part->GetGroupID() == active_group_id)
+            if (is_flashing)
             {
-                part->SetAttackDirection(main_attack_type);
+                flash_timer -= delta_second;
+                if (flash_timer <= 0.0f)
+                {
+                    is_flashing = false;
+                    flash_timer = 0.0f;
+                }
             }
-            else
+
+            if (is_screen_flash)
             {
-                // ▼ HPに応じて追加攻撃を設定（ビーム以外）
-                if (hp < 1500)
+                screen_flash_timer -= delta_second;
+                if (screen_flash_timer <= 0.0f)
                 {
-                    part->SetAttackDirection(BossRotatingPart::AttackDirectionType::HomingBurst);
+                    is_screen_flash = false;
                 }
-                else if (hp < 3000)
+            }
+
+            if (hp <= 0)
+            {
+                is_alive = false;
+                is_destroy = true;
+
+                auto* manager = Singleton<AnimationManager>::GetInstance();
+                int anim_id = manager->PlayerAnimation(EffectName::eExprotion, location, 0.05f, false);
+                manager->SetScale(anim_id, 1.0f);
+            }
+
+            static float anim_timer = 0.0f;
+            static int anim_index = 0;
+
+            if (!anim_indices.empty() && !images.empty())
+            {
+                anim_timer += delta_second;
+                if (anim_timer >= 0.1f)
                 {
-                    part->SetAttackDirection(BossRotatingPart::AttackDirectionType::RainShot);
+                    anim_timer = 0.0f;
+                    anim_index = (anim_index + 1) % anim_indices.size();
+                    int idx = anim_indices[anim_index];
+                    if (idx >= 0 && idx < (int)images.size())
+                    {
+                        image = images[idx];
+                    }
                 }
-                else if (hp < 5000)
-                {
-                    part->SetAttackDirection(BossRotatingPart::AttackDirectionType::Spiral);
-                }
+            }
+
+            part_attack_timer += delta_second;
+            if (part_attack_timer >= 4.0f)
+            {
+                part_attack_timer = 0.0f;
+                active_group_id = 1 - active_group_id;
+
+                if (main_attack_type == BossRotatingPart::AttackDirectionType::Inward)
+                    main_attack_type = BossRotatingPart::AttackDirectionType::Outward;
                 else
+                    main_attack_type = BossRotatingPart::AttackDirectionType::Inward;
+
+                for (auto& part : rotating_parts)
                 {
-                    part->SetAttackDirection(BossRotatingPart::AttackDirectionType::Omnidirectional);
+                    if (part->GetGroupID() == active_group_id)
+                    {
+                        part->SetAttackDirection(main_attack_type);
+                    }
+                    else
+                    {
+                        if (hp < 1500)
+                            part->SetAttackDirection(BossRotatingPart::AttackDirectionType::HomingBurst);
+                        else if (hp < 3000)
+                            part->SetAttackDirection(BossRotatingPart::AttackDirectionType::RainShot);
+                        else if (hp < 5000)
+                            part->SetAttackDirection(BossRotatingPart::AttackDirectionType::Spiral);
+                        else
+                            part->SetAttackDirection(BossRotatingPart::AttackDirectionType::Omnidirectional);
+                    }
                 }
             }
+
+            break;
         }
     }
 
-
-   /* Shot(delta_second);*/
     __super::Update(delta_second);
 }
 
@@ -241,6 +281,13 @@ void Stage2Boss::TakeDamage(int amount)
         manager->SetScale(anim_id, 1.0f);
     }
 }
+
+float Stage2Boss::GetTransformProgress() const
+{
+    return 0.0f;
+}
+
+
 
 void Stage2Boss::Shot(float delta_second)
 {

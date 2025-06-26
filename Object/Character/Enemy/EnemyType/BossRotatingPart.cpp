@@ -34,9 +34,12 @@ void BossRotatingPart::Initialize()
 
 void BossRotatingPart::Update(float delta_second)
 {
-    if (!boss) return;
+
+    if (!boss || !boss->IsInAttackPhase()) return;  // ©š’Ç‰ÁƒK[ƒh
 
     float rotation_speed = 0.5f;
+
+    if (!boss) return;
 
     if (boss->IsHpBelowThreshold())
     {

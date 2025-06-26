@@ -1,3 +1,4 @@
+// Stage2BOSS.h（修正済み）
 #pragma once
 
 #include "../EnemyBase.h"
@@ -15,6 +16,11 @@ public:
     void Draw(const Vector2D& screen_offset) const override;
     void Finalize() override;
     void TakeDamage(int amount);
+    void SetPlayer(Player* p)
+    {
+        player = p;
+    }
+
     int GetActiveGroupID() const
     {
         return active_group_id;
@@ -23,11 +29,6 @@ public:
     {
         return hp;
     }
-
-    void SetPlayer(Player* p)
-    {
-        player = p;
-    }
     bool GetIsAlive() const
     {
         return is_alive;
@@ -35,22 +36,29 @@ public:
 
     bool IsHpBelowThreshold() const
     {
-        return hp < 6666; // 10000の2/3
+        return hp < 6666;
     }
-
     bool IsTransforming() const
     {
         return is_transforming;
     }
+    float GetTransformProgress() const;
 
-    float GetTransformProgress() const
+    bool IsInAttackPhase() const // ←★追加ポイント
     {
-        float progress = transform_timer / transform_duration;
-        if (progress > 1.0f) return 1.0f;
-        return progress;
+        return pattern == Stage2BossPattern::RotateStart || pattern == Stage2BossPattern::AttackPhase;
     }
 
+    enum class Stage2BossPattern
+    {
+        Entrance,
+        Idle,
+        RotateStart,
+        AttackPhase
+    };
 
+    Stage2BossPattern pattern = Stage2BossPattern::Entrance;
+    float pattern_timer = 0.0f;
 
 private:
     Player* player = nullptr;
@@ -71,7 +79,6 @@ private:
     int hp = 7000;
     bool is_alive = true;
 
-    // アニメーション関連
     bool is_flashing = false;
     float flash_timer = 0.0f;
     bool visible = true;
@@ -87,6 +94,8 @@ private:
     const float screen_flash_duration = 0.3f;
 
     float life_timer = 0.0f;
+    bool has_started_rotation = false;
+    float wait_after_entry_timer = 0.0f;
 
     void Shot(float delta_second);
 };

@@ -65,137 +65,78 @@ void Zako::Update(float delta_second)
     {
         case ZakoPattern::MoveStraight:
         {
-            const float appear_time = 0.8f;  // Šg‘å‚É‚©‚¯‚éŠÔ
+            const float appear_time = 0.8f;
 
             if (pattern_timer < appear_time)
             {
                 float t = pattern_timer / appear_time;
-                scale = 0.5f + t * 1.5f;  // 0.2 ¨ 1.5 ‚ÉƒXƒP[ƒ‹ƒAƒbƒv
-                velocity = { 0, 180 };     // ‰º•ûŒü‚É“®‚«‘±‚¯‚é
+                scale = 0.5f + t * 1.5f;
+                velocity = { 0, 180 };
             }
             else
             {
                 scale = 2.0f;
-                velocity = { 0, 180 };     // ’ÊíƒXƒP[ƒ‹•ˆÚ“®
+                velocity = { 0, 180 };
             }
             //Shot(delta_second);
             break;
         }
 
-
         case ZakoPattern::RightMove:
-        {
-            const float arc_duration = 1.2f;     // ŒÊ‚ğ•`‚­ŠÔ
-            const float decel_duration = 1.0f;   // Œ¸‘¬ŠÔ
-            const float accel_duration = 1.0f;   // Ä‰Á‘¬ŠÔ
-
-            if (pattern_timer < arc_duration)
-            {
-                // ŒÊ‚ğ•`‚­“®‚«i‰Eã¨’†‰›‚Ö~‚è‚éj
-                float t = pattern_timer / arc_duration;
-                float angle = (1.0f - t) * (3.1415f / 2.0f);  // ƒÎ/2 ¨ 0
-
-                velocity.x = cosf(angle) * 250.0f;
-                velocity.y = sinf(angle) * 250.0f;
-
-                scale = 4.0f - 2.0f * t;  // 4.0 ¨ 2.0 ‚Ék¬
-            }
-            else if (pattern_timer < arc_duration + decel_duration)
-            {
-                float t = (pattern_timer - arc_duration) / decel_duration;
-                velocity.x = 250.0f * (1.0f - t);
-                velocity.y = 0.0f;
-
-                scale = 2.0f;
-            }
-            else if (pattern_timer < arc_duration + decel_duration + accel_duration)
-            {
-                float t = (pattern_timer - arc_duration - decel_duration) / accel_duration;
-                velocity.x = 200.0f + 300.0f * t;
-                velocity.y = 0.0f;
-
-                scale = 2.0f;
-            }
-            else
-            {
-                velocity.x = 500.0f;
-                velocity.y = 0.0f;
-
-                scale = 2.0f;
-            }
-
-            Shot(delta_second);
-
-            break;
-        }
-
-
-
         case ZakoPattern::LeftMove:
         {
-            const float arc_duration = 1.2f;     // ŒÊ‚ğ•`‚­ŠÔ
-            const float decel_duration = 1.0f;   // Œ¸‘¬ŠÔ
-            const float accel_duration = 1.0f;   // Ä‰Á‘¬ŠÔ
+            const float arc_duration = 1.2f;
+            const float decel_duration = 1.0f;
+            const float accel_duration = 1.0f;
 
             if (pattern_timer < arc_duration)
             {
-                // ŒÊ‚ğ•`‚­“®‚«i¶ã¨’†‰›‚Ö~‚è‚éj
                 float t = pattern_timer / arc_duration;
-                float angle = (1.0f - t) * (3.1415f / 2.0f);  // ƒÎ/2 ¨ 0
+                float angle = (1.0f - t) * (3.1415f / 2.0f);
+                float dir = (pattern == ZakoPattern::RightMove) ? 1.0f : -1.0f;
 
-                velocity.x = -cosf(angle) * 250.0f;
+                velocity.x = cosf(angle) * 250.0f * dir;
                 velocity.y = sinf(angle) * 250.0f;
 
-                scale = 4.0f - 2.0f * t;  // 4.0 ¨ 2.0 ‚Ék¬
+                scale = 4.0f - 2.0f * t;
             }
             else if (pattern_timer < arc_duration + decel_duration)
             {
                 float t = (pattern_timer - arc_duration) / decel_duration;
-                velocity.x = -250.0f * (1.0f - t);
+                velocity.x = 250.0f * (1.0f - t) * ((pattern == ZakoPattern::RightMove) ? 1.0f : -1.0f);
                 velocity.y = 0.0f;
-
                 scale = 2.0f;
             }
             else if (pattern_timer < arc_duration + decel_duration + accel_duration)
             {
                 float t = (pattern_timer - arc_duration - decel_duration) / accel_duration;
-                velocity.x = -200.0f - 300.0f * t;
+                velocity.x = ((pattern == ZakoPattern::RightMove) ? 200.0f : -200.0f) + ((pattern == ZakoPattern::RightMove) ? 1 : -1) * 300.0f * t;
                 velocity.y = 0.0f;
-
                 scale = 2.0f;
             }
             else
             {
-                velocity.x = -500.0f;
+                velocity.x = (pattern == ZakoPattern::RightMove) ? 500.0f : -500.0f;
                 velocity.y = 0.0f;
-
                 scale = 2.0f;
             }
 
             Shot(delta_second);
-
             break;
         }
-
-
-
-
 
         case ZakoPattern::ZIgzag:
             velocity.x = sinf(pattern_timer * 1.5f) * 320;
             velocity.y = 100;
-            //Shot(delta_second);
             break;
 
         case ZakoPattern::SideAppearAndShoot:
         {
             const float appear_duration = 1.0f;
-            const float stop_and_shoot_interval = 2.0f;
 
             if (pattern_timer < appear_duration)
             {
-                if (location.x > 400) velocity = { -200, 0 };
-                else velocity = { 200, 0 };
+                velocity = (location.x > 400) ? Vector2D(-200, 0) : Vector2D(200, 0);
             }
             else
             {
@@ -210,12 +151,12 @@ void Zako::Update(float delta_second)
             {
                 if (location.y < 300)
                 {
-                    scale = 2.0f;  // ˆÚ“®’†‚Í‘å‚«‚­
+                    scale = 2.0f;
                     velocity = { 0, 300 };
                 }
                 else
                 {
-                    scale = 2.0f;  // ’â~‚µ‚ÄŒ‚‚Â‘O‚Ék¬
+                    scale = 2.0f;
                     velocity = { 0, 0 };
                     shot_timer += delta_second;
 
@@ -239,16 +180,8 @@ void Zako::Update(float delta_second)
             }
             break;
 
-
         case ZakoPattern::MoveThenDiagonal:
-            if (pattern_timer < 1.0f)
-            {
-                velocity = { 0, 100 };
-            }
-            else
-            {
-                velocity = { 100, 100 };
-            }
+            velocity = (pattern_timer < 1.0f) ? Vector2D(0, 100) : Vector2D(100, 100);
             break;
 
         case ZakoPattern::Formation:
@@ -259,12 +192,12 @@ void Zako::Update(float delta_second)
         case ZakoPattern::DiveOnce:
             if (pattern_timer < 1.0f)
             {
-                scale = 2.0f;  // “oê‚Í‘å‚«‚­
+                scale = 2.0f;
                 velocity = { 0, 300 };
             }
             else if (pattern_timer < 2.0f)
             {
-                scale = 2.0f;  // ˆê’â~‚Ék¬
+                scale = 2.0f;
                 velocity = { 0, 0 };
             }
             else
@@ -274,23 +207,22 @@ void Zako::Update(float delta_second)
                     Vector2D dir = player->GetLocation() - location;
                     float len = dir.Length();
                     if (len > 0) dir /= len;
-
                     velocity = dir * 600.0f;
                     has_shot = true;
                 }
             }
             break;
 
-
         case ZakoPattern::ArcMoveAndStop:
         {
-            const float stop_y = custom_stop_y; // —á: 200
-            if (location.y < stop_y) {
-                velocity = { 0, 100 };  // ~‰º
-            }
-            else {
+            const float stop_y = custom_stop_y;
+            if (location.y < stop_y)
+                velocity = { 0, 100 };
+            else
+            {
                 velocity = { 0, 0 };
-                if (pattern_timer > 1.0f) {
+                if (pattern_timer > 1.0f)
+                {
                     Vector2D to_player = player->GetLocation() - location;
                     to_player.Normalize();
                     velocity = to_player * 250;
@@ -299,20 +231,17 @@ void Zako::Update(float delta_second)
             break;
         }
 
-
         case ZakoPattern::DepthAppear:
         {
-            const float appear_time = 1.0f;        // “oêƒtƒF[ƒhƒCƒ“ŠÔ
-            const float wait_after_appear = 0.0f; // ~‚Ü‚éŠÔ
+            const float appear_time = 1.0f;
 
             if (pattern_timer < appear_time)
             {
                 float t = pattern_timer / appear_time;
-                scale = 0.2f + t * 1.3f;  // 0.2`1.0
-                //location.y = 150 + (1.0f - t) * 100; // 150‚É‹ß‚Ã‚¯‚é
+                scale = 0.2f + t * 1.3f;
                 velocity = { 0, 0 };
             }
-            else if (pattern_timer < appear_time + wait_after_appear)
+            else
             {
                 scale = 1.5f;
                 velocity = { 0, 0 };
@@ -320,29 +249,27 @@ void Zako::Update(float delta_second)
             }
             break;
         }
+
         case ZakoPattern::RetreatUp:
         {
-            const float decel_duration = 0.5f;   // Œ¸‘¬ŠÔ
-            const float pause_duration = 0.3f;   // ’â‘ØŠÔ
-            const float accel_duration = 0.7f;   // ‰Á‘¬ŠÔ
+            const float decel_duration = 0.5f;
+            const float pause_duration = 0.3f;
+            const float accel_duration = 0.7f;
 
             if (pattern_timer < decel_duration)
             {
-                // Œ¸‘¬‚µ‚Ä’â~‚·‚é‚æ‚¤‚Éi‰º•ûŒü ¨ 0j
                 float t = pattern_timer / decel_duration;
-                velocity.y = 200.0f * (1.0f - t); // 200 ¨ 0
+                velocity.y = 200.0f * (1.0f - t);
             }
             else if (pattern_timer < decel_duration + pause_duration)
             {
-                // ˆê’â~
                 velocity.y = 0.0f;
             }
             else
             {
-                // ã•ûŒü‚É‰Á‘¬
                 float t = (pattern_timer - decel_duration - pause_duration) / accel_duration;
                 if (t > 1.0f) t = 1.0f;
-                velocity.y = -100.0f - 400.0f * t;  // -100 ¨ -500 ‚Ö‰Á‘¬
+                velocity.y = -100.0f - 400.0f * t;
             }
 
             if (location.y < -100)
@@ -352,27 +279,29 @@ void Zako::Update(float delta_second)
 
             break;
         }
+
         case ZakoPattern::SlowDownThenMove:
         {
             const float decel_duration = 1.0f;
             const float accel_duration = 1.0f;
 
-            if (pattern_timer < decel_duration) {
+            if (pattern_timer < decel_duration)
+            {
                 float t = pattern_timer / decel_duration;
-                velocity.y = 250.0f * (1.0f - t); // ™X‚ÉŒ¸‘¬
+                velocity.y = 250.0f * (1.0f - t);
                 scale = 1.0f + t * 0.5f;
             }
-            else if (pattern_timer < decel_duration + accel_duration) {
+            else if (pattern_timer < decel_duration + accel_duration)
+            {
                 float t = (pattern_timer - decel_duration) / accel_duration;
-                velocity.y = 100.0f + 200.0f * t; // ™X‚ÉÄ‰Á‘¬
+                velocity.y = 100.0f + 200.0f * t;
                 scale = 1.5f;
             }
-            else {
+            else
+            {
                 velocity.y = 300.0f;
                 scale = 1.5f;
             }
-
-            
             break;
         }
 
@@ -381,24 +310,27 @@ void Zako::Update(float delta_second)
             const float descend_duration = 0.8f;
             const float pause_duration = 0.5f;
 
-            if (pattern_timer < descend_duration) {
-                velocity = { 0.0f, 150.0f }; // ~‰º
+            if (pattern_timer < descend_duration)
+            {
+                velocity = { 0.0f, 150.0f };
             }
-            else if (pattern_timer < descend_duration + pause_duration) {
-                velocity = { 0.0f, 0.0f }; // ’â~
+            else if (pattern_timer < descend_duration + pause_duration)
+            {
+                velocity = { 0.0f, 0.0f };
             }
-            else {
+            else
+            {
                 Vector2D to_player = player->GetLocation() - location;
                 to_player.Normalize();
-                velocity = to_player * 350.0f; // “Ëi
+                velocity = to_player * 350.0f;
             }
             break;
         }
+
         case ZakoPattern::RotateAndShoot:
         {
-            velocity = { 0.0f, 80.0f }; // ‚ä‚Á‚­‚è‰º~
+            velocity = { 0.0f, 80.0f };
 
-            // ˆê’èŠÔŠu‚Å•úËó‚É’e‚ğo‚·
             if (fmod(pattern_timer, 0.5f) < delta_second && player)
             {
                 const float base_angle = pattern_timer * 2.0f;
@@ -412,15 +344,15 @@ void Zako::Update(float delta_second)
             }
             break;
         }
-
-
-
-
     }
 
+    // À•WXV
     location += velocity * delta_second;
 
-    // Zako::Update() ‚Ì hp <= 0 ‚Ì’†‚É’Ç‰Á
+    // “–‚½‚è”»’è‚Ì—LŒøE–³ŒøØ‚è‘Ö‚¦iscale‚ª1.5ˆÈã‚Å—LŒøj
+    collision.is_blocking = (scale >= 1.5f);
+
+    // HP‚ª0ˆÈ‰º‚Å”š”­‰‰o{”j‰ó
     if (hp <= 0)
     {
         PlaySoundMem(sound_destroy, DX_PLAYTYPE_BACK);
@@ -435,10 +367,9 @@ void Zako::Update(float delta_second)
         Singleton<ScoreData>::GetInstance()->SetScoreData(100);
     }
 
-
-
     __super::Update(delta_second);
 }
+
 
 void Zako::Draw(const Vector2D& screen_offset) const
 {
