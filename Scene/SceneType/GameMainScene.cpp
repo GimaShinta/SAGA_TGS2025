@@ -25,7 +25,7 @@ void GameMainScene::Initialize()
     AnimationManager* anim = Singleton<AnimationManager>::GetInstance();
     //anim->LoadAllEffects();
 
-    current_stage = new Stage2(player);
+    current_stage = new Stage1(player);
 
     current_stage->Initialize();
 
@@ -57,7 +57,7 @@ void GameMainScene::Initialize()
     current_bgm_handle = stage_bgm1;
 
     ChangeVolumeSoundMem(255 * 50 / 100, current_bgm_handle); 
-    ChangeVolumeSoundMem(255 * 20 / 100, stage_bgm1);
+    ChangeVolumeSoundMem(255 * 50 / 100, stage_bgm1);
 
     PlaySoundMem(current_bgm_handle, DX_PLAYTYPE_LOOP);
 

@@ -20,6 +20,9 @@ private:
 	bool m_logoAppeared = false;
 
 	int logo_se;
+	int bgm;
+	int cursor_se;
+	int tap_se;
 
 	int drawY;
 	float m_cursorY; // カーソルY座標

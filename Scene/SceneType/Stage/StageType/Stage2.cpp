@@ -61,6 +61,14 @@ void Stage2::Update(float delta)
     manager->Update(delta);
 
 
+    if (entry_effect_playing)
+    {
+        entry_effect_timer += delta;
+        if (entry_effect_timer >= 1.0f) // 1秒間表示
+        {
+            entry_effect_playing = false;
+        }
+    }
 
 
     stage_timer += delta;
@@ -199,6 +207,18 @@ void Stage2::Update(float delta)
 
 
     UpdateFade(delta);
+    if ((is_clear || is_over) && !glitch_started)
+    {
+        StartGlitchEffect(); // ← フェードの代わりに開始
+    }
+
+    UpdateGlitchEffect(delta);
+
+    if (glitch_done)
+    {
+        finished = true;
+    }
+
 }
 
 void Stage2::Draw()
@@ -247,6 +267,31 @@ void Stage2::Draw()
     manager->Draw();
 
     DrawFormatString(100, 100, GetColor(255, 255, 255), "fade_alpha: %.1f", fade_alpha);
+
+
+    if (entry_effect_playing)
+    {
+        float t = entry_effect_timer / 1.0f;
+        if (t > 1.0f) t = 1.0f;
+        int alpha = static_cast<int>((1.0f - t) * 255);
+
+        for (int i = 0; i < 30; ++i)
+        {
+            int x = GetRand(D_WIN_MAX_X);
+            int y = GetRand(D_WIN_MAX_Y);
+            int w = 40 + GetRand(100);
+            int h = 5 + GetRand(20);
+            int col = GetColor(200 + GetRand(55), 200 + GetRand(55), 255);
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+            DrawBox(x, y, x + w, y + h, col, TRUE);
+        }
+
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha / 3);
+        DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(255, 255, 255), TRUE); // フラッシュ効果
+        SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+    }
+
+    DrawGlitchEffect(); // ← 最前面にグリッチ表示
 
 
 }

@@ -29,12 +29,15 @@ void TitleScene::Initialize()
     m_logoAlpha = 0;
 
     ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
-    logo_se = rm->GetSounds("Resource/sound/se/battle/audiostock_1498491.mp3");
+   // logo_se = rm->GetSounds("Resource/sound/se/battle/audiostock_1498491.mp3");
+    bgm = rm->GetSounds("Resource/sound/bgm/TitleBGM.mp3");
+    cursor_se = rm->GetSounds("Resource/sound/se/se_effect/cursor.mp3");
+    tap_se = rm->GetSounds("Resource/sound/se/effect/start_se.mp3");
 
-    ChangeVolumeSoundMem(255 * 60 / 100, logo_se);
+    ChangeVolumeSoundMem(255 * 60 / 100, bgm);
+    PlaySoundMem(bgm, DX_PLAYTYPE_LOOP);
 
-
-
+    
 
     // ロゴ画像読み込み（透過PNG）
     m_logoHandle = rm->GetImages("Resource/Image/BackGround/Title/DigitalNexus.png")[0];
@@ -70,20 +73,50 @@ eSceneType TitleScene::Update(float delta_second)
     InputManager* input = Singleton<InputManager>::GetInstance();
 
     // 上下キー or コントローラ十字で選択
-    if (input->GetKeyDown(KEY_INPUT_UP) || input->GetKeyDown(KEY_INPUT_W) ||
-        input->GetButtonDown(XINPUT_BUTTON_DPAD_UP))
+    bool movedUp = input->GetKeyDown(KEY_INPUT_UP) || input->GetKeyDown(KEY_INPUT_W) ||
+        input->GetButtonDown(XINPUT_BUTTON_DPAD_UP);
+    bool movedDown = input->GetKeyDown(KEY_INPUT_DOWN) || input->GetKeyDown(KEY_INPUT_S) ||
+        input->GetButtonDown(XINPUT_BUTTON_DPAD_DOWN);
+
+    // スティックY軸の入力を反映（上下で判定、クールダウン制御付き）
+    static float stickCooldown = 0.0f;
+    stickCooldown -= delta_second;
+
+    Vector2D stick = input->GetLeftStick(); // 左スティックY軸：上→正、下→負
+    const float STICK_THRESHOLD = 0.5f;     // 感度調整
+    const float COOLDOWN_TIME = 0.2f;       // 連続入力防止
+
+    if (stickCooldown <= 0.0f)
     {
+        if (stick.y > STICK_THRESHOLD)
+        {
+            movedUp = true;
+            stickCooldown = COOLDOWN_TIME;
+        }
+        else if (stick.y < -STICK_THRESHOLD)
+        {
+            movedDown = true;
+            stickCooldown = COOLDOWN_TIME;
+        }
+    }
+
+    if (movedUp)
+    {
+        PlaySoundMem(cursor_se, DX_PLAYTYPE_BACK);
         m_selectedIndex = (m_selectedIndex + 3) % 4;
     }
-    if (input->GetKeyDown(KEY_INPUT_DOWN) || input->GetKeyDown(KEY_INPUT_S) ||
-        input->GetButtonDown(XINPUT_BUTTON_DPAD_DOWN))
+    if (movedDown)
     {
+        PlaySoundMem(cursor_se, DX_PLAYTYPE_BACK);
         m_selectedIndex = (m_selectedIndex + 1) % 4;
     }
+
 
     // 決定（スペース or Aボタン）
     if (!m_startTransitioning && (input->GetKeyDown(KEY_INPUT_SPACE) || input->GetButtonDown(XINPUT_BUTTON_A)))
     {
+        PlaySoundMem(tap_se, DX_PLAYTYPE_BACK);
+
         if (m_selectedIndex == 0) {
             m_startTransitioning = true;
             m_transitionTimer = 0.0f;
@@ -99,6 +132,8 @@ eSceneType TitleScene::Update(float delta_second)
     // 出撃演出中のタイマー進行
     if (m_startTransitioning)
     {
+        StopSoundMem(bgm);
+
         m_transitionTimer += delta_second;
 
         if (m_transitionTimer >= 2.0f) // 2秒で次のシーンへ
@@ -162,40 +197,71 @@ void TitleScene::Draw()
     DrawMenu();
     if (m_startTransitioning)
     {
-        float scale = 0.7f - m_transitionTimer * 0.5f;
-        if (scale < 0.0f) scale = 0.0f;
-        int alpha = (int)((1.0f - m_transitionTimer / 2.0f) * 255);
-        if (alpha < 0) alpha = 0;
+        float t = m_transitionTimer / 2.0f;
+        if (t > 1.0f) t = 1.0f;
+
+        // イージング（EaseInOutCubic）
+        float eased = t < 0.5f
+            ? 4 * t * t * t
+            : 1 - powf(-2 * t + 2, 3) / 2;
+
+        // スケール：最初は少し拡大→中央に吸い込む
+        float scale = 0.7f * (1.0f - eased) + 1.2f * (1.0f - (1.0f - eased) * (1.0f - eased));
+        int alpha = (int)((1.0f - eased) * 255);
 
         int scaledW = (int)(m_logoW * scale);
         int scaledH = (int)(m_logoH * scale);
+
         int drawX = (D_WIN_MAX_X - scaledW) / 2;
-        int drawY = m_logoY + (int)((m_logoH * 0.7f - scaledH) / 2); // ★中央から吸い込むように！
+        int drawY = m_logoY + (int)((m_logoH * 0.7f - scaledH) / 2 - 50 * eased);  // 少し上に上がる
 
         SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
         DrawExtendGraph(drawX, drawY, drawX + scaledW, drawY + scaledH, m_logoHandle, TRUE);
         SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
-        // 暗転フェード
-        int fade = (int)(m_transitionTimer * 200.0f);
-        if (fade > 255) fade = 255;
+        // 残光 or 閃光風の白枠（薄く）
+        if (eased < 0.8f) {
+            int glowAlpha = (int)((1.0f - eased) * 80);
+            SetDrawBlendMode(DX_BLENDMODE_ADD, glowAlpha);
+            DrawBox(drawX - 8, drawY - 8, drawX + scaledW + 8, drawY + scaledH + 8, GetColor(180, 240, 255), FALSE);
+            SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+        }
+
+        // 背景の暗転
+        int fade = (int)(eased * 255);
         SetDrawBlendMode(DX_BLENDMODE_ALPHA, fade);
         DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
         SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
         // CONNECTING 表示
-        if (m_transitionTimer > 1.4f)
-        {
-            const char* msg = "CONNECTING...";
-            int msgWidth = GetDrawStringWidthToHandle(msg, strlen(msg), m_menuFontHandle);
-            int cx = (D_WIN_MAX_X - msgWidth) / 2;
-            int cy = D_WIN_MAX_Y / 2;
+        // ゲージ風 LOADING 演出（1.4秒後に表示）
+if (m_transitionTimer > 1.4f)
+{
+    float loadingT = (m_transitionTimer - 1.4f) / 0.6f; // 0?1
+    if (loadingT > 1.0f) loadingT = 1.0f;
 
-            int pulse = 180 + (int)(sinf(GetNowCount() / 10.0f) * 75);
-            DrawStringToHandle(cx, cy, msg, GetColor(pulse, pulse, 255), m_menuFontHandle);
-        }
+    int cx = D_WIN_MAX_X / 2;
+    int cy = D_WIN_MAX_Y / 2 + 40;
+
+    const int barWidth = 300;
+    const int barHeight = 16;
+    int filledWidth = (int)(barWidth * loadingT);
+
+    // 枠
+    DrawBox(cx - barWidth / 2, cy, cx + barWidth / 2, cy + barHeight, GetColor(100, 100, 100), FALSE);
+    // 中身
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
+    DrawBox(cx - barWidth / 2, cy, cx - barWidth / 2 + filledWidth, cy + barHeight, GetColor(80, 200, 255), TRUE);
+    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+    // LOADING文字
+    const char* msg = "LOADING";
+    int msgWidth = GetDrawStringWidthToHandle(msg, strlen(msg), m_menuFontHandle);
+    DrawStringToHandle(cx - msgWidth / 2, cy - 30, msg, GetColor(200, 255, 255), m_menuFontHandle);
+}
 
     }
+
 
 
 

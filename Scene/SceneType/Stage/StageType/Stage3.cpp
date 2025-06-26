@@ -105,6 +105,16 @@ void Stage3::Update(float delta)
         manager->PlayerAnimation(EffectName::eExprotion, Vector2D(player->GetLocation().x, player->GetLocation().y), 0.05f, false);
     }
 
+
+    if (entry_effect_playing)
+    {
+        entry_effect_timer += delta;
+        if (entry_effect_timer >= 1.0f) // 1秒間表示
+        {
+            entry_effect_playing = false;
+        }
+    }
+
     UpdateBackgroundScroll(delta);
     ScrollEffectUpdate(delta);
 
@@ -201,6 +211,17 @@ void Stage3::Update(float delta)
     //        SetFinished();  
     //    }
     //}
+    if ((is_clear || is_over) && !glitch_started)
+    {
+        StartGlitchEffect(); // ← フェードの代わりに開始
+    }
+
+    UpdateGlitchEffect(delta);
+
+    if (glitch_done)
+    {
+        finished = true;
+    }
 
 
 }
@@ -350,6 +371,32 @@ void Stage3::Draw()
     //    std::string visible = boss_name.substr(0, chars);
     //    DrawStringToHandle(cx - 200, cy + 40, visible.c_str(), GetColor(0, 255, 255), font_orbitron );
     //}
+
+
+    if (entry_effect_playing)
+    {
+        float t = entry_effect_timer / 1.0f;
+        if (t > 1.0f) t = 1.0f;
+        int alpha = static_cast<int>((1.0f - t) * 255);
+
+        for (int i = 0; i < 30; ++i)
+        {
+            int x = GetRand(D_WIN_MAX_X);
+            int y = GetRand(D_WIN_MAX_Y);
+            int w = 40 + GetRand(100);
+            int h = 5 + GetRand(20);
+            int col = GetColor(200 + GetRand(55), 200 + GetRand(55), 255);
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+            DrawBox(x, y, x + w, y + h, col, TRUE);
+        }
+
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha / 3);
+        DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(255, 255, 255), TRUE); // フラッシュ効果
+        SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+    }
+
+    DrawGlitchEffect(); // ← 最前面にグリッチ表示
+
 }
 
 bool Stage3::IsFinished()

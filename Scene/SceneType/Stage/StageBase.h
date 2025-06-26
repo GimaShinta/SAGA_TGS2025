@@ -113,5 +113,54 @@ public:
         }
     }
 
+    // ƒOƒŠƒbƒ`‰‰o
+    bool glitch_started = false;
+    bool glitch_done = false;
+    float glitch_timer = 0.0f;
+
+    bool entry_effect_playing = true;
+    float entry_effect_timer = 0.0f;
+
+
+    void StartGlitchEffect()
+    {
+        glitch_started = true;
+        glitch_timer = 0.0f;
+        glitch_done = false;
+    }
+
+    void UpdateGlitchEffect(float delta)
+    {
+        if (glitch_started && !glitch_done)
+        {
+            glitch_timer += delta;
+            if (glitch_timer >= 2.0f)  // 2•bŒã‚ÉŠ®—¹
+            {
+                glitch_done = true;
+            }
+        }
+    }
+
+    void DrawGlitchEffect() const
+    {
+        if (!glitch_started) return;
+
+        float t = glitch_timer / 2.0f;
+        if (t > 1.0f) t = 1.0f;
+        int alpha = static_cast<int>(t * 180.0f);  // ”Z‚­‚È‚Á‚Ä‚¢‚­
+
+        for (int i = 0; i < 20; ++i)
+        {
+            int x = GetRand(D_WIN_MAX_X);
+            int y = GetRand(D_WIN_MAX_Y);
+            int w = 80 + GetRand(200);
+            int h = 5 + GetRand(30);
+            int col = GetColor(200 + GetRand(55), 200 + GetRand(55), 255);
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+            DrawBox(x, y, x + w, y + h, col, TRUE);
+        }
+        SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+    }
+
 
 };
