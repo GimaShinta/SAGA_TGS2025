@@ -25,7 +25,7 @@ void GameMainScene::Initialize()
     AnimationManager* anim = Singleton<AnimationManager>::GetInstance();
     //anim->LoadAllEffects();
 
-    current_stage = new Stage1(player);
+    current_stage = new Stage2(player);
 
     current_stage->Initialize();
 
@@ -154,7 +154,7 @@ eSceneType GameMainScene::Update(float delta_second)
                 {
                     if (stage3->request_stop_bgm)
                     {
-                        StopSoundMem(current_bgm_handle);
+                        StopSoundMem(stage_bgm3);
                         stage3->request_stop_bgm = false;
                     }
                      // BGM停止リクエスト（フェード後に止める）
@@ -248,6 +248,8 @@ eSceneType GameMainScene::Update(float delta_second)
                           black_fade_timer += delta_second;
                                 if (alpha >= 255)
                                 {
+                                    StopSoundMem(stage_bgm3); // ← ステージ3のBGMを明示的に停止
+
                                     StageBase* next_stage = current_stage->GetNextStage(player);
 
                                     current_stage->Finalize();
