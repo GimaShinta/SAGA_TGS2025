@@ -22,8 +22,8 @@ void GameMainScene::Initialize()
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
     player = objm->CreateObject<Player>(Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) + 220.0f));
 
-    AnimationManager* anim = Singleton<AnimationManager>::GetInstance();
-    anim->LoadAllEffects();
+    //AnimationManager* anim = Singleton<AnimationManager>::GetInstance();
+    //anim->LoadAllEffects();
 
     current_stage = new Stage1(player);
 
@@ -63,11 +63,11 @@ void GameMainScene::Initialize()
 
 
     //AnimationManager による事前アニメ再生（0.01秒、画面外で一度だけ再生）
-    anim->LoadAllEffects(); // ★ここで明示的に画像を先読みさせる！
+   // anim->LoadAllEffects(); // ★ここで明示的に画像を先読みさせる！
 
     // 仮にエフェクト2つを登録済みなら
-    anim->PlayerAnimation(EffectName::eExprotion, Vector2D(-999, -999), 0.01f, false);
-    anim->PlayerAnimation(EffectName::eExprotion2, Vector2D(-999, -999), 0.01f, false);
+    //anim->PlayerAnimation(EffectName::eExprotion, Vector2D(-999, -999), 0.01f, false);
+    //anim->PlayerAnimation(EffectName::eExprotion2, Vector2D(-999, -999), 0.01f, false);
 
 
     // ● フォント描画（初回だけ隠れて描画してフォント展開を済ませる）
@@ -102,8 +102,8 @@ void GameMainScene::Initialize()
     StopSoundMem(preload_hit);
 
     // === 敵が使うアニメーションも画面外でダミー生成 ===
-    anim->PlayerAnimation(EffectName::eExprotion, Vector2D(-999, -999), 0.01f, false);
-    anim->PlayerAnimation(EffectName::eExprotion2, Vector2D(-999, -999), 0.01f, false);
+    //anim->PlayerAnimation(EffectName::eExprotion, Vector2D(-999, -999), 0.01f, false);
+    //anim->PlayerAnimation(EffectName::eExprotion2, Vector2D(-999, -999), 0.01f, false);
 
 
 }
@@ -271,6 +271,34 @@ eSceneType GameMainScene::Update(float delta_second)
         score_logs.push_back(new_log);
 
         previous_score_count += 1.0f;
+    }
+
+    // シールドON検出
+    static bool prev_shield = false;
+    bool now_shield = player->GetShieldOn();
+    if (!prev_shield && now_shield) {
+        effect_shield_on = true;
+        effect_timer = 0.0f;
+    }
+    if (prev_shield && !now_shield) {
+        effect_shield_off = true;
+        effect_timer = 0.0f;
+    }
+    prev_shield = now_shield;
+
+    // パワーアップ検出（1フレームのみ）
+    static int prev_power = 1;
+    int now_power = player->GetPowerd();
+    if (now_power > prev_power) {
+        effect_powerup = true;
+        effect_timer = 0.0f;
+    }
+    prev_power = now_power;
+
+    // タイマー進行
+    effect_timer += delta_second;
+    if (effect_timer > effect_duration) {
+        effect_shield_on = effect_shield_off = effect_powerup = false;
     }
 
 
@@ -719,6 +747,23 @@ void GameMainScene::Draw()
 
     }
 
+    if (effect_shield_on || effect_shield_off || effect_powerup)
+    {
+        int alpha = static_cast<int>(100 * (1.0f - (effect_timer / effect_duration))); // 最大100に抑える
+
+        int color = GetColor(0, 0, 0); // デフォルト（透明黒）
+
+        if (effect_shield_on)
+            color = GetColor(0, 255, 180); // 緑系（シールドON）
+        else if (effect_shield_off)
+            color = GetColor(255, 50, 50); // 赤系（シールド破壊）
+        else if (effect_powerup)
+            color = GetColor(255, 255, 100); // 黄系（パワーアップ）
+
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+        DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, color, TRUE);
+        SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+    }
 
 }
 

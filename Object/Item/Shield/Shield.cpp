@@ -19,7 +19,7 @@ void Shield::Initialize()
     images = rm->GetImages("Resource/Image/Object/Item/PowerUp/anime_item32.png", 12, 6, 2, 32, 32);
     image = images[0];
 
-    se = rm->GetSounds("Resource/sound/se/effect/audiostock_1090663.mp3");
+    se = rm->GetSounds("Resource/sound/se/effect/shield1.mp3");
     ChangeVolumeSoundMem(255 * 100 / 100, se);
 }
 

@@ -47,7 +47,8 @@ void Shot::Initialize()
 	//// ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì’Ç‰ÁÝ’è
 	//am->SetAlpha(anim_id, 122);       // ”¼“§–¾
 	//am->SetScale(anim_id, 0.1f);      // 1.5”{Šg‘å
-	hit_se = rm->GetSounds("Resource/sound/se/se_effect/reaction.mp3");
+	hit_se = rm->GetSounds("Resource/sound/se/se_effect/hit_se.mp3");
+	ChangeVolumeSoundMem(255 * 50 / 100, hit_se);
 	//ChangeVolumeSoundMem(255 * 110 / 100, hit_se);
 	//ChangeVolumeSoundMem(255 * 60 / 100, se);
 	//PlaySoundMem(se, DX_PLAYTYPE_BACK);

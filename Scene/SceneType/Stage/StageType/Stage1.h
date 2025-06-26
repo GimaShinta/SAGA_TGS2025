@@ -46,7 +46,7 @@ private:
 	int bs_attack_pattrn = 0;  // ボスの攻撃パターン制御用インデックス
 	float shot_timer;          // ショット発射の間隔制御タイマー
 
-	float stage_timer = 0.0f;  // ステージの経過時間（秒単位）
+	float stage_timer = 60.0f;  // ステージの経過時間（秒単位）
 	bool item_spawned = false;  // ← 追加
 
 	float scene_timer = 0.0f;  // 演出や状態遷移用タイマー
@@ -151,6 +151,9 @@ private:
 	bool warning_label_shown = false;
 	int warning_label_alpha = 255; // 文字の透明度
 	float slide_out_timer = 0.0f;
+
+	bool preload_done = false;
+	float entry_timer = 0.0f;
 
 
 

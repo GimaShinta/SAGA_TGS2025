@@ -78,7 +78,7 @@ void Zako::Update(float delta_second)
                 scale = 2.0f;
                 velocity = { 0, 180 };     // ’ÊíƒXƒP[ƒ‹•ˆÚ“®
             }
-            Shot(delta_second);
+            //Shot(delta_second);
             break;
         }
 
