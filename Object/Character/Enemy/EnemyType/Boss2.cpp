@@ -23,10 +23,10 @@ void Boss2::Initialize()
 	enemy_type = ENE_BOSS2;
 	z_layer = 1;
 	box_size = 30;
-	hp = 20000;
+	hp = 1000;
 
 	// 攻撃パターンの設定
-	attack_pattrn_num = { 5 };
+	attack_pattrn_num = { 4, 5, 6, 7 };
 
 
 	// 当たり判定のオブジェクト設定

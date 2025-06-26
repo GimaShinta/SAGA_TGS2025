@@ -36,6 +36,7 @@ void Stage4::Initialize()
 	font_digital = CreateFontToHandle("Orbitron", 28, 6, DX_FONTTYPE_ANTIALIASING);
 	font_orbitron = CreateFontToHandle("Orbitron", 22, 6, DX_FONTTYPE_ANTIALIASING);
 
+    stage_id = StageID::Stage4;
 }
 
 void Stage4::Finalize()
@@ -55,19 +56,19 @@ void Stage4::Update(float delta)
     // delta_second 分加算
     stage_timer += delta;
 
-    // 一定時間ごとに distance を減らす（例：0.1秒ごとに1減らす）
-    if (stage_timer >= 0.01f)
-    {
-        if (distance > 0)
-        {
-            distance--;
-        }
-        else
-        {
-            distance = 0;
-        }
-        stage_timer = 0;
-    }
+    //// 一定時間ごとに distance を減らす（例：0.1秒ごとに1減らす）
+    //if (stage_timer >= 0.01f)
+    //{
+    //    if (distance > 0)
+    //    {
+    //        distance--;
+    //    }
+    //    else
+    //    {
+    //        distance = 0;
+    //    }
+    //    stage_timer = 0;
+    //}
 
     // オブジェクト管理クラスのインスタンスを取得
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
@@ -131,6 +132,7 @@ void Stage4::Draw()
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
     AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
 
+
     if (draw_animation_first)  // ← このフラグで順序を切り替える
     {
         manager->Draw();       // 先にアニメーション
@@ -170,6 +172,12 @@ bool Stage4::IsFinished()
 	return finished;
 }
 
+void Stage4::SetFinished()
+{
+    finished = true;
+}
+
+
 bool Stage4::IsClear()
 {
 	return is_clear;
@@ -183,6 +191,11 @@ bool Stage4::IsOver()
 StageBase* Stage4::GetNextStage(Player* player)
 {
 	return nullptr;
+}
+
+StageBase* Stage4::GetNowStage()
+{
+    return this;
 }
 
 void Stage4::DisplayWarning(float delta_second)
@@ -303,20 +316,22 @@ void Stage4::PlayerShot()
 
 void Stage4::EnemyAppearance()
 {
-    // オブジェクト管理クラスのインスタンスを取得
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
 
-    // 警告表示
-    if (distance == 150)
-    {
-        is_warning = true;
-    }
-    // ボス出現
-    if (distance == 1 && boss3 == nullptr)
-    {
-        //enemy_list.push_back(boss = objm->CreateObject<Boss>(Vector2D(D_WIN_MAX_X / 2 + 200, D_WIN_MAX_Y + 200)));
-        enemy_list.push_back(boss3 = objm->CreateObject<Boss3>(Vector2D(D_WIN_MAX_X / 2, D_WIN_MAX_Y / 2)));
+    if (boss3_spawned) return;
 
+
+    if (stage_timer < 10.0f)
+    {
+    }
+    else 
+    {
+        objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2 - 60, 120))->SetPlayer(player);
+        objm->CreateObject<Shield>(Vector2D(D_WIN_MAX_X / 2 + 60, 120))->SetPlayer(player);
+
+        boss3 = objm->CreateObject<Boss3>(Vector2D(D_WIN_MAX_X / 2, -100));
+        boss3->SetPlayer(player);
+        boss3_spawned = true;
     }
 }
 

@@ -55,7 +55,7 @@ private:
 	int obi_handle;
 
 	bool draw_animation_first = false;  // デフォルトはfalse
-
+	bool boss3_spawned = false;
 public:
 	Stage4(Player* player);
 	~Stage4();
@@ -65,9 +65,11 @@ public:
 	void Update(float delta) override;
 	void Draw() override;
 	bool IsFinished() override;
+	void SetFinished() override;
 	bool IsClear() override;
 	bool IsOver() override;
 	StageBase* GetNextStage(Player* player) override;
+	StageBase* GetNowStage() override;
 
 private:
 	void DisplayWarning(float delta_second);

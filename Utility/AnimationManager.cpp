@@ -25,9 +25,9 @@ void AnimationManager::LoadSE()
 {
 	ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
 
-	se_handles[SE_NAME::Shot] = rm->GetSounds("Resource/sound/se/shot/shot_02.mp3");
-	se_handles[SE_NAME::Reaction] = rm->GetSounds("Resource/sound/se/se_effect/reaction.mp3");
-	se_handles[SE_NAME::Explosion] = rm->GetSounds("Resource/sound/se/se_effect/explosion.mp3"); // ‰¼‚É’Ç‰Á
+	se_handles[SE_NAME::Shot] = rm->GetSounds("Resource/sound/se/effect/audiostock_1133382.mp3");
+	//se_handles[SE_NAME::Reaction] = rm->GetSounds("Resource/sound/se/se_effect/reaction.mp3");
+	//se_handles[SE_NAME::Explosion] = rm->GetSounds("Resource/sound/se/se_effect/explosion.mp3"); // ‰¼‚É’Ç‰Á
 }
 
 void AnimationManager::WarmUpSE()

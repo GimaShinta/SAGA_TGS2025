@@ -46,6 +46,7 @@ void GameMainScene::Initialize()
     font_digital = CreateFontToHandle("Orbitron", 28, 6, DX_FONTTYPE_ANTIALIASING);
     font_orbitron = CreateFontToHandle("Orbitron", 22, 6, DX_FONTTYPE_ANTIALIASING);
     //font_orbitron = CreateFontToHandle("DS-Digital", 28, 6, DX_FONTTYPE_ANTIALIASING);
+    font_warning = CreateFontToHandle("Orbitron", 48, 6, DX_FONTTYPE_ANTIALIASING);
 
     m_menuFontHandle = CreateFontToHandle("Orbitron", 36, 6); // メニュー専用フォント
 
@@ -53,7 +54,7 @@ void GameMainScene::Initialize()
     // ステージ1用BGMを再生
     current_bgm_handle = stage_bgm1;
 
-    ChangeVolumeSoundMem(255 * 70 / 100, current_bgm_handle);
+    ChangeVolumeSoundMem(255 * 10 / 100, current_bgm_handle);
 
     PlaySoundMem(current_bgm_handle, DX_PLAYTYPE_LOOP);
 
@@ -64,6 +65,8 @@ void GameMainScene::Initialize()
 
     //AnimationManager による事前アニメ再生（0.01秒、画面外で一度だけ再生）
     anim->LoadAllEffects(); // ★ここで明示的に画像を先読みさせる！
+    anim->LoadSE();
+
 
     // 仮にエフェクト2つを登録済みなら
     anim->PlayerAnimation(EffectName::eExprotion, Vector2D(-999, -999), 0.01f, false);
@@ -127,6 +130,7 @@ eSceneType GameMainScene::Update(float delta_second)
 
     if (!isPaused) 
     {
+        black_in_timer += delta_second;
         line_effect_timer += delta_second;
         transparent = 0;
         // ポーズ中は何も更新しない（またはポーズ画面の更新のみ）
@@ -137,35 +141,135 @@ eSceneType GameMainScene::Update(float delta_second)
 
             current_stage->Update(delta_second);
 
+            if (current_stage->GetStageID() == StageID::Stage4)
+            {
+                if (warning_state == WarningState::None && is_none == false)
+                {
+                    // 条件に応じて（例：一定時間経過後など）
+                    if (black_in_timer2 >= 2.0f)
+                    {
+                        is_none = true;
+                        warning_state = WarningState::Expanding;
+                        warning_timer = 0.0f;
+                        band_half_height = 0.0f; // 念のため初期化
+                        warning_text_x = 1020;   // 文字位置初期化（右端から流す場合）
+                    }
+                }
+
+
+                black_in_timer2 += delta_second;
+
+                warning_timer += delta_second;
+
+                switch (warning_state)
+                {
+                case WarningState::Expanding:
+                    band_half_height += band_expand_speed * delta_second;
+                    if (band_half_height >= band_max_half_height)
+                    {
+                        band_half_height = band_max_half_height;
+                        warning_state = WarningState::Displaying;
+                        warning_timer = 0.0f;
+                    }
+                    break;
+
+                case WarningState::Displaying:
+                    warning_text_x -= warning_scroll_speed * delta_second;
+                    if (warning_text_x < -200)
+                        warning_text_x = 1020;
+                    if (warning_timer >= warning_duration)
+                    {
+                        warning_state = WarningState::Shrinking;
+                    }
+                    break;
+
+                case WarningState::Shrinking:
+                    band_half_height -= band_expand_speed * delta_second;
+                    if (band_half_height <= 0.0f)
+                    {
+                        band_half_height = 0.0f;
+                        warning_state = WarningState::None;
+                        // ボス登場処理などへ
+                    }
+                    break;
+
+                default:
+                    break;
+                }
+
+            }
+
+
+
             if (current_stage->IsFinished())
             {
                 if (current_stage->IsClear() == true)
                 {
-                    StageBase* next_stage = current_stage->GetNextStage(player);
 
-                    current_stage->Finalize();
-                    delete current_stage;
-                    current_stage = nullptr;
-
-                    if (next_stage != nullptr)
+                    if (current_stage->GetStageID() == StageID::Stage3)
                     {
-                        // === ステージの切替とBGM処理 ===
-                        current_stage = next_stage;
-                        current_stage->Initialize();
-
-                        // ステージ3に到達した場合のみBGM切替
-                        if (dynamic_cast<Stage3*>(current_stage) != nullptr)
+                        black_fade_timer += delta_second;
+                        if (alpha >= 255)
                         {
-                            StopSoundMem(current_bgm_handle); // 現在のBGMを停止
-                            current_bgm_handle = stage_bgm3;  // ステージ3用BGMに切り替え
-                            ChangeVolumeSoundMem(255 * 90 / 100, current_bgm_handle);
-                            PlaySoundMem(current_bgm_handle, DX_PLAYTYPE_LOOP);
+                            StageBase* next_stage = current_stage->GetNextStage(player);
+
+                            current_stage->Finalize();
+                            delete current_stage;
+                            current_stage = nullptr;
+
+                            if (next_stage != nullptr)
+                            {
+                                // === ステージの切替とBGM処理 ===
+                                current_stage = next_stage;
+                                current_stage->Initialize();
+
+                                // ステージ3に到達した場合のみBGM切替
+                                if (dynamic_cast<Stage3*>(current_stage) != nullptr)
+                                {
+                                    StopSoundMem(current_bgm_handle); // 現在のBGMを停止
+                                    current_bgm_handle = stage_bgm3;  // ステージ3用BGMに切り替え
+                                    ChangeVolumeSoundMem(255 * 90 / 100, current_bgm_handle);
+                                    PlaySoundMem(current_bgm_handle, DX_PLAYTYPE_LOOP);
+                                }
+                            }
+                            else
+                            {
+                                return eSceneType::eTitle;
+                            }
+
                         }
                     }
                     else
                     {
-                        return eSceneType::eTitle;
+                        StageBase* next_stage = current_stage->GetNextStage(player);
+
+                        current_stage->Finalize();
+                        delete current_stage;
+                        current_stage = nullptr;
+
+                        if (next_stage != nullptr)
+                        {
+                            // === ステージの切替とBGM処理 ===
+                            current_stage = next_stage;
+                            current_stage->Initialize();
+
+                            // ステージ3に到達した場合のみBGM切替
+                            if (dynamic_cast<Stage3*>(current_stage) != nullptr)
+                            {
+                                StopSoundMem(current_bgm_handle); // 現在のBGMを停止
+                                current_bgm_handle = stage_bgm3;  // ステージ3用BGMに切り替え
+                                ChangeVolumeSoundMem(255 * 90 / 100, current_bgm_handle);
+                                PlaySoundMem(current_bgm_handle, DX_PLAYTYPE_LOOP);
+                            }
+                        }
+                        else
+                        {
+                            return eSceneType::eTitle;
+                        }
+
                     }
+
+
                 }
                 else if (current_stage->IsOver() == true)
                 {
@@ -283,27 +387,254 @@ eSceneType GameMainScene::Update(float delta_second)
 /// <returns></returns>
 void GameMainScene::Draw()
 {
-    if (current_stage) 
+    if (current_stage)
     {
         AnimationManager* anim = Singleton<AnimationManager>::GetInstance();
         anim->Draw();
-
         current_stage->Draw();
+        DrawUI();
+
+        if (current_stage->GetStageID() == StageID::Stage3)
+        {
+            if (current_stage->IsClear())
+            {
+                if (black_fade_timer >= 0.01f)
+                {
+                    black_fade_timer = 0.0f;
+                    alpha+=2;
+                }
+                //int alpha = static_cast<int>((black_fade_timer / black_fade_duration) * 255.0f);
+                if (alpha > 255) alpha = 255;
+
+                SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+                DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
+                SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+                if (alpha >= 255)
+                {
+                    current_stage->SetFinished();
+
+                    // 暗転完了 → 次のシーンへ切り替えなど
+                    // SceneManager::ChangeScene(...);
+                }
+            }
+        }
+        else if (current_stage->GetStageID() == StageID::Stage4)
+        {
+
+            if (black_in_timer2 >= 8.0f)
+            {
+                if (black_in_timer >= 0.01f)
+                {
+                    black_in_timer = 0.0f;
+                    alpha--;
+                }
+            }
+
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+            DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE); // ← 背景を最初に描く
+            SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0); // ← これを追加！（ここ重要！） ?
+
+            if (warning_state != WarningState::None)
+            {
+                int y_top = static_cast<int>(band_center_y - band_half_height);
+                int y_bottom = static_cast<int>(band_center_y + band_half_height);
+
+                if (band_half_height > 1.0f)
+                {
+                    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
+                    DrawBox(0, y_top, 1280, y_bottom, GetColor(255, 0, 0), TRUE);
+                    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+                    DrawLine(0, y_top, 1280, y_top, GetColor(255, 255, 255));
+                    DrawLine(0, y_bottom, 1280, y_bottom, GetColor(255, 255, 255));
+                }
+
+                if (warning_state == WarningState::Displaying)
+                {
+                    DrawStringToHandle(static_cast<int>(warning_text_x), band_center_y - 20,
+                        "!! WARNING !!", GetColor(255, 255, 255), font_warning);
+                }
+            }
+
+
+
+            //alpha--;
+
+            if (alpha < 0)
+            {
+                alpha = 0;
+                black_in_timer2 = 0.0f;
+            }
+            else
+            {
+
+            }
+
+
+        }
+
+        if (isPaused)
+        {
+            const int cx = D_WIN_MAX_X / 2;
+            const int cy = D_WIN_MAX_Y / 2 - 20;
+
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, transparent);
+            DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
+            //DrawBox(400, 200, 880, D_WIN_MAX_Y - 200, GetColor(255, 255, 255), FALSE);
+            SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+
+            const char* menuItems[] = {
+                "START GAME",
+                "BACK TITLE",
+            };
+
+            for (int i = 0; i < 2; ++i)
+            {
+                int y = 300 + i * 50;
+                int textWidth = GetDrawStringWidthToHandle(menuItems[i], strlen(menuItems[i]), m_menuFontHandle);
+                int x = (D_WIN_MAX_X - textWidth) / 2;
+
+                if (i == m_selectedIndex)
+                {
+                    // =========================
+                    // 背景ハイライトバー（画面端まで）
+                    // =========================
+                    int barHeight = 40;
+                    int barAlpha = 120 + (int)(sinf(GetNowCount() / 60.0f) * 50); // パルス
+                    SetDrawBlendMode(DX_BLENDMODE_ALPHA, barAlpha);
+                    DrawBox(
+                        0, y - 5,
+                        D_WIN_MAX_X, y + barHeight,
+                        GetColor(0, 200, 255), TRUE
+                    );
+
+                    // =========================
+                    // 両端のエッジエフェクト（流れる光）
+                    // =========================
+                    int edgeWidth = 80;
+                    int edgeHeight = 4;
+                    int scrollSpeed = 2;
+                    int edgeOffset = (GetNowCount() * scrollSpeed) % (D_WIN_MAX_X + edgeWidth * 2);
+
+                    // 左から右へ流れる（2個表示してループ感を出す）
+                    for (int j = 0; j < 2; ++j)
+                    {
+                        int edgeX = edgeOffset - edgeWidth * j;
+                        SetDrawBlendMode(DX_BLENDMODE_ADD, 50);
+                        DrawBox(
+                            edgeX, y + 10,
+                            edgeX + edgeWidth, y + 10 + edgeHeight,
+                            GetColor(200, 255, 255), TRUE
+                        );
+                        SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+                    }
+
+                    // =========================
+                    // テキスト（アウトライン＋グロー）
+                    // =========================
+                    int offsetX = (rand() % 3) - 1;
+                    int offsetY = (rand() % 3) - 1;
+
+                    DrawStringToHandle(x + offsetX - 1, y + offsetY, menuItems[i], GetColor(0, 0, 0), m_menuFontHandle);
+                    DrawStringToHandle(x + offsetX + 1, y + offsetY, menuItems[i], GetColor(0, 0, 0), m_menuFontHandle);
+                    DrawStringToHandle(x + offsetX, y + offsetY - 1, menuItems[i], GetColor(0, 0, 0), m_menuFontHandle);
+                    DrawStringToHandle(x + offsetX, y + offsetY + 1, menuItems[i], GetColor(0, 0, 0), m_menuFontHandle);
+
+                    int glow = (int)((sinf(GetNowCount() / 30.0f) + 1.0f) * 127);
+                    DrawStringToHandle(x + offsetX, y + offsetY, menuItems[i], GetColor(100 + glow, 255, 255), m_menuFontHandle);
+                }
+                else
+                {
+                    DrawStringToHandle(x, y, menuItems[i], GetColor(180, 180, 180), m_menuFontHandle);
+                }
+            }
+
+
+        }
+
+
+    }
+    DrawFormatString(D_WIN_MAX_X / 2, 0, GetColor(255, 255, 255), "Stage%d", current_stage->GetStageID());
+
+}
+
+
+// 終了時処理（使ったインスタンスの削除とか）
+void GameMainScene::Finalize()
+{
+    if (current_stage) 
+    {
+        current_stage->Finalize();
+        delete current_stage;
+        current_stage = nullptr;
+    }
+    if (current_bgm_handle != -1)
+    {
+        StopSoundMem(current_bgm_handle);
+        current_bgm_handle = -1;
+    }
+    if (font_digital != -1) {
+        DeleteFontToHandle(font_digital);
+        font_digital = -1;
+    }
+    if (font_orbitron != -1) {
+        DeleteFontToHandle(font_orbitron);
+        font_orbitron = -1;
     }
 
+
+
+}
+
+/// <summary>
+/// 現在のシーン情報
+/// </summary>
+/// <returns>現在はリザルトシーンです</returns>
+eSceneType GameMainScene::GetNowSceneType() const
+{
+	return eSceneType::eGameMain;
+}
+
+
+void GameMainScene::AddScoreLog(const std::string& text)
+{
+    // 新しいログを上に追加（スライド無し）
+    ScoreLog log;
+    log.text = text;
+    log.y_offset = 0.0f;
+    score_logs.push_back(log);
+
+    // 最大10行保持 → 古いものから削除
+    if (score_logs.size() >= 10)
+    {
+        score_logs.erase(score_logs.begin()); // 先頭（古い）を削除
+    }
+
+    // 既存ログはスライド開始（下に押し出される）
+    for (auto& log : score_logs)
+    {
+        log.y_offset = -20.0f;  // 毎フレームで補正される
+    }
+
+
+}
+
+void GameMainScene::DrawUI()
+{
     //// 左の黒帯
-    //DrawBox(0, 0, (D_WIN_MAX_X / 2) - 350, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
+//DrawBox(0, 0, (D_WIN_MAX_X / 2) - 350, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
 
-    //// 右の黒帯
-    //DrawBox((D_WIN_MAX_X / 2) + 350, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
+//// 右の黒帯
+//DrawBox((D_WIN_MAX_X / 2) + 350, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
 
-    // === 左の黒帯 ===
+// === 左の黒帯 ===
     DrawGraph(0, 0, obi_handle, TRUE);
 
     // === 右の黒帯（左右反転）===
     DrawTurnGraph(D_WIN_MAX_X - 290, 0, obi_handle, TRUE);
 
-  
+
 
 
     // === 左のサイドパネル（サイバー風） ===
@@ -371,48 +702,48 @@ void GameMainScene::Draw()
     }
     SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
-   // DrawFormatString(D_WIN_MAX_X - 140, 0, GetColor(255, 255, 255), "Life:%d", player->life);
+    // DrawFormatString(D_WIN_MAX_X - 140, 0, GetColor(255, 255, 255), "Life:%d", player->life);
 
-    // ==== 合計スコア（キルログの上） ====
-  {
-    ScoreData* score = Singleton<ScoreData>::GetInstance();
-    const auto& all_scores = score->GetScoreData();
-
-    float total_score = 0.0f;
-    for (float s : all_scores)
+     // ==== 合計スコア（キルログの上） ====
     {
-        total_score += s;
-    }
+        ScoreData* score = Singleton<ScoreData>::GetInstance();
+        const auto& all_scores = score->GetScoreData();
 
-    // 表示位置とサイズ
-    int score_box_x = 30;
-    int score_box_y = D_WIN_MAX_Y - 640;
-    int score_box_w = 220;
-    int score_box_h = 32;
+        float total_score = 0.0f;
+        for (float s : all_scores)
+        {
+            total_score += s;
+        }
 
-    // 点滅フレームカラー
-    int pulse = static_cast<int>(GetNowCount() % 100) > 50 ? 255 : 100;
-    int frame_color = GetColor(pulse, 255, pulse);
+        // 表示位置とサイズ
+        int score_box_x = 30;
+        int score_box_y = D_WIN_MAX_Y - 640;
+        int score_box_w = 220;
+        int score_box_h = 32;
 
-    // 背景と枠
-    //SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
-    //DrawBox(score_box_x, score_box_y, score_box_x + score_box_w, score_box_y + score_box_h, GetColor(10, 10, 30), TRUE);
-    //SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
-    //DrawBox(score_box_x, score_box_y, score_box_x + score_box_w, score_box_y + score_box_h, frame_color, FALSE);
+        // 点滅フレームカラー
+        int pulse = static_cast<int>(GetNowCount() % 100) > 50 ? 255 : 100;
+        int frame_color = GetColor(pulse, 255, pulse);
 
-    // スコアテキスト
-    DrawFormatStringToHandle(score_box_x - 20, score_box_y + 8, frame_color, font_digital, "TOTAL SCORE");
-    DrawFormatStringToHandle(score_box_x, score_box_y + 40, frame_color, font_digital, "%.0f", total_score);
+        // 背景と枠
+        //SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
+        //DrawBox(score_box_x, score_box_y, score_box_x + score_box_w, score_box_y + score_box_h, GetColor(10, 10, 30), TRUE);
+        //SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+        //DrawBox(score_box_x, score_box_y, score_box_x + score_box_w, score_box_y + score_box_h, frame_color, FALSE);
 
-    // 通常描画に戻す（念のため）
-    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+        // スコアテキスト
+        DrawFormatStringToHandle(score_box_x - 20, score_box_y + 8, frame_color, font_digital, "TOTAL SCORE");
+        DrawFormatStringToHandle(score_box_x, score_box_y + 40, frame_color, font_digital, "%.0f", total_score);
+
+        // 通常描画に戻す（念のため）
+        SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
 #if _DEBUG
-    DrawFormatString(0, 0, GetColor(255, 255, 255), "se_volume : %d", vo);
+        DrawFormatString(0, 0, GetColor(255, 255, 255), "se_volume : %d", vo);
 
 #endif // _DEBUG
 
-   }
+    }
 
 
     // ==== スコアログ（左下） ====
@@ -426,7 +757,7 @@ void GameMainScene::Draw()
         const auto& log = score_logs[count - 1 - i];
         int draw_y = log_base_y + static_cast<int>(i * line_height + log.y_offset);
 
-       // DrawBox(log_base_x - 10, draw_y - 2, log_base_x + 200, draw_y + 18, GetColor(10, 10, 30), TRUE);
+        // DrawBox(log_base_x - 10, draw_y - 2, log_base_x + 200, draw_y + 18, GetColor(10, 10, 30), TRUE);
         DrawLine(log_base_x - 10, draw_y - 2, log_base_x + 200, draw_y - 2, GetColor(0, 255, 255)); // 上ライン
         DrawFormatStringToHandle(log_base_x, draw_y, GetColor(0, 255, 255), font_digital, "%s", log.text.c_str());
 
@@ -435,8 +766,8 @@ void GameMainScene::Draw()
     // ==== LIFE - STOCK 表示（右上、Digital風＋残機アイコン） ====
     if (player)
     {
-        int life_box_x = D_WIN_MAX_X - 230;  
-        int life_box_y = 80;                 
+        int life_box_x = D_WIN_MAX_X - 230;
+        int life_box_y = 80;
         int life_box_w = 200;
         int life_box_h = 60;
 
@@ -463,7 +794,7 @@ void GameMainScene::Draw()
         }
     }
 
-   // PlaySoundMem(se_charge, DX_PLAYTYPE_BACK);
+    // PlaySoundMem(se_charge, DX_PLAYTYPE_BACK);
 
     if (player)
     {
@@ -529,7 +860,7 @@ void GameMainScene::Draw()
     {
         float rate = player->GetChargeRate(); // 0.0 ～ 1.0
         int gauge_x = D_WIN_MAX_X - 230;
-        int gauge_y = 150; 
+        int gauge_y = 150;
         int gauge_w = 200;
         int gauge_h = 50;
 
@@ -543,7 +874,7 @@ void GameMainScene::Draw()
         int fill_color = player->CanUseSpecial()
             ? GetColor(0, (GetNowCount() % 100 > 50) ? 255 : 100, 255)  // 点滅
             : GetColor(0, 255, 255); // 通常色
-      
+
         DrawBox(bar_x, bar_y, bar_x + bar_w, bar_y + bar_h, GetColor(30, 30, 30), TRUE); // 背景
         DrawBox(bar_x, bar_y, bar_x + static_cast<int>(bar_w * rate), bar_y + bar_h, fill_color, TRUE); // 本体
 
@@ -562,9 +893,9 @@ void GameMainScene::Draw()
     // ==== SPECIAL READY UI（プレイヤー下に真ん中表示） ====
     if (player && player->CanUseSpecial())
     {
-        
+
         Vector2D pos = player->GetLocation();
-        int ui_x = static_cast<int>(pos.x) - 55;  
+        int ui_x = static_cast<int>(pos.x) - 55;
         int ui_y = static_cast<int>(pos.y) + 40;
         int pulse = static_cast<int>(GetNowCount() % 100) > 50 ? 255 : 100;
 
@@ -638,161 +969,18 @@ void GameMainScene::Draw()
         }
     }
 
-
-    if (isPaused)
-    {
-        const int cx = D_WIN_MAX_X / 2;
-        const int cy = D_WIN_MAX_Y / 2 - 20;
-
-        SetDrawBlendMode(DX_BLENDMODE_ALPHA, transparent);
-        DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
-        //DrawBox(400, 200, 880, D_WIN_MAX_Y - 200, GetColor(255, 255, 255), FALSE);
-        SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-
-
-        const char* menuItems[] = {
-            "START GAME",
-            "BACK TITLE",
-                };
-
-        for (int i = 0; i < 2; ++i)
-        {
-            int y = 300 + i * 50;
-            int textWidth = GetDrawStringWidthToHandle(menuItems[i], strlen(menuItems[i]), m_menuFontHandle);
-            int x = (D_WIN_MAX_X - textWidth) / 2;
-
-            if (i == m_selectedIndex)
-            {
-                // =========================
-                // 背景ハイライトバー（画面端まで）
-                // =========================
-                int barHeight = 40;
-                int barAlpha = 120 + (int)(sinf(GetNowCount() / 60.0f) * 50); // パルス
-                SetDrawBlendMode(DX_BLENDMODE_ALPHA, barAlpha);
-                DrawBox(
-                    0, y - 5,
-                    D_WIN_MAX_X, y + barHeight,
-                    GetColor(0, 200, 255), TRUE
-                );
-
-                // =========================
-                // 両端のエッジエフェクト（流れる光）
-                // =========================
-                int edgeWidth = 80;
-                int edgeHeight = 4;
-                int scrollSpeed = 2;
-                int edgeOffset = (GetNowCount() * scrollSpeed) % (D_WIN_MAX_X + edgeWidth * 2);
-
-                // 左から右へ流れる（2個表示してループ感を出す）
-                for (int j = 0; j < 2; ++j)
-                {
-                    int edgeX = edgeOffset - edgeWidth * j;
-                    SetDrawBlendMode(DX_BLENDMODE_ADD, 50);
-                    DrawBox(
-                        edgeX, y + 10,
-                        edgeX + edgeWidth, y + 10 + edgeHeight,
-                        GetColor(200, 255, 255), TRUE
-                    );
-                    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-                }
-
-                // =========================
-                // テキスト（アウトライン＋グロー）
-                // =========================
-                int offsetX = (rand() % 3) - 1;
-                int offsetY = (rand() % 3) - 1;
-
-                DrawStringToHandle(x + offsetX - 1, y + offsetY, menuItems[i], GetColor(0, 0, 0), m_menuFontHandle);
-                DrawStringToHandle(x + offsetX + 1, y + offsetY, menuItems[i], GetColor(0, 0, 0), m_menuFontHandle);
-                DrawStringToHandle(x + offsetX, y + offsetY - 1, menuItems[i], GetColor(0, 0, 0), m_menuFontHandle);
-                DrawStringToHandle(x + offsetX, y + offsetY + 1, menuItems[i], GetColor(0, 0, 0), m_menuFontHandle);
-
-                int glow = (int)((sinf(GetNowCount() / 30.0f) + 1.0f) * 127);
-                DrawStringToHandle(x + offsetX, y + offsetY, menuItems[i], GetColor(100 + glow, 255, 255), m_menuFontHandle);
-            }
-            else
-            {
-                DrawStringToHandle(x, y, menuItems[i], GetColor(180, 180, 180), m_menuFontHandle);
-            }
-        }
-
-
-    }
-
-
-}
-
-
-// 終了時処理（使ったインスタンスの削除とか）
-void GameMainScene::Finalize()
-{
-    if (current_stage) 
-    {
-        current_stage->Finalize();
-        delete current_stage;
-        current_stage = nullptr;
-    }
-    if (current_bgm_handle != -1)
-    {
-        StopSoundMem(current_bgm_handle);
-        current_bgm_handle = -1;
-    }
-    if (font_digital != -1) {
-        DeleteFontToHandle(font_digital);
-        font_digital = -1;
-    }
-    if (font_orbitron != -1) {
-        DeleteFontToHandle(font_orbitron);
-        font_orbitron = -1;
-    }
-
-
-
-}
-
-/// <summary>
-/// 現在のシーン情報
-/// </summary>
-/// <returns>現在はリザルトシーンです</returns>
-eSceneType GameMainScene::GetNowSceneType() const
-{
-	return eSceneType::eGameMain;
-}
-
-
-void GameMainScene::AddScoreLog(const std::string& text)
-{
-    // 新しいログを上に追加（スライド無し）
-    ScoreLog log;
-    log.text = text;
-    log.y_offset = 0.0f;
-    score_logs.push_back(log);
-
-    // 最大10行保持 → 古いものから削除
-    if (score_logs.size() >= 10)
-    {
-        score_logs.erase(score_logs.begin()); // 先頭（古い）を削除
-    }
-
-    // 既存ログはスライド開始（下に押し出される）
-    for (auto& log : score_logs)
-    {
-        log.y_offset = -20.0f;  // 毎フレームで補正される
-    }
-
-
 }
 
 void GameMainScene::InputSePlay()
 {
     InputManager* input = Singleton<InputManager>::GetInstance();
     ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
+    AnimationManager* am = Singleton<AnimationManager>::GetInstance();
     int se = NULL;
 
     if (input->GetKeyDown(KEY_INPUT_1))
     {
-        se = rm->GetSounds("Resource/sound/se/effect/audiostock_1133382.mp3");
-        PlaySoundMem(se, DX_PLAYTYPE_LOOP);
+        am->PlaySE(SE_NAME::Shot);
     }
     if (input->GetKeyDown(KEY_INPUT_2))
     {

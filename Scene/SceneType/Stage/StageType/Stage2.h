@@ -33,9 +33,11 @@ public:
     void Update(float delta) override;
     void Draw() override;
     bool IsFinished() override;
+    void SetFinished() override;              // ステージが終了したかどうか
     bool IsClear() override;
     bool IsOver() override;
     StageBase* GetNextStage(Player* player) override;
+    StageBase* GetNowStage() override;
 
 private:
     bool finished = false;

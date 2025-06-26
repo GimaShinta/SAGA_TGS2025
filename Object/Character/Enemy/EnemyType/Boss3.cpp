@@ -381,6 +381,7 @@ void Boss3::Draw(const Vector2D& screen_offset) const
 		y + bar_height + 2.0f,
 		GetColor(255, 255, 0), TRUE // â©êFÇ»Ç«ñ⁄óßÇ¬êF
 	);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
 }
 
@@ -399,13 +400,19 @@ void Boss3::OnHitCollision(GameObjectBase* hit_object)
 			{
 				if (is_weakness == true)
 				{
-					hp -= 30;
+					hp -= 50;
 				}
 				else
 				{
 					hp -= 10;
 				}
 				on_hit = true;
+
+				if (GetRand(70) == 1)
+				{
+					DropItems();
+				}
+
 			}
 			else
 			{
@@ -421,14 +428,22 @@ void Boss3::OnHitCollision(GameObjectBase* hit_object)
 		{
 			if (is_weakness == true)
 			{
-				hp -= 30;
+				hp -= 50;
 			}
 			else
 			{
 				hp -= 10;
 			}
 			beam_damage_timer = 0;
+
+			if (GetRand(70) == 1)
+			{
+				DropItems();
+			}
+
 		}
+
+
 	}
 }
 
@@ -440,10 +455,21 @@ void Boss3::Movement(float delta_second)
 {
 	move_time += delta_second;
 
-	const float float_amplitude_y = 30.0f;
-	const float float_speed_y = 3.0f;
-	const float float_amplitude_x = 20.0f;
-	const float float_speed_x = 3.0f;
+	float float_amplitude_y = 30.0f;
+	float float_speed_y = 3.0f;
+	float float_amplitude_x = 20.0f;
+	float float_speed_x = 3.0f;
+	
+	if (is_crashing == true)
+	{
+		float_amplitude_y = 30.0f;
+		float_speed_y = 1.0f;
+		float_amplitude_x = 20.0f;
+		float_speed_x = 1.0f;
+	}
+
+	
+
 	Vector2D float_offset;
 	float_offset.y = sinf(move_time * float_speed_y) * float_amplitude_y;
 	float_offset.x = cosf(move_time * float_speed_x) * float_amplitude_x;

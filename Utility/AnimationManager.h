@@ -15,6 +15,14 @@ enum EffectName
 	eExprotion3,
 };
 
+enum class SE_NAME
+{
+	Shot,
+	Reaction,
+	Explosion,
+	// 必要に応じて追加
+};
+
 // AnimationID を int型と同等にする
 using AnimationID = int;
 
@@ -45,13 +53,6 @@ private:
 			: id(id_), image_handles(handles), position(pos), frame_time(frame_time_sec), loop(loop_flag) {}
 	};
 
-	enum class SE_NAME
-	{
-		Shot,
-		Reaction,
-		Explosion,
-		// 必要に応じて追加
-	};
 
 
 public:

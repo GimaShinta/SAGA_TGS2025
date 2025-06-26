@@ -107,9 +107,11 @@ public:
 	void Update(float delta) override;
 	void Draw() override;
 	bool IsFinished() override;
+	void SetFinished() override;
 	bool IsClear() override;
 	bool IsOver() override;
 	StageBase* GetNextStage(Player* player) override;
+	StageBase* GetNowStage() override;
 
 private:
 	void DisplayWarning(float delta_second);
@@ -169,6 +171,11 @@ private:
 	float post_result_wait_timer = 0.0f;  // ←これを追加
 	float delta_draw = 0.0f;
 
+	bool result_fadeout_started = false;
+	float result_fadeout_timer = 0.0f;
+	bool result_ended = false;
+
+	const float black_fade_duration = 60.0f; // 60フレーム（＝1秒）程度
 
 	template <typename T>
 	T my_max(const T& a, const T& b)

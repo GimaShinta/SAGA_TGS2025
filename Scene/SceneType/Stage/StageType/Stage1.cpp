@@ -65,6 +65,8 @@ void Stage1::Initialize()
     font_orbitron = CreateFontToHandle("Orbitron", 22, 6, DX_FONTTYPE_ANTIALIASING);
     font_digital = CreateFontToHandle("メイリオ", 28, 6, DX_FONTTYPE_ANTIALIASING);
 
+    stage_id = StageID::Stage1;
+
    // ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
    // bg_image = rm->GetImages("Resource/Image/BackGround/Main/Stage1/bg_01.png")[0];
 }
@@ -544,12 +546,16 @@ void Stage1::Draw()
         
 
     }
-
 }
 
 bool Stage1::IsFinished()
 {
     return finished;
+}
+
+void Stage1::SetFinished()
+{
+    finished = true;
 }
 
 bool Stage1::IsClear()
@@ -564,7 +570,12 @@ bool Stage1::IsOver()
 
 StageBase* Stage1::GetNextStage(Player* player)
 {
-    return new Stage3(player); // 次のステージへ
+    return new Stage2(player); // 次のステージへ
+}
+
+StageBase* Stage1::GetNowStage()
+{
+    return this;
 }
 
 //void Stage1::EnemyAppearance(float delta)

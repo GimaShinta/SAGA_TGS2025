@@ -47,6 +47,33 @@ private:
 
 	int vo = 70;
 
+	bool black_fade_started = false;
+	float black_fade_timer = 0.0f;
+	float black_in_timer = 0.0f;
+	float black_in_timer2 = 0.0f;
+	int alpha = 0;
+	// メンバ変数など
+	float band_center_y = 360;          // 画面中央の基準位置
+	float band_half_height = 0.0f;      // 帯の半分の高さ（0から最大まで変化）
+	const float band_max_half_height = 60.0f; // 帯の最大半分の高さ（つまり高さ120）
+	float band_expand_speed = 200.0f;   // 帯が広がる速度(px/s)
+	int font_warning;
+	float warning_text_x = 1280.0f; // 初期は右端外
+	float warning_timer = 0.0f;
+	float warning_scroll_speed = 700.0f; // px/秒
+	float warning_duration = 5.0f;
+
+	bool is_none = false;
+
+	enum class WarningState {
+		None,       // 無効
+		Expanding,  // 帯が広がっていく
+		Displaying, // 表示中（テキストスクロール）
+		Shrinking   // 帯が縮む
+	};
+
+	WarningState warning_state = WarningState::None;
+
 public:
 	GameMainScene();
 	virtual ~GameMainScene();
@@ -72,6 +99,8 @@ public:
 
 	// スコアログ追加関数
 	void AddScoreLog(const std::string& text);
+
+	void DrawUI();
 
 	void InputSePlay();
 };

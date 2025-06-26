@@ -29,6 +29,8 @@ void Stage2::Initialize()
     enemy_spawn_timer = 0.0f;
     zako5_spawned = false;
 
+    stage_id = StageID::Stage2;
+
 }
 
 void Stage2::Finalize()
@@ -217,6 +219,10 @@ bool Stage2::IsFinished()
 {
     return finished;
 }
+void Stage2::SetFinished()
+{
+    finished = true;
+}
 bool Stage2::IsClear()
 {
     return is_clear;
@@ -229,6 +235,11 @@ bool Stage2::IsOver()
 StageBase* Stage2::GetNextStage(Player* player)
 {
     return new Stage3(player);
+}
+
+StageBase* Stage2::GetNowStage()
+{
+    return this;
 }
 
 void Stage2::EnemyAppearance(float delta)

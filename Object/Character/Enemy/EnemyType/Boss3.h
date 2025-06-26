@@ -65,11 +65,11 @@ private:
 
 	int explosion_index = 0;
 	float explosion_timer = 0.0f;
-	const float explosion_interval = 0.3f; // 爆発の間隔（秒）
-	const int max_explosions = 20;          // 爆発の最大数
+	const float explosion_interval = 0.4f; // 爆発の間隔（秒）
+	const int max_explosions = 25;          // 爆発の最大数
 	bool explosions_started = false;       // 爆発処理を開始したかどうか
-	Vector2D crash_velocity = Vector2D(100.0f, -200.0f); // 初速度（右へ + 上に少し浮いてから落下）
-	float gravity = 400.0f; // 重力加速度（Y方向）
+	Vector2D crash_velocity = Vector2D(100.0f, -100.0f); // 初速度（右へ + 上に少し浮いてから落下）
+	float gravity = 50.0f; // 重力加速度（Y方向）
 
 public:
 	Boss3();

@@ -3,6 +3,15 @@
 #include "../../../Object/Character/Player/Player.h"
 #include "../../../Utility/ProjectConfig.h"
 
+// StageBase.h
+enum class StageID {
+    Stage1,
+    Stage2,
+    Stage3,
+    Stage4,
+    Unknown
+};
+
 class StageBase {
 protected:
     bool is_clear = false;
@@ -18,9 +27,16 @@ public:
     virtual void Draw() = 0;
     virtual void Finalize() = 0;
     virtual bool IsFinished() = 0;
+    virtual void SetFinished() = 0;
     virtual bool IsClear() = 0;
     virtual bool IsOver() = 0;
     virtual StageBase* GetNextStage(Player* player) = 0;
+    virtual StageBase* GetNowStage() = 0;
+
+protected:
+    StageID stage_id;
+public:
+    StageID GetStageID() const { return stage_id; }
 
 protected:
     class Player* player; // 共有するプレイヤー情報
