@@ -811,7 +811,7 @@ void Stage3::UpdateGameStatus(float delta)
         is_over = true;
     }
 
-    if (is_clear == true || is_over == true)
+    if (is_over == true)
     {
         scene_timer += delta;
         gameover_timer += delta;
@@ -822,7 +822,7 @@ void Stage3::UpdateGameStatus(float delta)
             gameover_timer = 0.0f;
         }
         
-        if (scene_timer >= 100.0f)
+        if (scene_timer >= 5.0f)
         {
             finished = true;
         }

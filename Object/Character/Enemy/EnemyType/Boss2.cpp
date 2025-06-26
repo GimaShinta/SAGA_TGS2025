@@ -23,7 +23,7 @@ void Boss2::Initialize()
 	enemy_type = ENE_BOSS2;
 	z_layer = 1;
 	box_size = 30;
-	hp = 1000;
+	hp = 20000;
 
 	// 攻撃パターンの設定
 	attack_pattrn_num = { 4, 5, 6, 7 };
@@ -479,23 +479,26 @@ void Boss2::OnHitCollision(GameObjectBase* hit_object)
 	}
 	if (hit_object->GetCollision().object_type == eObjectType::eBeam)
 	{
-		beam_damage_timer += delta;
-
-		if (beam_damage_timer >= 0.05f)
+		if (generate2 == true)
 		{
-			if (is_weakness == true)
-			{
-				hp -= 50;
-			}
-			else
-			{
-				hp -= 10;
-			}
-			beam_damage_timer = 0;
+			beam_damage_timer += delta;
 
-			if (GetRand(70) == 1)
+			if (beam_damage_timer >= 0.05f)
 			{
-				DropItems();
+				if (is_weakness == true)
+				{
+					hp -= 50;
+				}
+				else
+				{
+					hp -= 10;
+				}
+				beam_damage_timer = 0;
+
+				if (GetRand(70) == 1)
+				{
+					DropItems();
+				}
 			}
 		}
 	}
@@ -766,19 +769,23 @@ void Boss2::DrawBoss2(const Vector2D position) const
 
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255); // アルファブレンドON
 
-	for (int i = 0; i < 5; ++i) {
-		if (!ripples[i].active) continue;
+	if (is_crashing == false)
+	{
+		for (int i = 0; i < 5; ++i) {
+			if (!ripples[i].active) continue;
 
-		float t = ripples[i].timer / 0.5f; // 0.0～1.0
-		float radius = Lerp(0.0f, 80.0f, t); // 半径0→80に拡大
-		int alpha = static_cast<int>(Lerp(255.0f, 200.0f, t)); // 不透明→透明へ
+			float t = ripples[i].timer / 0.5f; // 0.0～1.0
+			float radius = Lerp(0.0f, 80.0f, t); // 半径0→80に拡大
+			int alpha = static_cast<int>(Lerp(255.0f, 200.0f, t)); // 不透明→透明へ
 
-		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
-		DrawCircle(static_cast<int>(ripples[i].pos.x),
-			static_cast<int>(ripples[i].pos.y),
-			static_cast<int>(radius),
-			GetColor(150, 255, 150),
-			FALSE);
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+			DrawCircle(static_cast<int>(ripples[i].pos.x),
+				static_cast<int>(ripples[i].pos.y),
+				static_cast<int>(radius),
+				GetColor(150, 255, 150),
+				FALSE);
+		}
+
 	}
 
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0); // ブレンド無効化

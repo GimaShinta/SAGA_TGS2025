@@ -269,6 +269,11 @@ void Player::OnHitCollision(GameObjectBase* hit_object)
 	{
 		is_shield = true;
 	}
+	if (hit_object->GetCollision().object_type == eObjectType::eMaxCharge)
+	{
+		charge = charge_max;
+		charge_ready = true;
+	}
 }
 
 /// <summary>
@@ -416,21 +421,9 @@ void Player::Shot(float delta_second)
 		shot_timer = SHOT_INTERVAL; 
 	}
 
-	//// Bを押したらビーム発射
-	//if ((input->GetKeyDown(KEY_INPUT_B) || input->GetButtonDown(XINPUT_BUTTON_B)) &&
-	//	CanUseSpecial())  // チャージ完了時のみ
-	//{
-	//	if (stop == false)
-	//	{
-	//		beam_on = true;
-	//		stop = true;
-	//		beam_timer = 0.0f;
-	//		UseSpecial();  // ゲージ消費
-	//	}
-	//}
-	
 	// Bを押したらビーム発射
-	if ((input->GetKeyDown(KEY_INPUT_B) || input->GetButtonDown(XINPUT_BUTTON_B)))  // チャージ完了時のみ
+	if ((input->GetKeyDown(KEY_INPUT_B) || input->GetButtonDown(XINPUT_BUTTON_B)) &&
+		CanUseSpecial())  // チャージ完了時のみ
 	{
 		if (stop == false)
 		{
@@ -440,6 +433,18 @@ void Player::Shot(float delta_second)
 			UseSpecial();  // ゲージ消費
 		}
 	}
+	
+	//// Bを押したらビーム発射
+	//if ((input->GetKeyDown(KEY_INPUT_B) || input->GetButtonDown(XINPUT_BUTTON_B)))  // チャージ完了時のみ
+	//{
+	//	if (stop == false)
+	//	{
+	//		beam_on = true;
+	//		stop = true;
+	//		beam_timer = 0.0f;
+	//		UseSpecial();  // ゲージ消費
+	//	}
+	//}
 
 	// ５秒経ったらビームの再起
 	if (beam_timer >= 5.0f)
