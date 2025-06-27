@@ -134,7 +134,7 @@ public:
         if (glitch_started && !glitch_done)
         {
             glitch_timer += delta;
-            if (glitch_timer >= 2.0f)  // 2•bŒã‚ÉŠ®—¹
+            if (glitch_timer >= 3.0f)  // 2•bŒã‚ÉŠ®—¹
             {
                 glitch_done = true;
             }

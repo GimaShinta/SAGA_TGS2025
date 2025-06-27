@@ -19,4 +19,7 @@ public:
 	std::vector<float> GetScoreData() const;
 	void SetScoreData(float score);
 
+	void Reset();
+
+
 };

@@ -1,5 +1,6 @@
 #pragma once
 #include "../SceneBase.h"
+#include "../../Utility/ScoreData.h"
 class TitleScene : public SceneBase
 {
 private:

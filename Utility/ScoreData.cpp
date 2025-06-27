@@ -17,3 +17,10 @@ void ScoreData::SetScoreData(float score)
 {
 	score_data.push_back(score);
 }
+
+void ScoreData::Reset()
+{
+	score_data.clear();
+	player_stock = 0;
+}
+
