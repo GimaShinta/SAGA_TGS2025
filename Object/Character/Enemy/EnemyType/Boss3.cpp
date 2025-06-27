@@ -1379,7 +1379,7 @@ void Boss3::Pattrn7_2(float fan_angle_range, float bullet_speed, float fan_inter
 			float rad = angle * DX_PI / 180.0f;
 			Vector2D velocity(cos(rad) * bullet_speed, sin(rad) * bullet_speed);
 
-			e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x - 170.0f, generate_location.y - 10.0f));
+			e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x - 140.0f, generate_location.y + 30.0f));
 			e_shot4->SetVelocity(velocity);
 		}
 	}
