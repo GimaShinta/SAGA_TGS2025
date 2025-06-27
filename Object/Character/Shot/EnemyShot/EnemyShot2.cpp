@@ -30,7 +30,7 @@ void EnemyShot2::Initialize()
 	image = rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/standard/bullet73.png")[0];
 	se = rm->GetSounds("Resource/sound/se/shot/shot_01.mp3");
 	ChangeVolumeSoundMem(255 * 90 / 100, se);
-	PlaySoundMem(se, DX_PLAYTYPE_BACK);
+	
 
 }
 
@@ -88,6 +88,7 @@ void EnemyShot2::Draw(const Vector2D& screen_offset) const
 	//DrawTriangle(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, color, TRUE);
 	//DrawTriangle(p1.x, p1.y, p3.x, p3.y, p4.x, p4.y, color, TRUE);
 
+	PlaySoundMem(se, DX_PLAYTYPE_BACK);
 	DrawRotaGraph(location.x, location.y, 1.9f, angle, image, TRUE);
 
 }

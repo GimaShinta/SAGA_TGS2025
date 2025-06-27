@@ -90,6 +90,7 @@ private:
 	bool ripple_start = false; // 波紋出現を開始するフラグ
 
 	int second_attack = 0;
+	int se[3];
 
 public:
 	Boss2();

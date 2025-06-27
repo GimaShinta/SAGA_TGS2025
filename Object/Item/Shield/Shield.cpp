@@ -1,5 +1,6 @@
 #include "Shield.h"
 #include "../../../Utility/InputManager.h"
+#include "../../../Utility/ScoreData.h"
 
 void Shield::Initialize()
 {
@@ -18,8 +19,7 @@ void Shield::Initialize()
     ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
     images = rm->GetImages("Resource/Image/Object/Item/PowerUp/anime_item32.png", 12, 6, 2, 32, 32);
     image = images[0];
-
-    se = rm->GetSounds("Resource/sound/se/effect/shield1.mp3");
+    se = rm->GetSounds("Resource/sound/se/effect/audiostock_1133382.mp3");
     ChangeVolumeSoundMem(255 * 100 / 100, se);
 }
 
@@ -96,6 +96,8 @@ void Shield::OnHitCollision(GameObjectBase* hit_object)
 {
     if (hit_object->GetCollision().object_type == eObjectType::ePlayer)
     {
+        PlaySoundMem(se, DX_PLAYTYPE_BACK);
+        Singleton<ScoreData>::GetInstance()->AddScore(GetRand(100) + 50);
         this->SetDestroy();
     }
 }

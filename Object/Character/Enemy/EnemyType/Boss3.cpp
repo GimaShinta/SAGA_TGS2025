@@ -59,6 +59,16 @@ void Boss3::Initialize()
 	//boss3_anim1 = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_03/anime01.png", 8, 8, 1, 32, 24);
 	//boss3_image[10] = boss3_anim1[0];
 
+	se[0] = rm->GetSounds("Resource/sound/se/battle/bakuhatu_b.mp3");
+	se[1] = rm->GetSounds("Resource/sound/se/boss_se/boss_kill.mp3");
+	se[2] = rm->GetSounds("Resource/sound/se/boss_se/bakuhatu_end.mp3");
+	se[3] = rm->GetSounds("Resource/sound/se/effect/audiostock_1553653.mp3");
+
+	ChangeVolumeSoundMem(255 * 100 / 100, se[0]);
+	ChangeVolumeSoundMem(255 * 100 / 100, se[1]);
+	ChangeVolumeSoundMem(255 * 100 / 100, se[2]);
+	ChangeVolumeSoundMem(255 * 100 / 100, se[3]);
+
 	boss3_jet = rm->GetImages("Resource/Image/Effect/exhaust_03_spritesheet.png", 24, 8, 3, 128, 200);
 	jet = boss3_jet[0];
 
@@ -157,6 +167,8 @@ void Boss3::Update(float delta_second)
 			explosions_started = true;
 			explosion_index = 0;
 			explosion_timer = 0.0f;
+			PlaySoundMem(se[0], DX_PLAYTYPE_BACK);
+			PlaySoundMem(se[1], DX_PLAYTYPE_BACK);
 
 			// ‰‰ñ‚Ì”š”­‚ğ‘¦¶¬
 			float offset_x = static_cast<float>(GetRand(200) - 100);
@@ -182,7 +194,8 @@ void Boss3::Update(float delta_second)
 			// •¡””š”­iÅ‘å”•ŠÔŠuj
 			if (explosion_index < max_explosions && explosion_timer >= explosion_interval) {
 				explosion_timer = 0.0f;
-
+				PlaySoundMem(se[0], DX_PLAYTYPE_BACK);
+				PlaySoundMem(se[1], DX_PLAYTYPE_BACK);
 				float offset_x = static_cast<float>(GetRand(200) - 100);
 				float offset_y = static_cast<float>(GetRand(200) - 100);
 				Vector2D random_pos = location + Vector2D(offset_x, offset_y);
@@ -201,6 +214,8 @@ void Boss3::Update(float delta_second)
 
 			// ‘S”š”­Š®—¹Œã‚É‘å”š”­•íœ
 			if (explosion_index >= max_explosions) {
+				PlaySoundMem(se[1], DX_PLAYTYPE_BACK);
+				PlaySoundMem(se[2], DX_PLAYTYPE_BACK);
 				int id = AnimationManager::GetInstance()->PlayerAnimation(
 					EffectName::eExprotion2,
 					location,
@@ -1843,7 +1858,7 @@ void Boss3::Pattrn11(float offsets_x)
 	if (!beam_on)
 	{
 		GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
-
+		PlaySoundMem(se[3], DX_PLAYTYPE_BACK);
 		b = objm->CreateObject<EnemyBeam1>(
 			Vector2D(
 				location.x + offsets_x,

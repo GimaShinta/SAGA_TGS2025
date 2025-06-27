@@ -239,7 +239,7 @@ void RankingScene::Draw()
     else
     {
         DrawNeonText(cx - 260, msg_y,
-            "Press A to return     Y to reset",
+            "B : Title",
             GetColor(100, 255, 255), GetColor(0, 150, 255), 150);
     }
 
