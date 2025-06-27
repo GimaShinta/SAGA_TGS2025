@@ -13,7 +13,7 @@ Stage2Boss::~Stage2Boss()
 
 void Stage2Boss::Initialize()
 {
-    hp = 10000;
+    hp = 8000;
     box_size = 50;
     z_layer = 2;
     enemy_type = ENE_ZAKO1;
@@ -23,7 +23,7 @@ void Stage2Boss::Initialize()
     collision.hit_object_type.push_back(eObjectType::eShot);
     collision.hit_object_type.push_back(eObjectType::eBeam);
 
-    location = { 640.0f, -200.0f };  // ã‚©‚ç“oê
+    location = { 640.0f, -200.0f };
     velocity = { 0.0f, 0.0f };
     pattern = Stage2BossPattern::Entrance;
     pattern_timer = 0.0f;
@@ -89,14 +89,14 @@ void Stage2Boss::Update(float delta_second)
             velocity = { 0, 0 };
             wait_after_entry_timer += delta_second;
 
-            if (wait_after_entry_timer >= 2.0f) // 2•b’âŽ~Œã‚É‰ñ“]ŠJŽn
+            if (wait_after_entry_timer >= 2.0f)
             {
                 for (auto& part : rotating_parts)
                 {
-                    part->SetRotationDirection(1.0f); // ŽžŒv‰ñ‚è
+                    part->SetRotationDirection(1.0f);
                 }
                 pattern = Stage2BossPattern::RotateStart;
-                wait_after_entry_timer = 0.0f; // ƒ^ƒCƒ}[ƒŠƒZƒbƒg
+                wait_after_entry_timer = 0.0f;
             }
             break;
         }
@@ -104,7 +104,6 @@ void Stage2Boss::Update(float delta_second)
         {
             wait_after_entry_timer += delta_second;
 
-            // UŒ‚ŠJŽn‚Ü‚Å‚³‚ç‚É2•b‘Ò‚Â
             if (wait_after_entry_timer >= 2.0f)
             {
                 pattern = Stage2BossPattern::AttackPhase;
@@ -112,8 +111,6 @@ void Stage2Boss::Update(float delta_second)
             }
             break;
         }
-
-
         case Stage2BossPattern::AttackPhase:
         {
             life_timer += delta_second;
@@ -185,8 +182,14 @@ void Stage2Boss::Update(float delta_second)
                 is_alive = false;
                 is_destroy = true;
 
+                // š ‰ñ“]ƒp[ƒc‚ð‘S‚Ä”j‰ó
+                for (auto& part : rotating_parts)
+                {
+                    part->SetDestroy();
+                }
+
                 auto* manager = Singleton<AnimationManager>::GetInstance();
-                int anim_id = manager->PlayerAnimation(EffectName::eExprotion, location, 0.05f, false);
+                anim_id = manager->PlayerAnimation(EffectName::eExprotion2, location, 0.035f, false);
                 manager->SetScale(anim_id, 1.0f);
                 Singleton<ScoreData>::GetInstance()->AddScore(GetRand(3000)+ 500);
             }
@@ -262,8 +265,6 @@ void Stage2Boss::Draw(const Vector2D& screen_offset) const
     {
         DrawRotaGraph(location.x, location.y, 4.0f, 0.0f, image, TRUE);
     }
-
-    //DrawFormatString(static_cast<int>(location.x - 30), static_cast<int>(location.y - 60), GetColor(255, 0, 0), "HP: %d", hp);
 }
 
 void Stage2Boss::Finalize()
@@ -277,6 +278,12 @@ void Stage2Boss::TakeDamage(int amount)
         is_alive = false;
         is_destroy = true;
 
+        // š ‰ñ“]ƒp[ƒc‚ð‘S‚Ä”j‰ó
+        for (auto& part : rotating_parts)
+        {
+            part->SetDestroy();
+        }
+
         auto* manager = Singleton<AnimationManager>::GetInstance();
         int anim_id = manager->PlayerAnimation(EffectName::eExprotion, location, 0.05f, false);
         manager->SetScale(anim_id, 1.0f);
@@ -287,8 +294,6 @@ float Stage2Boss::GetTransformProgress() const
 {
     return 0.0f;
 }
-
-
 
 void Stage2Boss::Shot(float delta_second)
 {

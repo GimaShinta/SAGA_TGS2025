@@ -78,6 +78,19 @@ void Stage2::Update(float delta)
         }
     }
 
+    // 強制的にBossBattleにするテスト
+    if (boss != nullptr)
+    {
+        phase = Stage2Phase::BossBattle;
+    }
+
+
+    // ボス撃破判定（BossBattle中のみ）
+    if (phase == Stage2Phase::BossBattle && boss != nullptr && !boss->GetIsAlive())
+    {
+        boss->SetDestroy();  // 消す場合
+        is_clear = true;
+    }
 
     stage_timer += delta;
     EnemyAppearance(delta);
@@ -257,14 +270,14 @@ void Stage2::Draw()
 
     DrawFormatString(0, 20, GetColor(255, 255, 255), "Time: %.1f", stage_timer);
 
-    if (is_clear)
+  /*  if (is_clear)
     {
         DrawString((D_WIN_MAX_X / 2) - 40, (D_WIN_MAX_Y / 2) - 100, "NEXT STAGE...", GetColor(255, 255, 255));
     }
     else if (is_over)
     {
         DrawString((D_WIN_MAX_X / 2) - 60, (D_WIN_MAX_Y / 2) - 100, "ゲームオーバー", GetColor(255, 255, 255));
-    }
+    }*/
 
 
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
@@ -338,7 +351,7 @@ void Stage2::EnemyAppearance(float delta)
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
 
     // --- 0～10秒：お山フォーメーション（3レーン、重複抑制） ---
-    if (stage_timer < 10.0f)
+    if (stage_timer < 20.0f)
     {
         static int previous_lane = -1;  // 前回のレーン記録用
 
@@ -381,9 +394,7 @@ void Stage2::EnemyAppearance(float delta)
     }
 
     // --- 10?15秒：右下がり ＼ の階段状に3体を順番に出現（1回限り） ---
-    static bool spawned_stair_done = false;
-    static int stair_index = 0;
-    static float stair_timer = 0.0f;
+   
 
     if (stage_timer >= 10.0f && stage_timer < 15.0f && !spawned_stair_done)
     {
@@ -404,9 +415,12 @@ void Stage2::EnemyAppearance(float delta)
             float y = base_y + stair_index * offset_y;
 
             Zako* zako = objm->CreateObject<Zako>(Vector2D(x, y));
-            zako->SetPattern(ZakoPattern::LeftMove);  // 左に進む
-            zako->SetPlayer(player);
-            enemy_list.push_back(zako);
+            if (zako != nullptr)
+            {
+                zako->SetPattern(ZakoPattern::LeftMove);
+                zako->SetPlayer(player);
+                enemy_list.push_back(zako);
+            }
 
             stair_index++;
         }
@@ -418,9 +432,7 @@ void Stage2::EnemyAppearance(float delta)
     }
 
     // --- 15?20秒：右上がり ／ の階段状に3体を順番に出現（1回限り） ---
-    static bool spawned_slash_done = false;
-    static int slash_index = 0;
-    static float slash_timer = 0.0f;
+    
 
     if (stage_timer >= 15.0f && stage_timer < 20.0f && !spawned_slash_done)
     {
@@ -503,7 +515,7 @@ void Stage2::EnemyAppearance(float delta)
     }
 
     // --- 60～110秒：ボス出現（1回のみ） ---
-    static bool stage2boss_spawned = false;
+   
     if (!stage2boss_spawned && stage_timer >= 60.0f)
     {
         stage2boss_spawned = true;

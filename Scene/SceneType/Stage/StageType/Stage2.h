@@ -3,6 +3,7 @@
 #include "../../../../Object/Character/Player/Player.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako1.h"
 #include "../../../../Object/Character/Enemy/EnemyType/Zako5.h"
+#include "../../../../Object/GameObjectBase.h"  // ← 追加
 
 class Stage2 : public StageBase
 {
@@ -14,6 +15,7 @@ private:
     class Zako* zako;
     class Stage2Boss* boss;
     std::vector<EnemyBase*> enemy_list;
+    std::vector<GameObjectBase*> extra_destroy_list; // ボスの回転パーツなど
 
     float stage_timer = 0.0f;
     float enemy_spawn_timer = 0.0f;
@@ -38,19 +40,17 @@ private:
     bool is_player_dead = false;
     float player_death_timer = 0.0f;
 
-
     // ----------- 演出用変数 ----------
     enum class Stage2Phase
     {
         Normal,
         Warning,
-        BossBump1, // ←追加
-        BossBump2, // ←追加
-        BossBump3, // ←追加
+        BossBump1,
+        BossBump2,
+        BossBump3,
         BossDescending,
         BossBattle
     };
-
 
     Stage2Phase phase = Stage2Phase::Normal;
     float warning_timer = 0.0f;
@@ -58,6 +58,15 @@ private:
 
     bool is_brend = false;
     int flash_counter = 0;
+
+    // Stage2.h の private 内
+    bool spawned_stair_done = false;
+    bool spawned_slash_done = false;
+    int stair_index = 0;
+    int slash_index = 0;
+    float stair_timer = 0.0f;
+    float slash_timer = 0.0f;
+    bool stage2boss_spawned = false;
 
 public:
     Stage2(Player* player);
@@ -68,7 +77,7 @@ public:
     void Update(float delta) override;
     void Draw() override;
     bool IsFinished() override;
-    void SetFinished() override;              // ステージが終了したかどうか
+    void SetFinished() override;
     bool IsClear() override;
     bool IsOver() override;
     void SetLocation(const Vector2D& pos)
@@ -82,7 +91,4 @@ public:
 private:
     void EnemyAppearance(float delta);
     void DrawScrollBackground() const override;
-
-    std::vector<GameObjectBase*> extra_destroy_list;  // ← GameObjectManager 管理の補助用
-
 };
