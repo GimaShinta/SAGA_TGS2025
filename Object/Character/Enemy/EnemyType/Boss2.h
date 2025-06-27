@@ -88,6 +88,9 @@ private:
 	float ripple_spawn_timer = 0.0f;
 	int ripple_spawn_count = 0;
 	bool ripple_start = false; // 波紋出現を開始するフラグ
+
+	int second_attack = 0;
+
 public:
 	Boss2();
 	~Boss2();
@@ -150,7 +153,7 @@ public:
 	//{
 	//	return a + (b - a) * t;
 	//}
-
+	int ripple_attack_pattrn = 0;
 	bool GetGenerate() const;
 	bool GetIsCrashing() const;
 	bool IsBoss() const override { return true; }

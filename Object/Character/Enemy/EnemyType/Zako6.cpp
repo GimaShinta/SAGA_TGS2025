@@ -155,7 +155,7 @@ void Zako6::Update(float delta_second)
             location.x = base_location.x + sinf(float_timer * 1.5f) * 10.0f;
             location.y = base_location.y + sinf(float_timer * 2.0f) * 5.0f;
 
-            if (float_timer >= 5.0f) {
+            if (float_timer >= 2.0f) {
                 state = ZakoState::Leaving;
                 float_timer = 0.0f;
             }
@@ -214,7 +214,7 @@ void Zako6::Update(float delta_second)
             location.x = base_location.x + sinf(float_timer * 1.5f) * 10.0f;
             location.y = base_location.y + sinf(float_timer * 2.0f) * 5.0f;
 
-            if (float_timer >= 5.0f) {
+            if (float_timer >= 2.0f) {
                 state = ZakoState::Leaving;
                 float_timer = 0.0f;
             }
@@ -232,7 +232,7 @@ void Zako6::Update(float delta_second)
 }
 
     // oŒ»’†‚Í–³“GA•‚—Vó‘Ô‚É‚È‚Á‚½‚ç“–‚½‚è”»’èON
-    if (state == ZakoState::Floating) 
+    if (state == ZakoState::Floating || state == ZakoState::Leaving) 
     {
         collision.is_blocking = true;
         collision.object_type = eObjectType::eEnemy;
@@ -255,7 +255,7 @@ void Zako6::Update(float delta_second)
         anim_id = manager->PlayerAnimation(EffectName::eExprotion2, location, 0.035f, false);
         manager->SetScale(anim_id, 0.5f);
 
-        Singleton<ScoreData>::GetInstance()->SetScoreData(100);
+        Singleton<ScoreData>::GetInstance()->SetScoreData(500);
     }
 
     std::vector<int> animation_num;

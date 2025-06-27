@@ -263,7 +263,7 @@ void Stage2Boss::Draw(const Vector2D& screen_offset) const
         DrawRotaGraph(location.x, location.y, 4.0f, 0.0f, image, TRUE);
     }
 
-    DrawFormatString(static_cast<int>(location.x - 30), static_cast<int>(location.y - 60), GetColor(255, 0, 0), "HP: %d", hp);
+    //DrawFormatString(static_cast<int>(location.x - 30), static_cast<int>(location.y - 60), GetColor(255, 0, 0), "HP: %d", hp);
 }
 
 void Stage2Boss::Finalize()

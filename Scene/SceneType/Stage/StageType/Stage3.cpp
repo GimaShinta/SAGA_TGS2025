@@ -554,8 +554,60 @@ void Stage3::EnemyAppearance(float delta)
 
     if (stage_timer < 5.0f)
     {
-        SpawnBossAndItems();
+        //SpawnBossAndItems();
 
+        if (!is_zako7_group_spawned)
+        {
+            //const float base_y = -50.0f;
+            //const float center_y = 320.0f;         // 中央基準（少し上に変更して階段の効果を出す）
+            //const float delay_step = 0.3f;
+            //const float step_y = 50.0f;            // 1段あたりのY段差（好きな値に調整可）
+
+            //const float left_start_x = 490.0f;
+            //const float right_start_x = 790.0f;
+            //const float spacing_x = 30.0f;
+
+            //// 左に3体（→中央→左上）
+            //for (int i = 0; i < 3; ++i)
+            //{
+            //    float x = left_start_x + spacing_x * i;
+            //    float delay = 1.0f + delay_step * i;
+            //    float target_y = center_y + i * step_y;  // ← 階段状に下へ
+
+            //    auto zako = objm->CreateObject<Zako6>(Vector2D(x, base_y));
+            //    zako->SetMode(ZakoMode::Zako7);
+            //    zako->SetAppearParams(Vector2D(x, base_y), Vector2D(x, target_y), delay, true);
+            //    zako->SetPlayer(player);
+            //}
+
+            //// 右に3体（→中央→右上）
+            //for (int i = 0; i < 3; ++i)
+            //{
+            //    float x = right_start_x - spacing_x * i;
+            //    float delay = 1.0f + delay_step * i;
+            //    float target_y = center_y + i * step_y;
+
+            //    auto zako = objm->CreateObject<Zako6>(Vector2D(x, base_y));
+            //    zako->SetMode(ZakoMode::Zako7);
+            //    zako->SetAppearParams(Vector2D(x, base_y), Vector2D(x, target_y), delay, false);
+            //    zako->SetPlayer(player);
+            //}
+
+            //is_zako7_group_spawned = true;
+        }
+
+        HandleZako1_LR(delta);
+    }
+    else if (stage_timer < 10.0f)
+    {
+        HandleZako1_Center(delta);
+    }
+    else if (stage_timer < 15.0f)
+    {
+        HandleZako2_Upward(delta);
+    }
+    else if (stage_timer < 20.0f)
+    {
         if (!is_zako7_group_spawned)
         {
             const float base_y = -50.0f;
@@ -595,17 +647,9 @@ void Stage3::EnemyAppearance(float delta)
 
             is_zako7_group_spawned = true;
         }
-        HandleZako1_LR(delta);
+
     }
-    else if (stage_timer < 10.0f)
-    {
-        HandleZako1_Center(delta);
-    }
-    else if (stage_timer < 15.0f)
-    {
-        HandleZako2_Upward(delta);
-    }
-    else if (stage_timer < 20.0f)
+    else if (stage_timer < 25.0f)
     {
         const float spawn_interval = 4.0f;
         if (zako2_spawn_timer < spawn_interval) return;
@@ -628,84 +672,84 @@ void Stage3::EnemyAppearance(float delta)
 
             auto zako = objm->CreateObject<Zako6>(appear_pos);
             zako->SetMode(ZakoMode::Zako2);
-            zako->SetAppearParams(appear_pos, target_pos - (50.0f * i), delay, true);
+            zako->SetAppearParams(appear_pos, target_pos, delay, true);
             zako->SetPlayer(player);
         }
 
         zako2_spawn_timer = 0.0f;
     }
-    else if (stage_timer < 30.0f)
+    //else if (stage_timer < 30.0f)
+    //{
+    //    const float spawn_interval = 4.0f;
+    //    if (zako2_spawn_timer < spawn_interval) return;
+
+    //    const int num = 6;
+    //    const float spacing = 0.0f;
+    //    const float base_y = D_WIN_MAX_Y + 50.0f;
+    //    const float target_y = D_WIN_MAX_Y / 2 - 100.0f;
+    //    const float delay_per = 0.3f;
+
+    //    float start_x = ((D_WIN_MAX_X / 2) + 300.0f) - spacing;
+
+    //    for (int i = 0; i < num; ++i)
+    //    {
+    //        float x = start_x - spacing * i;
+    //        float delay = 2.0f + delay_per * i;
+
+    //        Vector2D appear_pos(x - 50.0f * i, base_y);
+    //        Vector2D target_pos(x, target_y);
+
+    //        auto zako = objm->CreateObject<Zako6>(appear_pos);
+    //        zako->SetMode(ZakoMode::Zako2);
+    //        zako->SetAppearParams(appear_pos, target_pos - (50.0f * i), delay, true);
+    //        zako->SetPlayer(player);
+    //    }
+
+    //    zako2_spawn_timer = 0.0f;
+    //}
+    //else if (stage_timer < 32.0f)
+    //{
+    //    //float spawn_interval = my_max(2.0f - stage_timer / 5.0f, 0.5f);
+    //    //if (enemy_spawn_timer < spawn_interval) return;
+
+    //    //const int num = 5;
+    //    //const float spacing = 150.0f;
+
+    //    //bool from_left = (enemy_group_index % 2 == 0);
+
+    //    //// y座標を from_left に応じて上下に切り替える
+    //    //float appear_y = from_left ? -100.0f : D_WIN_MAX_Y + 100.0f;
+    //    //float target_y = 300.0f;
+
+    //    //float base_x = from_left ? 60.0f : (D_WIN_MAX_X - 60.0f);
+    //    //float dx = from_left ? spacing : -spacing;
+    //    //float end_base_x = from_left ? D_WIN_MAX_X / 2 + 120.0f : D_WIN_MAX_X / 2 - 240.0f;
+
+    //    //for (int i = 0; i < num; ++i)
+    //    //{
+    //    //    float x = base_x + dx * i;
+    //    //    float delay = i * 0.5f;
+
+    //    //    Vector2D appear_pos(x, appear_y);
+    //    //    Vector2D end_pos(end_base_x + spacing * i, target_y + (enemy_group_index * 100.0f));
+
+    //    //    auto zako = objm->CreateObject<Zako6>(appear_pos);
+    //    //    zako->SetMode(ZakoMode::Zako3);
+    //    //    zako->SetAppearParams(appear_pos, end_pos, 1.3f + delay, from_left);
+    //    //    zako->SetPlayer(player);
+
+    //    //}
+
+    //    //enemy_group_index++;
+    //    //enemy_spawn_timer = 0.0f;
+    //}
+    //else if (stage_timer < 35.0f)
+    //{
+
+    //}
+    else if (stage_timer < 34.5f)
     {
-        const float spawn_interval = 4.0f;
-        if (zako2_spawn_timer < spawn_interval) return;
-
-        const int num = 6;
-        const float spacing = 0.0f;
-        const float base_y = D_WIN_MAX_Y + 50.0f;
-        const float target_y = D_WIN_MAX_Y / 2 - 100.0f;
-        const float delay_per = 0.3f;
-
-        float start_x = ((D_WIN_MAX_X / 2) + 300.0f) - spacing;
-
-        for (int i = 0; i < num; ++i)
-        {
-            float x = start_x - spacing * i;
-            float delay = 2.0f + delay_per * i;
-
-            Vector2D appear_pos(x - 50.0f * i, base_y);
-            Vector2D target_pos(x, target_y);
-
-            auto zako = objm->CreateObject<Zako6>(appear_pos);
-            zako->SetMode(ZakoMode::Zako2);
-            zako->SetAppearParams(appear_pos, target_pos - (50.0f * i), delay, true);
-            zako->SetPlayer(player);
-        }
-
-        zako2_spawn_timer = 0.0f;
-    }
-    else if (stage_timer < 32.0f)
-    {
-        //float spawn_interval = my_max(2.0f - stage_timer / 5.0f, 0.5f);
-        //if (enemy_spawn_timer < spawn_interval) return;
-
-        //const int num = 5;
-        //const float spacing = 150.0f;
-
-        //bool from_left = (enemy_group_index % 2 == 0);
-
-        //// y座標を from_left に応じて上下に切り替える
-        //float appear_y = from_left ? -100.0f : D_WIN_MAX_Y + 100.0f;
-        //float target_y = 300.0f;
-
-        //float base_x = from_left ? 60.0f : (D_WIN_MAX_X - 60.0f);
-        //float dx = from_left ? spacing : -spacing;
-        //float end_base_x = from_left ? D_WIN_MAX_X / 2 + 120.0f : D_WIN_MAX_X / 2 - 240.0f;
-
-        //for (int i = 0; i < num; ++i)
-        //{
-        //    float x = base_x + dx * i;
-        //    float delay = i * 0.5f;
-
-        //    Vector2D appear_pos(x, appear_y);
-        //    Vector2D end_pos(end_base_x + spacing * i, target_y + (enemy_group_index * 100.0f));
-
-        //    auto zako = objm->CreateObject<Zako6>(appear_pos);
-        //    zako->SetMode(ZakoMode::Zako3);
-        //    zako->SetAppearParams(appear_pos, end_pos, 1.3f + delay, from_left);
-        //    zako->SetPlayer(player);
-
-        //}
-
-        //enemy_group_index++;
-        //enemy_spawn_timer = 0.0f;
-    }
-    else if (stage_timer < 35.0f)
-    {
-
-    }
-    else if (stage_timer < 37.0f)
-    {
-        is_warning = true;
+        //is_warning = true;
     }
     else
     {

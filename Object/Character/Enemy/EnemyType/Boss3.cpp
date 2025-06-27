@@ -3,6 +3,7 @@
 #include "../../../../Utility/AnimationManager.h"
 #include "../../Shot/EnemyBeam1.h"
 
+
 Boss3::Boss3()
 {
 }
@@ -17,10 +18,10 @@ void Boss3::Initialize()
 	enemy_type = ENE_BOSS3;
 	z_layer = 1;
 	box_size = 30;
-	hp = 10000;
+	hp = 40000;
 
 	// 攻撃パターンの設定
-	attack_pattrn_num = { 11 };
+	attack_pattrn_num = { 12, 5, 6, 5, 7, 5 };
 
 	// 当たり判定のオブジェクト設定
 	collision.is_blocking = true;
@@ -66,6 +67,12 @@ void Boss3::Initialize()
 	{
 		part_positions[i] = location;
 	}
+
+	for (int i = 0; i < 5; ++i) {
+		ripples[i].active = false;
+		ripples[i].timer = 0.0f;
+	}
+
 }
 
 /// <summary>
@@ -310,6 +317,16 @@ void Boss3::Update(float delta_second)
 			if (hpbar_fade_timer > 1.0f) hpbar_fade_timer = 1.0f;
 		}
 	}
+
+	for (int i = 0; i < 5; ++i) {
+		if (ripples[i].active) {
+			ripples[i].timer += delta_second;
+			if (ripples[i].timer >= 0.5f) { // 0.5秒で消滅
+				ripples[i].active = false;
+			}
+		}
+	}
+
 
 	// 親クラスの更新処理を呼び出す
 	__super::Update(delta_second);
@@ -561,7 +578,7 @@ void Boss3::Shot(float delta_second)
 	// 次の攻撃パターン変更までの時間
 	const int shot_interval = 0.1f;
 
-	// 時間経過したら攻撃パターンを変更して弾を発射
+	// 攻撃パターン更新（is_shotがfalseのときだけ）
 	if (generate2 == true && is_shot == false)
 	{
 		shot_timer += delta_second;
@@ -574,16 +591,14 @@ void Boss3::Shot(float delta_second)
 			attack_pattrn = 5;
 #else
 			// HPが減ったら攻撃パターンを変更（オーバーフロー防止に合わせてリセット）
-			if (hp <= 50 && attack_pattrn_num != std::vector<int>{7, 8})
+			if (hp <= 5000 && attack_pattrn_num != std::vector<int>{5, 7})
 			{
-				attack_pattrn_num = { 7, 8 };
-				attack_count = 0; // 安全にリセット
+				attack_pattrn_num = { 5, 7 };
+				attack_count = 0;
 			}
 
-			// 決められた攻撃パターンのみ繰り返す
 			if (!attack_pattrn_num.empty())
 			{
-				// 念のため配列サイズチェックを挟む（念押し）
 				if (attack_count >= attack_pattrn_num.size())
 				{
 					attack_count = 0;
@@ -593,21 +608,46 @@ void Boss3::Shot(float delta_second)
 			}
 			else
 			{
-				// 予備処理：攻撃パターンリストが空の時は安全なデフォルトに
 				attack_pattrn = 0;
 			}
 #endif
 
 #else
-			// 完全ランダム
 			attack_pattrn = 4 + rand() % MAX_ATTACK_PATTRN;
 #endif
+
 			is_shot = true;
 			shot_timer = 0;
 		}
+
+		// 波紋発生処理（正しい attack_pattrn に基づいて位置を決定）
+		for (int i = 0; i < 5; ++i)
+		{
+			if (!ripples[i].active)
+			{
+				ripples[i].active = true;
+				ripples[i].timer = 0.0f;
+				ripples[i].pos = (attack_pattrn != 12)
+					? Vector2D(location.x - 160.0f, location.y + 100.0f)
+					: Vector2D(location.x - 100.0f, location.y + 40.0f);
+				break;
+			}
+		}
+		for (int i = 0; i < 5; ++i)
+		{
+			if (!ripples[i].active)
+			{
+				ripples[i].active = true;
+				ripples[i].timer = 0.0f;
+				ripples[i].pos = (attack_pattrn != 12)
+					? Vector2D(location.x + 160.0f, location.y + 100.0f)
+					: Vector2D(location.x + 100.0f, location.y + 40.0f);
+				break;
+			}
+		}
 	}
 
-	// 攻撃
+	// 攻撃実行
 	Attack(delta_second);
 }
 
@@ -643,6 +683,34 @@ void Boss3::DrawBoss3(const Vector2D position) const
 	//	GetColor(255, 100, 0), TRUE);
 
 	//DrawRotaGraph(D_WIN_MAX_X / 2, D_WIN_MAX_Y / 2, 2.0f, angle, jet, TRUE);
+
+
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255); // アルファブレンドON
+
+	if (is_crashing == false)
+	{
+		for (int i = 0; i < 5; ++i) {
+			if (!ripples[i].active) continue;
+
+			float t = ripples[i].timer / 0.5f; // 0.0～1.0
+			if (t > 1.0f) t = 1.0f;            // 安全のためClampするならここで
+
+			// Lerp(0.0f, 80.0f, t) → 0.0f + (80.0f - 0.0f) * t
+			float radius = 80.0f * t;
+
+			// Lerp(255.0f, 200.0f, t) → 255.0f + (200.0f - 255.0f) * t = 255 - 55 * t
+			int alpha = static_cast<int>(255.0f - 55.0f * t);
+
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+			DrawCircle(static_cast<int>(ripples[i].pos.x),
+				static_cast<int>(ripples[i].pos.y),
+				static_cast<int>(radius),
+				GetColor(150, 255, 150),
+				FALSE);
+		}
+	}
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0); // ブレンド無効化
+
 
 }
 
@@ -792,7 +860,7 @@ void Boss3::Attack(float delta_second)
 			/// <param name="spiral_speed">弾の速度</param>
 			/// <param name="generate_location">生成する位置</param>
 			/// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
-			Pattrn5(0.1f, 5.0f, 300.0f, location, delta_second);
+			Pattrn5_2(0.1f, 5.0f, 300.0f, location, delta_second);
 #endif
 			break;
 		case 6:
@@ -1085,7 +1153,7 @@ void Boss3::Pattrn5_2(float spiral_interval, float spiral_duration_limit, float 
 			float rad = current_angle * DX_PI / 180.0f;
 			Vector2D velocity(cos(rad) * spiral_speed, sin(rad) * spiral_speed);
 
-			EnemyShot4* shot = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x + 170.0f, generate_location.y + 65.0f));
+			EnemyShot4* shot = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x + 20.0f, generate_location.y - 50.0f));
 			shot->SetVelocity(velocity);
 		}
 
@@ -1097,7 +1165,7 @@ void Boss3::Pattrn5_2(float spiral_interval, float spiral_duration_limit, float 
 			float rad = current_angle * DX_PI / 180.0f;
 			Vector2D velocity(cos(rad) * spiral_speed, sin(rad) * spiral_speed);
 
-			EnemyShot4* shot = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x - 170.0f, generate_location.y + 65.0f));
+			EnemyShot4* shot = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x - 20.0f, generate_location.y - 50.0f));
 			shot->SetVelocity(velocity);
 		}
 

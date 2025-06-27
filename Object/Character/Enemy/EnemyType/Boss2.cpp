@@ -23,10 +23,10 @@ void Boss2::Initialize()
 	enemy_type = ENE_BOSS2;
 	z_layer = 1;
 	box_size = 30;
-	hp = 20000;
+	hp = 30000;
 
 	// 攻撃パターンの設定
-	attack_pattrn_num = { 4, 5, 6, 7 };
+	attack_pattrn_num = { 7, 4, 5, 4, 6, 4, 10, 4, 12 };
 
 
 	// 当たり判定のオブジェクト設定
@@ -399,7 +399,7 @@ void Boss2::Draw(const Vector2D& screen_offset) const
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
 
 	// スケーリング付き描画
-	const float max_hp = 20000.0f;
+	const float max_hp = 30000.0f;
 	const float bar_width_full = 650.0f;
 	const float bar_height = 8.0f;
 	const float x_center = D_WIN_MAX_X / 2;
@@ -682,9 +682,9 @@ void Boss2::Shot(float delta_second)
 			attack_pattrn = 5;
 	#else
 			// HPが減ったら攻撃パターンを変更（オーバーフロー防止に合わせてリセット）
-			if (hp <= 1000 && attack_pattrn_num != std::vector<int>{7, 8})
+			if (hp <= 3000 && attack_pattrn_num != std::vector<int>{12, 5})
 			{
-				attack_pattrn_num = { 7, 8 };
+				attack_pattrn_num = { 12, 5 };
 				attack_count = 0; // 安全にリセット
 			}
 
@@ -775,8 +775,13 @@ void Boss2::DrawBoss2(const Vector2D position) const
 			if (!ripples[i].active) continue;
 
 			float t = ripples[i].timer / 0.5f; // 0.0～1.0
-			float radius = Lerp(0.0f, 80.0f, t); // 半径0→80に拡大
-			int alpha = static_cast<int>(Lerp(255.0f, 200.0f, t)); // 不透明→透明へ
+			if (t > 1.0f) t = 1.0f;            // 安全のためClampするならここで
+
+			// Lerp(0.0f, 80.0f, t) → 0.0f + (80.0f - 0.0f) * t
+			float radius = 80.0f * t;
+
+			// Lerp(255.0f, 200.0f, t) → 255.0f + (200.0f - 255.0f) * t = 255 - 55 * t
+			int alpha = static_cast<int>(255.0f - 55.0f * t);
 
 			SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
 			DrawCircle(static_cast<int>(ripples[i].pos.x),
@@ -785,7 +790,6 @@ void Boss2::DrawBoss2(const Vector2D position) const
 				GetColor(150, 255, 150),
 				FALSE);
 		}
-
 	}
 
 	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0); // ブレンド無効化
