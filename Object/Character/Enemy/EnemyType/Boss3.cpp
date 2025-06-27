@@ -21,7 +21,7 @@ void Boss3::Initialize()
 	hp = 40000;
 
 	// 攻撃パターンの設定
-	attack_pattrn_num = { 12, 5, 6, 5, 7, 5 };
+	attack_pattrn_num = { 11, 5, 6, 4, 7, 5 };
 
 	// 当たり判定のオブジェクト設定
 	collision.is_blocking = true;
@@ -819,7 +819,7 @@ void Boss3::Attack(float delta_second)
 			/// <param name="spiral_duration_limit">攻撃する時間</param>
 			/// <param name="generate_location">生成する位置</param>
 			/// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
-			Pattrn4(20, 300.0f, 1.0f, 5.0f, location, delta_second);
+			Pattrn4_2(20, 300.0f, 1.0f, 5.0f, location, delta_second);
 			break;
 		case 5:
 #if 0
@@ -860,7 +860,7 @@ void Boss3::Attack(float delta_second)
 			/// <param name="spiral_speed">弾の速度</param>
 			/// <param name="generate_location">生成する位置</param>
 			/// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
-			Pattrn5_2(0.1f, 5.0f, 300.0f, location, delta_second);
+			Pattrn5_2(0.1f, 5.0f, 350.0f, location, delta_second);
 #endif
 			break;
 		case 6:
@@ -873,7 +873,8 @@ void Boss3::Attack(float delta_second)
 			/// <param name="fan_duration_limit">攻撃する時間</param>
 			/// <param name="generate_location">生成する位置</param>
 			/// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
-			Pattrn6(100.0f, 300.0f, 0.15f, 10.0f, location, delta_second);
+			//Pattrn6(180.0f, 400.0f, 0.06f, 10.0f, location, delta_second);
+			Pattrn6_2(30.0f, 350.0f, 0.05f, 3.0f, location, delta_second);
 
 			break;
 		case 7:
@@ -886,7 +887,7 @@ void Boss3::Attack(float delta_second)
 			/// <param name="fan_duration_limit">攻撃時間</param>
 			/// <param name="generate_location">生成する位置</param>
 			/// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
-			Pattrn7(150.0f, 300.0f, 0.5f, 10.0f, Vector2D(location.x, location.y + 100.0f), delta_second);
+			Pattrn7_2(150.0f, 300.0f, 0.5f, 10.0f, Vector2D(location.x, location.y + 100.0f), delta_second);
 
 			break;
 		case 8:
@@ -1027,7 +1028,7 @@ void Boss3::Pattrn4_2(int bullet_num, float speed, float spiral_interval, float 
 
 			Vector2D velocity(cos(rad) * speed, sin(rad) * speed);
 
-			EnemyShot4* e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x - 170.0f, generate_location.y + 65.0f));
+			EnemyShot4* e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x - 20.0f, generate_location.y - 20.0f));
 			e_shot4->SetVelocity(velocity);
 		}
 
@@ -1038,7 +1039,7 @@ void Boss3::Pattrn4_2(int bullet_num, float speed, float spiral_interval, float 
 
 			Vector2D velocity(cos(rad) * speed, sin(rad) * speed);
 
-			EnemyShot4* e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x + 170.0f, generate_location.y + 65.0f));
+			EnemyShot4* e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x + 20.0f, generate_location.y - 20.0f));
 			e_shot4->SetVelocity(velocity);
 		}
 	}
@@ -1116,7 +1117,7 @@ void Boss3::Pattrn5_2(float spiral_interval, float spiral_duration_limit, float 
 	{
 		spiral_timer = 0.0f;
 
-#if 0
+#if 1
 		for (int dir = 0; dir < 2; dir++)
 		{
 			float base_angle = (dir == 0) ? 90.0f : 270.0f;
@@ -1125,7 +1126,7 @@ void Boss3::Pattrn5_2(float spiral_interval, float spiral_duration_limit, float 
 			float rad = current_angle * DX_PI / 180.0f;
 			Vector2D velocity(cos(rad) * spiral_speed, sin(rad) * spiral_speed);
 
-			EnemyShot4* shot = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x + 170.0f, generate_location.y + 65.0f));
+			EnemyShot4* shot = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x + 20.0f, generate_location.y - 20.0f));
 			shot->SetVelocity(velocity);
 			shot->SetAttackPattrn(2);
 		}
@@ -1138,7 +1139,7 @@ void Boss3::Pattrn5_2(float spiral_interval, float spiral_duration_limit, float 
 			float rad = current_angle * DX_PI / 180.0f;
 			Vector2D velocity(cos(rad) * spiral_speed, sin(rad) * spiral_speed);
 
-			EnemyShot4* shot = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x - 170.0f, generate_location.y + 65.0f));
+			EnemyShot4* shot = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x - 20.0f, generate_location.y - 20.0f));
 			shot->SetVelocity(velocity);
 			shot->SetAttackPattrn(2);
 		}
@@ -1221,7 +1222,7 @@ void Boss3::Pattrn6(float fan_angle_range, float bullet_speed, float fan_interva
 		float rad = random_angle * DX_PI / 180.0f;
 		Vector2D velocity(cos(rad) * bullet_speed, sin(rad) * bullet_speed);
 
-		e_shot4 = objm->CreateObject<EnemyShot4>(generate_location);
+		e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x, generate_location.y - 15.0f));
 		e_shot4->SetVelocity(velocity);
 		e_shot4->SetAttackPattrn(1);
 
@@ -1261,9 +1262,9 @@ void Boss3::Pattrn6_2(float fan_angle_range, float bullet_speed, float fan_inter
 		float rad = random_angle * DX_PI / 180.0f;
 		Vector2D velocity(cos(rad) * bullet_speed, sin(rad) * bullet_speed);
 
-		e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x + 170.0f, generate_location.y + 65.0f));
+		e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x - 60.0f, generate_location.y + 160.0f));
 		e_shot4->SetVelocity(velocity);
-		e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x - 170.0f, generate_location.y + 65.0f));
+		e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x + 60.0f, generate_location.y + 160.0f));
 		e_shot4->SetVelocity(velocity);
 	}
 
@@ -1351,7 +1352,7 @@ void Boss3::Pattrn7_2(float fan_angle_range, float bullet_speed, float fan_inter
 			float rad = angle * DX_PI / 180.0f;
 			Vector2D velocity(cos(rad) * bullet_speed, sin(rad) * bullet_speed);
 
-			e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x + 170.0f, generate_location.y - 10.0f));
+			e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x + 140.0f, generate_location.y + 30.0f));
 			e_shot4->SetVelocity(velocity);
 		}
 
