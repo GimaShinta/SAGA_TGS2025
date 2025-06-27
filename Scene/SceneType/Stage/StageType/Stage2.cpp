@@ -268,7 +268,7 @@ void Stage2::Draw()
     SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
     // ステージタイマーの表示（右上）
 
-    DrawFormatString(0, 20, GetColor(255, 255, 255), "Time: %.1f", stage_timer);
+    //DrawFormatString(0, 20, GetColor(255, 255, 255), "Time: %.1f", stage_timer);
 
   /*  if (is_clear)
     {
@@ -287,7 +287,7 @@ void Stage2::Draw()
     AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
     manager->Draw();
 
-    DrawFormatString(100, 100, GetColor(255, 255, 255), "fade_alpha: %.1f", fade_alpha);
+    //DrawFormatString(100, 100, GetColor(255, 255, 255), "fade_alpha: %.1f", fade_alpha);
 
 
     if (entry_effect_playing)

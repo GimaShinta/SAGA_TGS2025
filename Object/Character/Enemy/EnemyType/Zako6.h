@@ -43,6 +43,7 @@ private:
     float appear_timer;
     float appear_duration;
     float descend_duration;
+    int  sound_destroy;
 
     float scale_min;
     float scale_max;

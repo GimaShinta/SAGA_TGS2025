@@ -37,6 +37,8 @@ private:
     int alpha = 0;
     bool is_invincible = true;
 
+    int sound_destroy;
+
     bool is_attacking = false;
     float attack_cooldown = 0.0f;
     int attack_pattern = 6;

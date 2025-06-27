@@ -35,6 +35,9 @@ void Stage2Boss::Initialize()
     anim_indices = { 0, 1, 2, 3, 4, 5 };
     image = images[0];
 
+    sound_destroy = rm->GetSounds("Resource/sound/se/se_effect/kill_4.mp3");
+    ChangeVolumeSoundMem(255 * 100 / 100, sound_destroy);
+
     auto* manager = Singleton<GameObjectManager>::GetInstance();
     for (int i = 0; i < 6; ++i)
     {
@@ -187,7 +190,7 @@ void Stage2Boss::Update(float delta_second)
                 {
                     part->SetDestroy();
                 }
-
+                PlaySoundMem(sound_destroy, DX_PLAYTYPE_BACK);
                 auto* manager = Singleton<AnimationManager>::GetInstance();
                 anim_id = manager->PlayerAnimation(EffectName::eExprotion2, location, 0.035f, false);
                 manager->SetScale(anim_id, 1.0f);

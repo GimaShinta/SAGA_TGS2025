@@ -49,8 +49,8 @@ void Zako::Initialize()
    // sound_hit = rm->GetSounds("Resource/Sound/reaction.mp3");
     sound_destroy = rm->GetSounds("Resource/sound/se/se_effect/kill_4.mp3");
     se_start = rm->GetSounds("Resource/sound/se/effect/buon.mp3");
-    ChangeVolumeSoundMem(255 * 120 / 100, sound_destroy);
-    ChangeVolumeSoundMem(255 * 120 / 100, se_start);
+    ChangeVolumeSoundMem(255 * 100 / 100, sound_destroy);
+    ChangeVolumeSoundMem(255 * 10 / 100, se_start);
     ChangePatternRandomly();
 }
 

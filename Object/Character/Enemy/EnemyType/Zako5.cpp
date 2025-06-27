@@ -36,6 +36,9 @@ void Zako5::Initialize()
 
     auto* rm = Singleton<ResourceManager>::GetInstance();
     image = rm->GetImages("Resource/Image/Object/Enemy/Zako5/enemy53.png")[0];
+
+    sound_destroy = rm->GetSounds("Resource/sound/se/se_effect/kill_4.mp3");
+    ChangeVolumeSoundMem(255 * 100 / 100, sound_destroy);
 }
 
 void Zako5::Update(float delta)
@@ -189,6 +192,7 @@ void Zako5::Update(float delta)
             if (hp <= 0)
             {
                 is_destroy = true;
+                PlaySoundMem(sound_destroy, DX_PLAYTYPE_BACK);
                 auto* manager = Singleton<AnimationManager>::GetInstance();
                 anim_id = manager->PlayerAnimation(EffectName::eExprotion2, location, 0.035f, false);
                 manager->SetScale(anim_id, 1.5f);

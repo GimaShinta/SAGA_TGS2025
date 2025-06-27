@@ -85,6 +85,8 @@ private:
 
     void ChangePatternRandomly();
 
+    int sound_destroy;
+
     // Entranceパターン専用：ワープフラグ
     bool entrance_warp_done[5] = { false };
 };

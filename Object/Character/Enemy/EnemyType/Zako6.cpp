@@ -37,6 +37,8 @@ void Zako6::Initialize()
     enemy_jet = rm->GetImages("Resource/Image/Object/Player/Shot/anime_effect17.png", 6, 6, 1, 8, 88);
     jet = enemy_jet[4];
 
+    sound_destroy = rm->GetSounds("Resource/sound/se/se_effect/kill_4.mp3");
+    ChangeVolumeSoundMem(255 * 100 / 100, sound_destroy);
 
     // ‹¤’Êƒpƒ‰ƒ[ƒ^
     scale_min = 0.3f;
@@ -250,7 +252,7 @@ void Zako6::Update(float delta_second)
         is_destroy = true;
 
         DropItems();
-
+        PlaySoundMem(sound_destroy, DX_PLAYTYPE_BACK);
         AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
         anim_id = manager->PlayerAnimation(EffectName::eExprotion2, location, 0.035f, false);
         manager->SetScale(anim_id, 0.5f);

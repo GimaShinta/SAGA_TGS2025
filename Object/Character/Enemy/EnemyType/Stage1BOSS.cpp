@@ -40,6 +40,9 @@ void Stage1Boss::Initialize()
     images = images_b;
     image = images[0];
 
+    sound_destroy = rm->GetSounds("Resource/sound/se/se_effect/kill_4.mp3");
+    ChangeVolumeSoundMem(255 * 100 / 100, sound_destroy);
+
     ChangePatternRandomly();
 
     floating_center_initialized = false;
@@ -317,7 +320,7 @@ void Stage1Boss::Update(float delta_second)
     {
         is_alive = false;
         is_destroy = true;
-
+        PlaySoundMem(sound_destroy, DX_PLAYTYPE_BACK);
         // ====== 演出とスコア処理 ======
         auto* manager = Singleton<AnimationManager>::GetInstance();
         anim_id = manager->PlayerAnimation(EffectName::eExprotion, location, 0.05f, false);
