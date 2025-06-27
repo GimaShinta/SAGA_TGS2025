@@ -25,13 +25,13 @@ void GameMainScene::Initialize()
     AnimationManager* anim = Singleton<AnimationManager>::GetInstance();
     //anim->LoadAllEffects();
 
-    current_stage = new Stage2(player);
+    current_stage = new Stage1(player);
 
     current_stage->Initialize();
 
     // BGM読み込み（初回のみ）
     ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
-    stage_bgm1 = rm->GetSounds("Resource/sound/bgm/stage/BGM_2.mp3");
+    stage_bgm1 = rm->GetSounds("Resource/sound/bgm/stage/stage1_2.mp3");
     stage_bgm3 = rm->GetSounds("Resource/sound/bgm/stage/Cybernetic.mp3");
 
     stage_bgm4 = rm->GetSounds("Resource/sound/bgm/stage/Last_Boss.mp3"); // 任意のファイル
@@ -57,7 +57,7 @@ void GameMainScene::Initialize()
     current_bgm_handle = stage_bgm1;
 
     ChangeVolumeSoundMem(255 * 50 / 100, current_bgm_handle); 
-    ChangeVolumeSoundMem(255 * 50 / 100, stage_bgm1);
+    ChangeVolumeSoundMem(255 * 100 / 100, stage_bgm1);
 
     PlaySoundMem(current_bgm_handle, DX_PLAYTYPE_LOOP);
 

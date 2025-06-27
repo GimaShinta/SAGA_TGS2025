@@ -32,6 +32,10 @@ void Application::WakeUp()
 	// ウィンドウモードで起動する
 	ChangeWindowMode(TRUE);
 
+	// フォントパスの定義（相対パスで OK）
+	AddFontResourceEx("DS-DIGI.TTF", FR_PRIVATE, NULL);
+	AddFontResourceEx("Orbitron-VariableFont_wght.ttf", FR_PRIVATE, NULL);
+
 	// ウィンドウサイズの設定
 	SetGraphMode(D_WIN_MAX_X, D_WIN_MAX_Y, D_COLOR_BIT);
 

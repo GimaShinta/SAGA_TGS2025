@@ -192,6 +192,7 @@ void Zako5::Update(float delta)
                 auto* manager = Singleton<AnimationManager>::GetInstance();
                 anim_id = manager->PlayerAnimation(EffectName::eExprotion2, location, 0.035f, false);
                 manager->SetScale(anim_id, 1.5f);
+                Singleton<ScoreData>::GetInstance()->AddScore(GetRand(1000)+1500);
             }
             break;
     }

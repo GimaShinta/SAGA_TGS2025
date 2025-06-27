@@ -1,4 +1,5 @@
 #include "MaxCharge.h"
+#include "../../../Utility/ScoreData.h"
 
 void MaxCharge::Initialize()
 {
@@ -17,6 +18,9 @@ void MaxCharge::Initialize()
     ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
     images = rm->GetImages("Resource/Image/Object/Item/PowerUp/max.png", 48, 8, 6, 48, 64);
     image = images[0];
+
+    se = rm->GetSounds("Resource/sound/se/effect/audiostock_1133382.mp3");
+    ChangeVolumeSoundMem(255 * 100 / 100, se);
 }
 
 void MaxCharge::Update(float delta)
@@ -89,6 +93,8 @@ void MaxCharge::OnHitCollision(GameObjectBase* hit_object)
 {
     if (hit_object->GetCollision().object_type == eObjectType::ePlayer)
     {
+        PlaySoundMem(se, DX_PLAYTYPE_BACK);
+        Singleton<ScoreData>::GetInstance()->AddScore(GetRand(100) + 50);
         this->SetDestroy();
     }
 

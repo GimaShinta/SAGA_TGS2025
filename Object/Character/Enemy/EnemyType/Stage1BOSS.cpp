@@ -22,7 +22,7 @@ void Stage1Boss::Initialize()
     enemy_type = ENE_ZAKO1;
     z_layer = 2;
     box_size = 35;
-    hp = 1000;
+    hp = 3000;
 
     collision.is_blocking = true;
     collision.object_type = eObjectType::eEnemy;

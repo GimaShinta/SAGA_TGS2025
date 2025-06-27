@@ -84,6 +84,7 @@ private:
 	int ripple_spawn_count = 0;
 	bool ripple_start = false; // 波紋出現を開始するフラグ
 
+	int se[4];
 
 public:
 	Boss3();

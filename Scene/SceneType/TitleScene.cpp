@@ -129,6 +129,10 @@ eSceneType TitleScene::Update(float delta_second)
         else if (m_selectedIndex == 1) {
             return eSceneType::eRanking;
         }
+        else if (m_selectedIndex == 2)  
+        {
+            return eSceneType::eCredit;
+        }
         else if (m_selectedIndex == 3) {
             return eSceneType::eXit;
         }

@@ -14,6 +14,7 @@ enum class eSceneType
 	eTitle,
 	eHelp,
 	eGameMain,
+	eCredit,
 	eResult,
 	eRanking,
 	eXit

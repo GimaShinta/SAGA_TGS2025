@@ -68,8 +68,12 @@ void Boss2::Initialize()
 	boss2_jet = rm->GetImages("Resource/Image/Effect/exhaust_03_spritesheet.png", 24, 8, 3, 128, 200);
 	jet = boss2_jet[0];
 
-	//se_beam = rm->GetSounds("Resource/sound/se/effect/audiostock_1090663.mp3");
-	//ChangeVolumeSoundMem(255 * 60 / 100, se_beam);
+	se[0] = rm->GetSounds("Resource/sound/se/battle/bakuhatu_b.mp3");
+	se[1] = rm->GetSounds("Resource/sound/se/boss_se/boss_kill.mp3");
+	se[2] = rm->GetSounds("Resource/sound/se/boss_se/bakuhatu_end.mp3");
+	ChangeVolumeSoundMem(255 * 100 / 100, se[0]);
+	ChangeVolumeSoundMem(255 * 100 / 100, se[1]);
+	ChangeVolumeSoundMem(255 * 100 / 100, se[2]);
 
 	// Å‰‚Í–{‘Ì‚ÌˆÊ’u‚ÉŒÅ’è
 	for (int i = 0; i < 6; ++i)
@@ -148,7 +152,8 @@ void Boss2::Update(float delta_second)
 			explosions_started = true;
 			explosion_index = 0;
 			explosion_timer = 0.0f;
-
+			PlaySoundMem(se[0], DX_PLAYTYPE_BACK);
+			PlaySoundMem(se[1], DX_PLAYTYPE_BACK);
 			// ‰‰ñ‚Ì”š”­‚ğ‘¦¶¬
 			float offset_x = static_cast<float>(GetRand(200) - 100);
 			float offset_y = static_cast<float>(GetRand(200) - 100);
@@ -178,7 +183,7 @@ void Boss2::Update(float delta_second)
 				float offset_y = static_cast<float>(GetRand(200) - 100);
 				Vector2D random_pos = location + Vector2D(offset_x, offset_y);
 				float scale = 0.3f + (GetRand(200) / 200.0f); // 0.5 ` 1.5
-
+				PlaySoundMem(se[0], DX_PLAYTYPE_BACK);
 				int id = AnimationManager::GetInstance()->PlayerAnimation(
 					EffectName::eExprotion2,
 					random_pos,
@@ -192,6 +197,8 @@ void Boss2::Update(float delta_second)
 
 			// ‘S”š”­Š®—¹Œã‚É‘å”š”­•íœ
 			if (explosion_index >= max_explosions) {
+				PlaySoundMem(se[1], DX_PLAYTYPE_BACK);
+				PlaySoundMem(se[2], DX_PLAYTYPE_BACK);
 				int id = AnimationManager::GetInstance()->PlayerAnimation(
 					EffectName::eExprotion2,
 					location,

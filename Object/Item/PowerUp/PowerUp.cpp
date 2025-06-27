@@ -1,5 +1,6 @@
 #include "PowerUp.h"
 #include "DxLib.h"
+#include "../../../Utility/ScoreData.h"
 
 void PowerUp::Initialize()
 {
@@ -18,6 +19,9 @@ void PowerUp::Initialize()
     ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
     images = rm->GetImages("Resource/Image/Object/Item/PowerUp/anime_item31.png", 16, 8, 2, 32, 32);
     image = images[0];
+
+    se = rm->GetSounds("Resource/sound/se/effect/audiostock_1133382.mp3");
+    ChangeVolumeSoundMem(255 * 100 / 100, se);
 }
 
 void PowerUp::Update(float delta)
@@ -91,6 +95,8 @@ void PowerUp::OnHitCollision(GameObjectBase* hit_object)
 {
     if (hit_object->GetCollision().object_type == eObjectType::ePlayer)
     {
+        PlaySoundMem(se, DX_PLAYTYPE_BACK);
+        Singleton<ScoreData>::GetInstance()->AddScore(GetRand(100) + 50);
         this->SetDestroy();
     }
 }
