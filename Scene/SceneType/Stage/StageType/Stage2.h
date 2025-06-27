@@ -82,4 +82,5 @@ public:
 private:
     void EnemyAppearance(float delta);
     void DrawScrollBackground() const override;
+
 };

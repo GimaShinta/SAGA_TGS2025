@@ -344,6 +344,40 @@ void Zako::Update(float delta_second)
             }
             break;
         }
+        case ZakoPattern::SlowInShootOut:
+        {
+            const float decel_duration = 1.0f;
+            const float shoot_duration = 0.5f;
+            const float escape_duration = 1.0f;
+
+            if (pattern_timer < decel_duration)
+            {
+                // 徐々に減速
+                float t = pattern_timer / decel_duration;
+                float vx = (start_location.x < 640.0f) ? 250.0f * (1.0f - t) : -250.0f * (1.0f - t);
+                velocity = { vx, 0.0f };
+            }
+            else if (pattern_timer < decel_duration + shoot_duration)
+            {
+                // 停止して弾発射
+                velocity = { 0.0f, 0.0f };
+                Shot(delta_second);
+            }
+            else if (pattern_timer < decel_duration + shoot_duration + escape_duration)
+            {
+                // 加速して退場
+                float t = (pattern_timer - decel_duration - shoot_duration) / escape_duration;
+                float vx = (start_location.x < 640.0f) ? 150.0f + 350.0f * t : -150.0f - 350.0f * t;
+                velocity = { vx, 0.0f };
+            }
+            else
+            {
+                // 完全退場スピード
+                velocity.x = (start_location.x < 640.0f) ? 500.0f : -500.0f;
+                velocity.y = 0.0f;
+            }
+            break;
+        }
     }
 
     // 座標更新
@@ -468,6 +502,12 @@ void Zako::SetPattern(ZakoPattern new_pattern)
             hp = 30;
             images = images_a;
             anim_indices = { 0, 1, 2, 3 };
+            scale = 1.5f;
+            break;
+        case ZakoPattern::SlowInShootOut:
+            hp = 25;
+            images = images_b;
+            anim_indices = { 0,1,2,3,4,5,6,7,8,9,10,11 };
             scale = 1.5f;
             break;
 

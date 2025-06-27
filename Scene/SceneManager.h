@@ -48,4 +48,11 @@ private:
     /// <param name="scene_type">生成したいシーンのタイプ</param>
     /// <returns></returns>
     SceneBase* CreateScene(eSceneType scene_type);
+
+public:
+    SceneBase* GetNowScene() const
+    {
+        return current_scene;
+    }
+
 };
