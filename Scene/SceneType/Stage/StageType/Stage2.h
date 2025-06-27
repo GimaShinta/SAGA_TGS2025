@@ -82,4 +82,7 @@ public:
 private:
     void EnemyAppearance(float delta);
     void DrawScrollBackground() const override;
+
+    std::vector<GameObjectBase*> extra_destroy_list;  // © GameObjectManager ŠÇ—‚Ì•â•—p
+
 };

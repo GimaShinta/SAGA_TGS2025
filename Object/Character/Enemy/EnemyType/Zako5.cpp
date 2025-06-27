@@ -19,7 +19,7 @@ void Zako5::Initialize()
     enemy_type = ENE_ZAKO5;
     z_layer = 2;
     box_size = Vector2D(120, 40);
-    hp = 2000;
+    hp = 5000;
 
     phase = Zako5Phase::Appearing;
     appear_timer = 0.0f;

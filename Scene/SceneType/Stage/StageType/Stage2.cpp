@@ -46,11 +46,19 @@ void Stage2::Finalize()
     }
     enemy_list.clear();
 
+    // ★追加：BossRotatingPart など GameObjectBase*
+    for (auto& obj : extra_destroy_list)
+    {
+        obj->SetDestroy();
+    }
+    extra_destroy_list.clear();
+
     if (is_over == true)
     {
         player->SetDestroy();
     }
 }
+
 
 void Stage2::Update(float delta)
 {
@@ -143,7 +151,7 @@ void Stage2::Update(float delta)
 
     // タイムで自動クリア
 
-    if (stage_timer >= 5.0f)
+    if (stage_timer >= 120.0f)
     {
         is_clear = true;
     }
@@ -326,21 +334,31 @@ StageBase* Stage2::GetNowStage()
 void Stage2::EnemyAppearance(float delta)
 {
     enemy_spawn_timer += delta;
-    const float spawn_interval = 2.5f;
-    const int MAX_ENEMIES_ON_SCREEN = 20;
-
+    const float spawn_interval = 1.0f;
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
 
-    if (enemy_list.size() >= MAX_ENEMIES_ON_SCREEN) return;
-
-    // 0?10秒：Zako出現
+    // --- 0～10秒：お山フォーメーション（3レーン、重複抑制） ---
     if (stage_timer < 10.0f)
     {
+        static int previous_lane = -1;  // 前回のレーン記録用
+
         if (enemy_spawn_timer >= spawn_interval)
         {
             enemy_spawn_timer = 0.0f;
 
-            float base_x = (std::rand() % 2 == 0) ? 400.0f : 900.0f;
+            // 前回と違うレーンを選ぶ
+            int lane;
+            do
+            {
+                lane = std::rand() % 3;  // 0:左, 1:中央, 2:右
+            } while (lane == previous_lane);
+            previous_lane = lane;
+
+            float base_x;
+            if (lane == 0)      base_x = 400.0f;
+            else if (lane == 1) base_x = 640.0f;
+            else                base_x = 900.0f;
+
             float base_y = 0.0f;
             float offset_x = 50.0f;
             float offset_y = 30.0f;
@@ -362,8 +380,82 @@ void Stage2::EnemyAppearance(float delta)
         }
     }
 
-    // 15秒以降：Zako5 1回出現
-    if (stage_timer > 15.0f && !zako5_spawned)
+    // --- 10?15秒：右下がり ＼ の階段状に3体を順番に出現（1回限り） ---
+    static bool spawned_stair_done = false;
+    static int stair_index = 0;
+    static float stair_timer = 0.0f;
+
+    if (stage_timer >= 10.0f && stage_timer < 15.0f && !spawned_stair_done)
+    {
+        stair_timer += delta;
+
+        const float stair_spawn_interval = 0.6f;  // 出現間隔（秒）
+
+        if (stair_index < 3 && stair_timer >= stair_spawn_interval)
+        {
+            stair_timer = 0.0f;
+
+            float base_x = 1000.0f;
+            float base_y = 40.0f;
+            float offset_x = 30.0f;
+            float offset_y = 60.0f;
+
+            float x = base_x + stair_index * offset_x;
+            float y = base_y + stair_index * offset_y;
+
+            Zako* zako = objm->CreateObject<Zako>(Vector2D(x, y));
+            zako->SetPattern(ZakoPattern::LeftMove);  // 左に進む
+            zako->SetPlayer(player);
+            enemy_list.push_back(zako);
+
+            stair_index++;
+        }
+
+        if (stair_index >= 3)
+        {
+            spawned_stair_done = true;
+        }
+    }
+
+    // --- 15?20秒：右上がり ／ の階段状に3体を順番に出現（1回限り） ---
+    static bool spawned_slash_done = false;
+    static int slash_index = 0;
+    static float slash_timer = 0.0f;
+
+    if (stage_timer >= 15.0f && stage_timer < 20.0f && !spawned_slash_done)
+    {
+        slash_timer += delta;
+
+        const float slash_spawn_interval = 0.6f;  // 出現間隔（秒）
+
+        if (slash_index < 3 && slash_timer >= slash_spawn_interval)
+        {
+            slash_timer = 0.0f;
+
+            float base_x = 270.0f;
+            float base_y = 200.0f;
+            float offset_x = 40.0f;
+            float offset_y = -50.0f;
+
+            float x = base_x + slash_index * offset_x;
+            float y = base_y + slash_index * offset_y;
+
+            Zako* zako = objm->CreateObject<Zako>(Vector2D(x, y));
+            zako->SetPattern(ZakoPattern::RightMove);
+            zako->SetPlayer(player);
+            enemy_list.push_back(zako);
+
+            slash_index++;
+        }
+
+        if (slash_index >= 3)
+        {
+            spawned_slash_done = true;
+        }
+    }
+
+    // --- 20～40秒：Zako5を2体だけ1回出現 ---
+    if (stage_timer >= 20.0f && stage_timer < 40.0f && !zako5_spawned)
     {
         enemy_spawn_timer = 0.0f;
         zako5_spawned = true;
@@ -381,35 +473,38 @@ void Stage2::EnemyAppearance(float delta)
         enemy_list.push_back(right);
     }
 
-    // 40?55秒：Zako6 出現（ボス前の15秒）
-    if (stage_timer >= 50.0f && stage_timer < 65.0f)
+    // --- 40～60秒：お山フォーメーション（ランダム位置） ---
+    if (stage_timer >= 42.0f && stage_timer < 55.0f)
     {
         if (enemy_spawn_timer >= spawn_interval)
         {
             enemy_spawn_timer = 0.0f;
 
-            float base_x = (std::rand() % 2 == 0) ? 400.0f : 900.0f;
+            float base_x = 320.0f + std::rand() % 640;
             float base_y = 0.0f;
-            float offset_x = 50.0f;
+            float offset_x = 40.0f;
             float offset_y = 30.0f;
 
             Zako* zako_top = objm->CreateObject<Zako>(Vector2D(base_x, base_y - offset_y));
             zako_top->SetPattern(ZakoPattern::MoveStraight);
+            zako_top->SetPlayer(player);
             enemy_list.push_back(zako_top);
 
             Zako* zako_left = objm->CreateObject<Zako>(Vector2D(base_x - offset_x, base_y + offset_y));
             zako_left->SetPattern(ZakoPattern::MoveStraight);
+            zako_left->SetPlayer(player);
             enemy_list.push_back(zako_left);
 
             Zako* zako_right = objm->CreateObject<Zako>(Vector2D(base_x + offset_x, base_y + offset_y));
             zako_right->SetPattern(ZakoPattern::MoveStraight);
+            zako_right->SetPlayer(player);
             enemy_list.push_back(zako_right);
         }
     }
 
-    // ★ 55秒以降：BOSS出現（ifに変更！）
+    // --- 60～110秒：ボス出現（1回のみ） ---
     static bool stage2boss_spawned = false;
-    if (!stage2boss_spawned && stage_timer >= 70.0f)
+    if (!stage2boss_spawned && stage_timer >= 60.0f)
     {
         stage2boss_spawned = true;
 
@@ -418,11 +513,17 @@ void Stage2::EnemyAppearance(float delta)
         boss->SetPlayer(player);
         enemy_list.push_back(boss);
 
+        // 回転パーツも GameObjectBase* として破棄対象に登録
+        for (auto& part : boss->GetRotatingParts())
+        {
+            extra_destroy_list.push_back(part);
+        }
+
         phase = Stage2Phase::BossDescending;
         is_warning = false;
     }
-}
 
+}
 
 
 void Stage2::DrawScrollBackground() const

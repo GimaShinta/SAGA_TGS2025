@@ -201,8 +201,7 @@ void BossRotatingPart::Draw(const Vector2D& screen_offset) const
 
 void BossRotatingPart::OnHitCollision(GameObjectBase* hit_object)
 {
-    if (hit_object->GetCollision().object_type == eObjectType::eShot ||
-        hit_object->GetCollision().object_type == eObjectType::eBeam)
+    if (hit_object->GetCollision().object_type == eObjectType::eShot)
     {
         hit_object->SetDestroy();
     }

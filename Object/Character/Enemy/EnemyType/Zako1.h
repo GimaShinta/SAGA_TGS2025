@@ -22,7 +22,8 @@ enum class ZakoPattern
     SlowDownThenMove,   // ← 新パターン
     PauseThenRush,      // ← 新パターン
     RotateAndShoot,
-    Count
+    Count,
+    SlowInShootOut,
 };
 
 class Zako : public EnemyBase
