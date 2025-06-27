@@ -98,4 +98,11 @@ private:
     float wait_after_entry_timer = 0.0f;
 
     void Shot(float delta_second);
+
+public:
+    const std::vector<BossRotatingPart*>& GetRotatingParts() const
+    {
+        return rotating_parts;
+    }
+
 };

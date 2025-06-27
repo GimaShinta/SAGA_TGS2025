@@ -46,11 +46,19 @@ void Stage2::Finalize()
     }
     enemy_list.clear();
 
+    // š’Ç‰ÁFBossRotatingPart ‚È‚Ç GameObjectBase*
+    for (auto& obj : extra_destroy_list)
+    {
+        obj->SetDestroy();
+    }
+    extra_destroy_list.clear();
+
     if (is_over == true)
     {
         player->SetDestroy();
     }
 }
+
 
 void Stage2::Update(float delta)
 {
@@ -505,9 +513,16 @@ void Stage2::EnemyAppearance(float delta)
         boss->SetPlayer(player);
         enemy_list.push_back(boss);
 
+        // ‰ñ“]ƒp[ƒc‚à GameObjectBase* ‚Æ‚µ‚Ä”jŠü‘ÎÛ‚É“o˜^
+        for (auto& part : boss->GetRotatingParts())
+        {
+            extra_destroy_list.push_back(part);
+        }
+
         phase = Stage2Phase::BossDescending;
         is_warning = false;
     }
+
 }
 
 
