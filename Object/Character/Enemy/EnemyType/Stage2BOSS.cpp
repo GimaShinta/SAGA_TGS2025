@@ -188,6 +188,7 @@ void Stage2Boss::Update(float delta_second)
                 auto* manager = Singleton<AnimationManager>::GetInstance();
                 int anim_id = manager->PlayerAnimation(EffectName::eExprotion, location, 0.05f, false);
                 manager->SetScale(anim_id, 1.0f);
+                Singleton<ScoreData>::GetInstance()->AddScore(GetRand(3000)+ 500);
             }
 
             static float anim_timer = 0.0f;

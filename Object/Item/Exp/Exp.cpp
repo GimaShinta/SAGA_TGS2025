@@ -2,7 +2,7 @@
 #include "DxLib.h"
 #include "../../Character/Player/Player.h"
 #include "../../GameObjectManager.h"
-
+#include "../../../Utility/ScoreData.h"
 
 Exp::Exp() : 
     lifetime(5.0f)         //©“®íœ‚·‚é•b”
@@ -139,6 +139,7 @@ void Exp::OnHitCollision(GameObjectBase* hit_object)
         {
             player->AddCharge(1.0f);  // ’²®‰Â”\
         }
+        Singleton<ScoreData>::GetInstance()->AddScore(10);
         this->SetDestroy(); // ‹zû ¨ íœ
     }
 }

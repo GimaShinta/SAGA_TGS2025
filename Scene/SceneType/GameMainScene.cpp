@@ -391,7 +391,7 @@ eSceneType GameMainScene::Update(float delta_second)
 
         // スコアログ用メッセージ作成
         char buf[64];
-        sprintf_s(buf, sizeof(buf), "Enemy +%.0f", new_score);
+        sprintf_s(buf, sizeof(buf), "Score +%.0f", new_score);
 
         // ★ 先に最大行数チェック（10行超えたら古いのから削除）
         if (score_logs.size() >= 10)
@@ -502,24 +502,92 @@ void GameMainScene::Draw()
 
             if (warning_state != WarningState::None)
             {
-                int y_top = static_cast<int>(band_center_y - band_half_height);
-                int y_bottom = static_cast<int>(band_center_y + band_half_height);
+                float flash_alpha = 200.0f * sinf(warning_timer * 10.0f);
+                if (flash_alpha < 0) flash_alpha = 0;
 
-                if (band_half_height > 1.0f)
+                // ===== 警告終了間際に帯と文字をフェードアウト =====
+                float fade_start_time = warning_duration - 1.0f;
+                int band_alpha = 255;
+                if (warning_timer >= fade_start_time)
                 {
-                    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
-                    DrawBox(0, y_top, 1280, y_bottom, GetColor(255, 0, 0), TRUE);
-                    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-                    DrawLine(0, y_top, 1280, y_top, GetColor(255, 255, 255));
-                    DrawLine(0, y_bottom, 1280, y_bottom, GetColor(255, 255, 255));
+                    float t = (warning_duration - warning_timer);
+                    if (t < 0.0f) t = 0.0f;
+                    band_alpha = static_cast<int>(255 * t);  // 0?255に減少
                 }
 
-                if (warning_state == WarningState::Displaying)
+                // ===== 背景フラッシュ（赤） =====
+                SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)flash_alpha);
+                DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(255, 50, 50), TRUE);
+
+                SetDrawBlendMode(DX_BLENDMODE_ALPHA, band_alpha);
+
+                const int band_height = 120;
+                const char* warn_text = "!! WARNING !!";
+                const char* scroll_text = "!! SECURITY WARNING  FINAL PROTOCOL ACTIVE  SYSTEM LOCKDOWN ENGAGED !! - !! SECURITY WARNING  FINAL PROTOCOL ACTIVE  SYSTEM LOCKDOWN ENGAGED !!";
+                int scroll_speed = 200;
+
+                int text_width = GetDrawStringWidthToHandle(scroll_text, strlen(scroll_text), font_orbitron);
+                int scroll_color = GetColor(255, 100 + GetRand(80), 80);
+
+                float scale = 3.0f;
+                int base_w = GetDrawStringWidthToHandle(warn_text, strlen(warn_text), font_orbitron);
+                int draw_w = (int)(base_w * scale);
+                int draw_h = (int)(32 * scale);
+
+                int x = (D_WIN_MAX_X - draw_w) / 2;
+                int y = (D_WIN_MAX_Y - draw_h) / 2;
+
+                int offset_x = GetRand(5) - 2;
+                int offset_y = GetRand(3) - 1;
+
+                int pulse = (GetNowCount() % 100 < 50) ? 255 : 100;
+                int color = GetColor(255, pulse, pulse);
+
+                // 中央巨大 WARNING
+                DrawExtendStringToHandle(x + offset_x, y + offset_y, scale, scale, warn_text, color, font_orbitron);
+
+                // === 上帯背景とライン ===
+                DrawBox(0, 0, D_WIN_MAX_X, band_height, GetColor(30, 0, 0), TRUE);
+                DrawLine(0, band_height - 2, D_WIN_MAX_X, band_height - 2, GetColor(255, GetRand(100), 100));
+
+                float scroll_scale = 1.8f;
+                int scroll_font_h = (int)(32 * scroll_scale);
+                int scroll_x_top = static_cast<int>(D_WIN_MAX_X - (warning_timer * scroll_speed));
+                if (scroll_x_top + text_width * scroll_scale > 0)
                 {
-                    DrawStringToHandle(static_cast<int>(warning_text_x), band_center_y - 20,
-                        "!! WARNING !!", GetColor(255, 255, 255), font_warning);
+                    DrawExtendStringToHandle(scroll_x_top, band_height / 2 - scroll_font_h / 2,
+                        scroll_scale, scroll_scale, scroll_text, scroll_color, font_orbitron);
                 }
+
+                // === 下帯背景とライン ===
+                DrawBox(0, D_WIN_MAX_Y - band_height, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(30, 0, 0), TRUE);
+                DrawLine(0, D_WIN_MAX_Y - band_height + 1, D_WIN_MAX_X, D_WIN_MAX_Y - band_height + 1, GetColor(255, GetRand(100), 100));
+
+                int scroll_x_bot = static_cast<int>(-(text_width * scroll_scale) + (warning_timer * scroll_speed));
+                if (scroll_x_bot < D_WIN_MAX_X)
+                {
+                    DrawExtendStringToHandle(scroll_x_bot, D_WIN_MAX_Y - band_height + band_height / 2 - scroll_font_h / 2,
+                        scroll_scale, scroll_scale, scroll_text, scroll_color, font_orbitron);
+                }
+
+                // ===== ノイズエフェクト（帯上） =====
+                for (int i = 0; i < 15; ++i)
+                {
+                    int nx = GetRand(D_WIN_MAX_X);
+                    int ny = GetRand(band_height);
+                    int nl = GetRand(40) + 20;
+
+                    DrawBox(nx, ny, nx + nl, ny + 2, GetColor(100 + GetRand(100), 0, 0), TRUE);
+                    DrawBox(nx, D_WIN_MAX_Y - band_height + ny, nx + nl, D_WIN_MAX_Y - band_height + ny + 2, GetColor(100 + GetRand(100), 0, 0), TRUE);
+                }
+
+                SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
             }
+
+
+
+
+
 
 
 
@@ -620,7 +688,7 @@ void GameMainScene::Draw()
 
 
     }
-    DrawFormatString(D_WIN_MAX_X / 2, 0, GetColor(255, 255, 255), "Stage%d", current_stage->GetStageID());
+    //DrawFormatString(D_WIN_MAX_X / 2, 0, GetColor(255, 255, 255), "Stage%d", current_stage->GetStageID());
 
 }
 
@@ -756,7 +824,13 @@ void GameMainScene::DrawUI()
         //int scan_y = (GetNowCount() / 5) % D_WIN_MAX_Y;
         //DrawLine(right_x1, scan_y, right_x2, scan_y, GetColor(0, 150, 255));
     }
+    if (current_stage->GetStageID() == StageID::Stage4) {
 
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 50);
+        DrawBox(0, 0, 290, D_WIN_MAX_Y, GetColor(255, 0, 0), TRUE);
+        DrawBox(990, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(255, 0, 0), TRUE);
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+    }
     // Draw() のサイドパネル描画後に追加
     for (int y = 0; y < 720; y += 4)
     {
@@ -769,47 +843,23 @@ void GameMainScene::DrawUI()
 
     // DrawFormatString(D_WIN_MAX_X - 140, 0, GetColor(255, 255, 255), "Life:%d", player->life);
 
-     // ==== 合計スコア（キルログの上） ====
+    // ==== トータルスコア（左上） ====
     {
         ScoreData* score = Singleton<ScoreData>::GetInstance();
         const auto& all_scores = score->GetScoreData();
 
         float total_score = 0.0f;
-        for (float s : all_scores)
-        {
-            total_score += s;
-        }
+        for (float s : all_scores) total_score += s;
 
-        // 表示位置とサイズ
-        int score_box_x = 30;
-        int score_box_y = D_WIN_MAX_Y - 640;
-        int score_box_w = 220;
-        int score_box_h = 32;
+        int x = 30, y = 80;
+        int w = 240, h = 80;
 
-        // 点滅フレームカラー
-        int pulse = static_cast<int>(GetNowCount() % 100) > 50 ? 255 : 100;
-        int frame_color = GetColor(pulse, 255, pulse);
+        DrawLine(x, y, x + w, y, GetColor(0, 255, 255));         // 上
+        DrawLine(x, y + h, x + w, y + h, GetColor(0, 255, 255)); // 下
 
-        // 背景と枠
-        //SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
-        //DrawBox(score_box_x, score_box_y, score_box_x + score_box_w, score_box_y + score_box_h, GetColor(10, 10, 30), TRUE);
-        //SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
-        //DrawBox(score_box_x, score_box_y, score_box_x + score_box_w, score_box_y + score_box_h, frame_color, FALSE);
-
-        // スコアテキスト
-        DrawFormatStringToHandle(score_box_x - 20, score_box_y + 8, frame_color, font_digital, "TOTAL SCORE");
-        DrawFormatStringToHandle(score_box_x, score_box_y + 40, frame_color, font_digital, "%.0f", total_score);
-
-        // 通常描画に戻す（念のため）
-        SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-
-#if _DEBUG
-        DrawFormatString(0, 0, GetColor(255, 255, 255), "se_volume : %d", vo);
-
-#endif // _DEBUG
-
+        DrawStringToHandle(x + 10, y + 8, "TOTAL SCORE", GetColor(0, 255, 255), font_orbitron);
+        DrawFormatStringToHandle(x + 20, y + 40, GetColor(255, 255, 100), font_digital, "%.0f", total_score);
     }
-
 
     // ==== スコアログ（左下） ====
     int log_base_x = 30;
@@ -828,96 +878,109 @@ void GameMainScene::DrawUI()
 
     }
 
-    // ==== LIFE - STOCK 表示（右上、Digital風＋残機アイコン） ====
-    if (player)
+
+  // ==== LIFE - STOCK（右上） ====
+if (player)
+{
+    int x = D_WIN_MAX_X - 230;
+    int y = 80;
+
+    DrawStringToHandle(x + 10, y + 4, "LIFE - STOCK", GetColor(0, 255, 255), font_orbitron);
+
+    for (int i = 0; i < player->life; ++i)
     {
-        int life_box_x = D_WIN_MAX_X - 230;
-        int life_box_y = 80;
-        int life_box_w = 200;
-        int life_box_h = 60;
-
-        // ラベル
-        DrawStringToHandle(life_box_x + 10, life_box_y + 4, "LIFE - STOCK", GetColor(0, 255, 255), font_orbitron);
-
-        // 残機表示（△を横に並べる）
-        int icon_base_x = life_box_x + 20;
-        int icon_y = life_box_y + 32;
-        int icon_size = 14;
-        int icon_gap = 20;
-
-        for (int i = 0; i < player->life; ++i)
-        {
-            int x = icon_base_x + i * icon_gap;
-
-            // △ 三角形（小型ドローン風）
-            DrawTriangle(
-                x, icon_y + icon_size,           // 下
-                x + icon_size / 2, icon_y,       // 上
-                x + icon_size, icon_y + icon_size, // 下
-                GetColor(255, 100, 100), TRUE     // 塗りつぶし
-            );
-        }
+        int px = x + 20 + i * 20;
+        int py = y + 32;
+        int sz = 14;
+        DrawTriangle(px, py + sz, px + sz / 2, py, px + sz, py + sz, GetColor(255, 100, 100), TRUE);
     }
 
-    // PlaySoundMem(se_charge, DX_PLAYTYPE_BACK);
+    // 横幅いっぱいのライン
+    DrawLine(x, y + 64, x + 200, y + 64, GetColor(0, 255, 255));
+}
 
-    if (player)
+// ==== CHARGE ゲージ ====
+if (player)
+{
+    int x = D_WIN_MAX_X - 230;
+    int y = 150;
+
+    DrawStringToHandle(x + 10, y + 2, "CHARGE", GetColor(0, 255, 255), font_orbitron);
+
+    float rate = player->GetChargeRate();
+    int bar_x = x + 10, bar_y = y + 25;
+    int bar_w = 180, bar_h = 12;
+
+    int fill = player->CanUseSpecial() ? GetColor(0, (GetNowCount() % 100 > 50) ? 255 : 100, 255) : GetColor(0, 255, 255);
+    DrawBox(bar_x, bar_y, bar_x + bar_w, bar_y + bar_h, GetColor(30, 30, 30), TRUE);
+    DrawBox(bar_x, bar_y, bar_x + static_cast<int>(bar_w * rate), bar_y + bar_h, fill, TRUE);
+
+    // "Press B!!" 表示
+    if (player->CanUseSpecial())
     {
-        int power_box_x = D_WIN_MAX_X - 230;
-        int power_box_y = 150 + 60 + 10; // LIFE-STOCKの下
-        int power_box_w = 200;
-        int power_box_h = 50;
-
-        DrawStringToHandle(power_box_x + 10, power_box_y + 2, "POWER UP", GetColor(0, 255, 255), font_orbitron);
-
-        int level = player->GetPowerd();
-        for (int i = 0; i < level; ++i)
-        {
-            int x = power_box_x + 20 + i * 20;
-            int y = power_box_y + 25;
-            DrawBox(x, y, x + 14, y + 14, GetColor(255, 255, 100), TRUE); // 黄色の小ブロック
-        }
+        int text_x = x + 140;
+        int text_y = y + 30;
+        int pulse = (GetNowCount() % 100 > 50) ? 255 : 100;
+        DrawStringToHandle(text_x -25, text_y+5, "Press B!!", GetColor(255, pulse, pulse), font_orbitron);
     }
 
-    if (player)
+    DrawLine(x, y + 60, x + 200, y + 60, GetColor(0, 255, 255));
+}
+
+// ==== POWER（ゲージ型） ====
+if (player)
+{
+    int x = D_WIN_MAX_X - 230;
+    int y = 220;
+
+    DrawStringToHandle(x + 10, y + 2, "POWER", GetColor(0, 255, 255), font_orbitron);
+
+    int level = player->GetPowerd();
+    for (int i = 0; i < 3; ++i)
     {
-        int shield_box_x = D_WIN_MAX_X - 230;
-        int shield_box_y = 150 + 60 + 10 + 60; // PowerUPの下
-        int shield_box_w = 200;
-        int shield_box_h = 50;
-
-        DrawStringToHandle(shield_box_x + 10, shield_box_y + 2, "SHIELD", GetColor(0, 255, 255), font_orbitron);
-
-        const char* shield_text = player->GetShieldOn() ? "ON" : "OFF";
-        int color = player->GetShieldOn() ? GetColor(0, 255, 100) : GetColor(255, 100, 100);
-        DrawStringToHandle(shield_box_x + 20, shield_box_y + 25, shield_text, color, font_digital);
-        if (player->GetShieldOn())
-        {
-            float t = sinf(GetNowCount() / 30.0f) * 5 + 15; // 半径変動
-            int cx = shield_box_x + 150;
-            int cy = shield_box_y + 35;
-            DrawCircle(cx, cy, static_cast<int>(t), GetColor(0, 255, 180), FALSE);
-        }
-
+        int px = x + 20 + i * 20;
+        int py = y + 25;
+        int col = (i < level) ? GetColor(255, 255, 100) : GetColor(50, 50, 50);
+        DrawBox(px, py, px + 14, py + 14, col, TRUE);
     }
 
+    DrawLine(x, y + 60, x + 200, y + 60, GetColor(0, 255, 255));
+}
 
-    if (player)
+// ==== SHIELD ====
+if (player)
+{
+    int x = D_WIN_MAX_X - 230;
+    int y = 290;
+
+    DrawStringToHandle(x + 10, y + 2, "SHIELD", GetColor(0, 255, 255), font_orbitron);
+
+    const char* shield_text = player->GetShieldOn() ? "ON" : "OFF";
+    int color = player->GetShieldOn() ? GetColor(0, 255, 100) : GetColor(255, 100, 100);
+    DrawStringToHandle(x + 20, y + 25, shield_text, color, font_digital);
+
+    if (player->GetShieldOn())
     {
-        int exp_box_x = 30;
-        int exp_box_y = D_WIN_MAX_Y - 580; // TOTAL SCORE の少し下
-        int exp_box_w = 220;
-        int exp_box_h = 40;
-
-        ScoreData* score = Singleton<ScoreData>::GetInstance();
-        const auto& all_scores = score->GetScoreData();
-        float total_score = 0.0f;
-        for (float s : all_scores)
-            total_score += s;
-
-        DrawStringToHandle(exp_box_x + 10, exp_box_y + 4, "EXP", GetColor(0, 255, 255), font_orbitron);
-        DrawFormatStringToHandle(exp_box_x + 80, exp_box_y + 8, GetColor(0, 255, 180), font_digital, "%.0f", total_score * 0.1f);
+        float r = sinf(GetNowCount() / 30.0f) * 5 + 15;
+        DrawCircle(x + 150, y + 35, static_cast<int>(r), GetColor(0, 255, 180), FALSE);
     }
+
+    // ラインの位置を少し下にずらす（重なり防止）
+    DrawLine(x, y + 70, x + 200, y + 70, GetColor(0, 255, 255));
+}
+
+
+
+//if (player)
+//{
+//    int exp_box_x = 30;
+//    int exp_box_y = D_WIN_MAX_Y - 550; // TOTAL SCORE の少し下
+//    int exp_box_w = 220;
+//    int exp_box_h = 40;
+//
+//    DrawStringToHandle(exp_box_x + 10, exp_box_y + 4, "EXP", GetColor(0, 255, 255), font_orbitron);
+//    DrawFormatStringToHandle(exp_box_x + 80, exp_box_y + 8, GetColor(0, 255, 180), font_digital, "%.0f");
+//}
 
 
     // ==== 必殺技ゲージ（LIFEの下、点滅＆レイアウト調整済） ====
@@ -967,72 +1030,92 @@ void GameMainScene::DrawUI()
         SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
         DrawFormatStringToHandle(ui_x, ui_y, GetColor(255, pulse, pulse), font_orbitron, "Press B!!");
     }
-    if (player && player->CanUseSpecial())
+    //if (player && player->CanUseSpecial())
+    //{
+    //    int gauge_x = D_WIN_MAX_X - 260;
+    //    int gauge_y = 150;
+
+    //    int text_x = gauge_x + 140;
+    //    int text_y = gauge_y + 30;
+    //    int pulse = (GetNowCount() % 100 > 50) ? 255 : 100;
+
+    //    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+    //    DrawStringToHandle(text_x, text_y, "Press B!!", GetColor(255, pulse, pulse), font_orbitron);
+    //}
+
+
+
+
+  // === 操作UI（右下） ===
     {
-        int gauge_x = D_WIN_MAX_X - 260;
-        int gauge_y = 150;
+        const int base_x = D_WIN_MAX_X - 250;
+        const int base_y = D_WIN_MAX_Y - 240;
+        const int line_height = 42;
 
-        int text_x = gauge_x + 140;
-        int text_y = gauge_y + 30;
-        int pulse = (GetNowCount() % 100 > 50) ? 255 : 100;
+        const char* inputs[] = {
+            "MOVE    : LeftStick",
+            "SHOT    : A",
+            "SPECIAL : B",
+            "PAUSE   : Start"
+        };
 
-        SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
-        DrawStringToHandle(text_x, text_y, "Press B!!", GetColor(255, pulse, pulse), font_orbitron);
+        int pulse = (GetNowCount() % 100 < 50) ? 255 : 100;
+        int op_color = GetColor(100, pulse, 255);  // 操作ガイドカラー
+
+        for (int i = 0; i < 4; ++i)
+        {
+            int y = base_y + i * line_height;
+            DrawStringToHandle(base_x, y, inputs[i], op_color, font_orbitron);
+        }
     }
 
 
 
-
-    // ==== 操作UI（右下） ====
-    int panel_x = D_WIN_MAX_X - 260;
-    int panel_y = D_WIN_MAX_Y - 150;
-    int panel_w = 230;
-    int panel_h = 130;
-
-    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
-    DrawBox(panel_x, panel_y, panel_x + panel_w, panel_y + panel_h, GetColor(10, 10, 30), TRUE); // 背景
-    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
-    DrawBox(panel_x, panel_y, panel_x + panel_w, panel_y + panel_h, GetColor(0, 255, 255), FALSE); // 枠線
-
-    DrawStringToHandle(panel_x + 10, panel_y + 10, "Manual", GetColor(0, 255, 255), font_orbitron);
-
-    DrawStringToHandle(panel_x + 10, panel_y + 35, "Move : L-Stick", GetColor(255, 255, 255), font_orbitron);
-    DrawStringToHandle(panel_x + 10, panel_y + 55, "Shot : Space / A", GetColor(255, 255, 255), font_orbitron);
-    DrawStringToHandle(panel_x + 10, panel_y + 75, "Beam : B", GetColor(255, 255, 255), font_orbitron);
-    DrawStringToHandle(panel_x + 10, panel_y + 95, "Flip : RB / L", GetColor(255, 255, 255), font_orbitron);
-
-
-    // ==== サイドパネルとの境界に「流れるライン」エフェクト（Stage3は色変更） ====
+    // ==== サイドパネルとの境界に「流れるライン」エフェクト（Stage4は赤?黄のチカチカ） ====
     {
         const int line_width = 4;
-        const int flow_speed = 1000;  // ← 1秒間に60px動く（元の flow_speed=1 に近づける）
+        const int flow_speed = 1000;
         const int gap = 70;
 
         int offset = static_cast<int>(line_effect_timer * flow_speed) % gap;
 
-        int pulse = (static_cast<int>(line_effect_timer * 100) % 100 > 50) ? 255 : 100;
+        // Stage4判定
+        bool is_stage4 = (current_stage && current_stage->GetStageID() == StageID::Stage4);
 
-        int line_color = GetColor(0, pulse, 255); // 通常：ネオンブルー
+        int pulse_timer = (GetNowCount() / 10) % 2;  // 交互に点滅（10フレームごと）
+        int line_color = is_stage4
+            ? (pulse_timer == 0 ? GetColor(255, 80, 50) : GetColor(255, 200, 50)) // 赤と黄色
+            : GetColor(0, 180, 255); // 通常：ネオンブルー
 
-        if (dynamic_cast<Stage3*>(current_stage) != nullptr)
-        {
-            // line_color = GetColor(255, 100, 150); // ←必要に応じて復活
-        }
+        int flare_color = is_stage4
+            ? (pulse_timer == 0 ? GetColor(255, 120, 120) : GetColor(255, 240, 120)) // フレアも切り替え
+            : GetColor(100, 255, 255);
 
         int left_x = (D_WIN_MAX_X / 2) - 350;
-        for (int y = -gap; y < D_WIN_MAX_Y + gap; y += gap)
-        {
-            int y0 = y + offset;
-            DrawBox(left_x, y0, left_x + line_width, y0 + 20, line_color, TRUE);
-        }
-
         int right_x = (D_WIN_MAX_X / 2) + 350 - line_width;
+
         for (int y = -gap; y < D_WIN_MAX_Y + gap; y += gap)
         {
             int y0 = y + offset;
+
+            // 左ライン
+            DrawBox(left_x, y0, left_x + line_width, y0 + 20, line_color, TRUE);
+            if (is_stage4)
+            {
+                DrawCircle(left_x + line_width / 2, y0 + 10, 3, flare_color, TRUE); // フレア追加
+            }
+
+            // 右ライン
             DrawBox(right_x, y0, right_x + line_width, y0 + 20, line_color, TRUE);
+            if (is_stage4)
+            {
+                DrawCircle(right_x + line_width / 2, y0 + 10, 3, flare_color, TRUE);
+            }
         }
     }
+
+
+
 
 
     if (isPaused)

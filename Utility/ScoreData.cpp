@@ -24,3 +24,7 @@ void ScoreData::Reset()
 	player_stock = 0;
 }
 
+void ScoreData::AddScore(float value)
+{
+	score_data.push_back(value);
+}

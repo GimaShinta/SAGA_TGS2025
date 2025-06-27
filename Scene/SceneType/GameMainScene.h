@@ -92,7 +92,6 @@ private:
 
 	WarningState warning_state = WarningState::None;
 
-
 public:
 	GameMainScene();
 	virtual ~GameMainScene();
