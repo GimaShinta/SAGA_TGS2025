@@ -1227,6 +1227,7 @@ void Stage3::HandleZako1_LR(float delta)
         zako->SetMode(ZakoMode::Zako3);
         zako->SetAppearParams(appear_pos, end_pos, 1.3f + delay, from_left);
         zako->SetPlayer(player);
+        enemy_list.push_back(zako);
 
     }
 
@@ -1262,6 +1263,7 @@ void Stage3::HandleZako1_Center(float delta)
         zako->SetMode(ZakoMode::Zako3);
         zako->SetAppearParams(appear_pos, end_pos, 1.3f + delay, true);
         zako->SetPlayer(player);
+        enemy_list.push_back(zako);
     }
 
     enemy_group_index++;
@@ -1295,6 +1297,7 @@ void Stage3::HandleZako2_Upward(float delta)
         zako->SetMode(ZakoMode::Zako2);
         zako->SetAppearParams(appear_pos, target_pos, delay, true);
         zako->SetPlayer(player);
+        enemy_list.push_back(zako);
     }
 
     zako2_spawn_timer = 0.0f;
@@ -1310,6 +1313,7 @@ void Stage3::SpawnBossAndItems()
 
     boss2 = objm->CreateObject<Boss2>(Vector2D(670, -200));
     boss2->SetPlayer(player);
+    enemy_list.push_back(boss2);
     boss2_spawned = true;
     is_warning = false;
 }

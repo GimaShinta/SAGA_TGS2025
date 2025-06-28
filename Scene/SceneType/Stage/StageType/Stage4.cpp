@@ -273,7 +273,7 @@ void Stage4::PlayerShot()
                 shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 10, p_location.y - D_OBJECT_SIZE));
                 shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 30, p_location.y));
             }
-            else
+            else if (player->GetPowerd() == 3)
             {
                 shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 50, p_location.y + D_OBJECT_SIZE));
                 shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 30, p_location.y));
@@ -283,6 +283,18 @@ void Stage4::PlayerShot()
                 shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 50, p_location.y + D_OBJECT_SIZE));
 
             }
+            //else
+            //{
+            //    shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 70, p_location.y + (D_OBJECT_SIZE * 2)));
+            //    shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 50, p_location.y + D_OBJECT_SIZE));
+            //    shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 30, p_location.y));
+            //    shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 10, p_location.y - D_OBJECT_SIZE));
+            //    shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 10, p_location.y - D_OBJECT_SIZE));
+            //    shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 30, p_location.y));
+            //    shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 50, p_location.y + D_OBJECT_SIZE));
+            //    shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 70, p_location.y + (D_OBJECT_SIZE * 2)));
+
+            //}
             shot->SetShotFlip(false);
         }
         // ”½“]‚µ‚Ä‚¢‚½‚çã•ûŒü‚É¶¬

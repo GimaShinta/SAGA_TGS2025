@@ -695,4 +695,3 @@ void Player::ForceNeutralAnim(bool enable)
 {
 	force_neutral_anim = enable;
 }
-

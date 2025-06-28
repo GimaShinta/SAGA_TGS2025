@@ -17,6 +17,9 @@ protected:
     bool is_clear = false;
     bool is_over = false;
     int se;
+public:
+    bool request_stop_bgm = false;         // BGM’â~—v‹
+
 
 
 public:
