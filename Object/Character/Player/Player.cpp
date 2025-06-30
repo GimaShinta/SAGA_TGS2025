@@ -121,6 +121,40 @@ void Player::Update(float delta_second)
 		BuhinAnim(delta_second);
 	}
 
+	//if (beam_on == true)
+	//{
+	//	// 自分のオブジェクトタイプ
+	//	collision.object_type = eObjectType::eNone;
+	//	// 当たる相手のオブジェクトタイプ
+	//	collision.hit_object_type.clear();
+	//}
+	//else
+	//{
+	//	// 自分のオブジェクトタイプ
+	//	collision.object_type = eObjectType::ePlayer;
+	//	// 当たる相手のオブジェクトタイプ
+	//	collision.hit_object_type = {eObjectType::eEnemy, eObjectType::eBoss2, eObjectType::eBoss3, eObjectType::eExp, eObjectType::ePowerUp };
+	//	//collision.hit_object_type.push_back(eObjectType::eEnemy);
+	//	//collision.hit_object_type.push_back(eObjectType::eBoss2);
+	//	//collision.hit_object_type.push_back(eObjectType::eBoss3);
+	//	//collision.hit_object_type.push_back(eObjectType::eExp);
+	//	//collision.hit_object_type.push_back(eObjectType::ePowerUp);
+	//}
+
+	if (invincible_time > 0.0f)
+	{
+		invincible_time -= delta_second;
+		collision.object_type = eObjectType::eNone;
+		collision.hit_object_type.clear();
+	}
+	else
+	{
+		// 自分のオブジェクトタイプ
+		collision.object_type = eObjectType::ePlayer;
+		// 当たる相手のオブジェクトタイプ
+		collision.hit_object_type = { eObjectType::eEnemy, eObjectType::eBoss2, eObjectType::eBoss3, eObjectType::eExp, eObjectType::ePowerUp };
+	}
+
 
 	// 親クラスの更新処理を呼び出す
 	__super::Update(delta_second);
@@ -434,6 +468,7 @@ void Player::Shot(float delta_second)
 			beam_on = true;
 			stop = true;
 			beam_timer = 0.0f;
+			invincible_time = 5.0f;
 			UseSpecial();  // ゲージ消費
 		}
 	}
@@ -454,6 +489,7 @@ void Player::Shot(float delta_second)
 	if (beam_timer >= 5.0f)
 	{
 		stop = false;
+		beam_on = false;
 	}
 }
 
