@@ -16,9 +16,9 @@ Boss3::~Boss3()
 void Boss3::Initialize()
 {
 	enemy_type = ENE_BOSS3;
-	z_layer = 1;
+	z_layer = 3;
 	box_size = 30;
-	hp = 40000;
+	hp = 75000;
 
 	// 攻撃パターンの設定
 	attack_pattrn_num = { 4, 6, 7, 8, 9 };
@@ -59,15 +59,15 @@ void Boss3::Initialize()
 	//boss3_anim1 = rm->GetImages("Resource/Image/Object/Enemy/Boss/Boss_03/anime01.png", 8, 8, 1, 32, 24);
 	//boss3_image[10] = boss3_anim1[0];
 
-	se[0] = rm->GetSounds("Resource/sound/se/battle/bakuhatu_b.mp3");
-	se[1] = rm->GetSounds("Resource/sound/se/boss_se/boss_kill.mp3");
-	se[2] = rm->GetSounds("Resource/sound/se/boss_se/bakuhatu_end.mp3");
-	se[3] = rm->GetSounds("Resource/sound/se/effect/audiostock_1553653.mp3");
+	//se[0] = rm->GetSounds("Resource/sound/se/battle/bakuhatu_b.mp3");
+	//se[1] = rm->GetSounds("Resource/sound/se/boss_se/boss_kill.mp3");
+	//se[2] = rm->GetSounds("Resource/sound/se/boss_se/bakuhatu_end.mp3");
+	//se[3] = rm->GetSounds("Resource/sound/se/effect/audiostock_1553653.mp3");
 
-	ChangeVolumeSoundMem(255 * 100 / 100, se[0]);
-	ChangeVolumeSoundMem(255 * 100 / 100, se[1]);
-	ChangeVolumeSoundMem(255 * 100 / 100, se[2]);
-	ChangeVolumeSoundMem(255 * 100 / 100, se[3]);
+	//ChangeVolumeSoundMem(255 * 100 / 100, se[0]);
+	//ChangeVolumeSoundMem(255 * 100 / 100, se[1]);
+	//ChangeVolumeSoundMem(255 * 100 / 100, se[2]);
+	//ChangeVolumeSoundMem(255 * 100 / 100, se[3]);
 
 	boss3_jet = rm->GetImages("Resource/Image/Effect/exhaust_03_spritesheet.png", 24, 8, 3, 128, 200);
 	jet = boss3_jet[0];
@@ -167,8 +167,8 @@ void Boss3::Update(float delta_second)
 			explosions_started = true;
 			explosion_index = 0;
 			explosion_timer = 0.0f;
-			PlaySoundMem(se[0], DX_PLAYTYPE_BACK);
-			PlaySoundMem(se[1], DX_PLAYTYPE_BACK);
+			AnimationManager::GetInstance()->PlaySE(SE_NAME::Bakuhatu);
+			AnimationManager::GetInstance()->PlaySE(SE_NAME::Kill);
 
 			// 初回の爆発を即時生成
 			float offset_x = static_cast<float>(GetRand(200) - 100);
@@ -214,8 +214,8 @@ void Boss3::Update(float delta_second)
 
 			// 全爆発完了後に大爆発＆削除
 			if (explosion_index >= max_explosions) {
-				PlaySoundMem(se[1], DX_PLAYTYPE_BACK);
-				PlaySoundMem(se[2], DX_PLAYTYPE_BACK);
+				AnimationManager::GetInstance()->PlaySE(SE_NAME::Kill);
+				AnimationManager::GetInstance()->PlaySE(SE_NAME::Bakuhatu_End);
 				int id = AnimationManager::GetInstance()->PlayerAnimation(
 					EffectName::eExprotion2,
 					location,
@@ -376,7 +376,7 @@ void Boss3::Draw(const Vector2D& screen_offset) const
 	//	DrawBox(x, y, x + bar_width * hp_ratio, y + bar_height, GetColor(255, 255, 255), TRUE);
 	//}
 
-	const float max_hp = 40000.0f;
+	const float max_hp = 70000.0f;
 	const float bar_width = 650.0f;   // 中心から左右で350
 	const float bar_height = 8.0f;   // 細め
 	const float x = D_WIN_MAX_X / 2 - bar_width / 2;

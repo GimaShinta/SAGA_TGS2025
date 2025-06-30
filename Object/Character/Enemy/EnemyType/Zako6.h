@@ -34,7 +34,7 @@ public:
 
     /// Zako2 or Zako3 ‚Ì“®ìØ‚è‘Ö‚¦
     void SetMode(ZakoMode mode);
-
+    void ShootToPlayer(float speed);
 private:
     ZakoMode mode;
     ZakoState state;

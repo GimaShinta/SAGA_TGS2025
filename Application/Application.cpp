@@ -110,6 +110,7 @@ void Application::ShutDown()
 	InputManager::DeleteInstance();
 	SceneManager::DeleteInstance();
 
+	AnimationManager::GetInstance()->UnloadSE();
 	// Dxライブラリの使用を終了する
 	DxLib_End();
 }

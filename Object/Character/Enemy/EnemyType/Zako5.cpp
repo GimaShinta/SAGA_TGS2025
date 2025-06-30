@@ -17,7 +17,7 @@ Zako5::~Zako5()
 void Zako5::Initialize()
 {
     enemy_type = ENE_ZAKO5;
-    z_layer = 2;
+    z_layer = 3;
     box_size = Vector2D(120, 40);
     hp = 5000;
 

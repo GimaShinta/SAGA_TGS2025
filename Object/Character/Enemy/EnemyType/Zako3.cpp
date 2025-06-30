@@ -13,7 +13,7 @@ Zako3::~Zako3()
 void Zako3::Initialize()
 {
     enemy_type = ENE_ZAKO3;
-    z_layer = 2;
+    z_layer = 3;
     box_size = 12;
     hp = 30;
 

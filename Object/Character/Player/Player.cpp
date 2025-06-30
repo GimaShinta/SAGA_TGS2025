@@ -47,8 +47,8 @@ void Player::Initialize()
 	shields2 = rm->GetImages("Resource/Image/Object/Item/Shield/pipo-btleffect206_480.png", 20, 5, 4, 480, 480);
 	shields = rm->GetImages("Resource/Image/Object/Item/Shield/pipo-btleffect206h_480.png", 15, 5, 3, 480, 480);
 
-	se_shot = rm->GetSounds("Resource/sound/se/shot/shot_02.mp3");
-	ChangeVolumeSoundMem(255 * 60 / 100, se_shot);
+	//se_shot = rm->GetSounds("Resource/sound/se/shot/shot_02.mp3");
+	//ChangeVolumeSoundMem(255 * 60 / 100, se_shot);
 
 }
 
@@ -364,6 +364,7 @@ void Player::Shot(float delta_second)
 {
 	// オブジェクト管理クラスのインスタンを取得
 	InputManager* input = Singleton<InputManager>::GetInstance();
+	AnimationManager* am = Singleton<AnimationManager>::GetInstance();
 
 	// 打つまでの時間を計測
 	shot_timer += delta_second;
@@ -387,7 +388,9 @@ void Player::Shot(float delta_second)
 	if (input->GetKeyDown(KEY_INPUT_SPACE) ||
 		input->GetButtonDown(XINPUT_BUTTON_A))
 	{
-		PlaySoundMem(se_shot, DX_PLAYTYPE_BACK);
+		am->PlaySE(SE_NAME::Shot);
+		am->ChangeSEVolume(SE_NAME::Shot, 60);
+		//PlaySoundMem(se_shot, DX_PLAYTYPE_BACK);
 		// 何も打ってなかったら打てるようにする
 		if (stop == false)
 		{
@@ -410,7 +413,8 @@ void Player::Shot(float delta_second)
 				is_shot_anim = true;
 				is_shot = true;
 				shot_timer = 0.0f;
-				PlaySoundMem(se_shot, DX_PLAYTYPE_BACK);
+				am->PlaySE(SE_NAME::Shot);
+				am->ChangeSEVolume(SE_NAME::Shot, 60);
 			}
 		}
 	}

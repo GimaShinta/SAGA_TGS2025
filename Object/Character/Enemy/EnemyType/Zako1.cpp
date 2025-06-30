@@ -24,7 +24,7 @@ Zako::~Zako()
 void Zako::Initialize()
 {
     enemy_type = ENE_ZAKO1;
-    z_layer = 2;
+    z_layer = 3;
     box_size = 12;
     hp = 0;
 
@@ -47,10 +47,10 @@ void Zako::Initialize()
 
     //SE
    // sound_hit = rm->GetSounds("Resource/Sound/reaction.mp3");
-    sound_destroy = rm->GetSounds("Resource/sound/se/se_effect/kill_4.mp3");
-    se_start = rm->GetSounds("Resource/sound/se/effect/buon.mp3");
-    ChangeVolumeSoundMem(255 * 100 / 100, sound_destroy);
-    ChangeVolumeSoundMem(255 * 10 / 100, se_start);
+    //sound_destroy = rm->GetSounds("Resource/sound/se/se_effect/kill_4.mp3");
+    //se_start = rm->GetSounds("Resource/sound/se/effect/buon.mp3");
+    //ChangeVolumeSoundMem(255 * 100 / 100, sound_destroy);
+    //ChangeVolumeSoundMem(255 * 10 / 100, se_start);
     ChangePatternRandomly();
 }
 
@@ -389,12 +389,15 @@ void Zako::Update(float delta_second)
     // HP‚ª0ˆÈ‰º‚Å”š”­‰‰o{”j‰ó
     if (hp <= 0)
     {
-        PlaySoundMem(sound_destroy, DX_PLAYTYPE_BACK);
+        //PlaySoundMem(sound_destroy, DX_PLAYTYPE_BACK);
+        AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+        manager->PlaySE(SE_NAME::Destroy);
+
+
         is_destroy = true;
 
         DropItems();
 
-        AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
         anim_id = manager->PlayerAnimation(EffectName::eExprotion2, location, 0.035f, false);
         manager->SetScale(anim_id, 0.5f);
 

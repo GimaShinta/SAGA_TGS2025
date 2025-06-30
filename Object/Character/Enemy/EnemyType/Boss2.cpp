@@ -21,12 +21,12 @@ Boss2::~Boss2()
 void Boss2::Initialize()
 {
 	enemy_type = ENE_BOSS2;
-	z_layer = 1;
+	z_layer = 3;
 	box_size = 30;
 	hp = 30000;
 
 	// 攻撃パターンの設定
-	attack_pattrn_num = { 7, 4, 5, 4, 6, 4, 10, 4, 12 };
+	attack_pattrn_num = { 7, 12, 5, 12, 6, 12, 10, 12 };
 
 
 	// 当たり判定のオブジェクト設定
@@ -68,12 +68,14 @@ void Boss2::Initialize()
 	boss2_jet = rm->GetImages("Resource/Image/Effect/exhaust_03_spritesheet.png", 24, 8, 3, 128, 200);
 	jet = boss2_jet[0];
 
-	se[0] = rm->GetSounds("Resource/sound/se/battle/bakuhatu_b.mp3");
-	se[1] = rm->GetSounds("Resource/sound/se/boss_se/boss_kill.mp3");
-	se[2] = rm->GetSounds("Resource/sound/se/boss_se/bakuhatu_end.mp3");
-	ChangeVolumeSoundMem(255 * 100 / 100, se[0]);
-	ChangeVolumeSoundMem(255 * 100 / 100, se[1]);
-	ChangeVolumeSoundMem(255 * 100 / 100, se[2]);
+
+	// ちょっと重くなる
+	//se[0] = rm->GetSounds("Resource/sound/se/battle/bakuhatu_b.mp3");
+	//se[1] = rm->GetSounds("Resource/sound/se/boss_se/boss_kill.mp3");
+	//se[2] = rm->GetSounds("Resource/sound/se/boss_se/bakuhatu_end.mp3");
+	//ChangeVolumeSoundMem(255 * 100 / 100, se[0]);
+	//ChangeVolumeSoundMem(255 * 100 / 100, se[1]);
+	//ChangeVolumeSoundMem(255 * 100 / 100, se[2]);
 
 	// 最初は本体の位置に固定
 	for (int i = 0; i < 6; ++i)
@@ -152,8 +154,10 @@ void Boss2::Update(float delta_second)
 			explosions_started = true;
 			explosion_index = 0;
 			explosion_timer = 0.0f;
-			PlaySoundMem(se[0], DX_PLAYTYPE_BACK);
-			PlaySoundMem(se[1], DX_PLAYTYPE_BACK);
+			AnimationManager::GetInstance()->PlaySE(SE_NAME::Bakuhatu);
+			AnimationManager::GetInstance()->PlaySE(SE_NAME::Kill);
+			//PlaySoundMem(se[0], DX_PLAYTYPE_BACK);
+			//PlaySoundMem(se[1], DX_PLAYTYPE_BACK);
 			// 初回の爆発を即時生成
 			float offset_x = static_cast<float>(GetRand(200) - 100);
 			float offset_y = static_cast<float>(GetRand(200) - 100);
@@ -183,7 +187,8 @@ void Boss2::Update(float delta_second)
 				float offset_y = static_cast<float>(GetRand(200) - 100);
 				Vector2D random_pos = location + Vector2D(offset_x, offset_y);
 				float scale = 0.3f + (GetRand(200) / 200.0f); // 0.5 ～ 1.5
-				PlaySoundMem(se[0], DX_PLAYTYPE_BACK);
+				//PlaySoundMem(se[0], DX_PLAYTYPE_BACK);
+				AnimationManager::GetInstance()->PlaySE(SE_NAME::Bakuhatu);
 				int id = AnimationManager::GetInstance()->PlayerAnimation(
 					EffectName::eExprotion2,
 					random_pos,
@@ -197,8 +202,11 @@ void Boss2::Update(float delta_second)
 
 			// 全爆発完了後に大爆発＆削除
 			if (explosion_index >= max_explosions) {
-				PlaySoundMem(se[1], DX_PLAYTYPE_BACK);
-				PlaySoundMem(se[2], DX_PLAYTYPE_BACK);
+				//PlaySoundMem(se[1], DX_PLAYTYPE_BACK);
+				//PlaySoundMem(se[2], DX_PLAYTYPE_BACK);
+				AnimationManager::GetInstance()->PlaySE(SE_NAME::Kill);
+				AnimationManager::GetInstance()->PlaySE(SE_NAME::Bakuhatu_End);
+
 				int id = AnimationManager::GetInstance()->PlayerAnimation(
 					EffectName::eExprotion2,
 					location,
@@ -440,7 +448,7 @@ void Boss2::Draw(const Vector2D& screen_offset) const
 	DrawBox(x, y, x + current_bar_width, y + bar_height, GetColor(255, 255, 255), FALSE);
 
 	// くぼみ（第二形態位置）
-	float notch_x = x + current_bar_width / 2;
+	float notch_x = x + current_bar_width / 3;
 	DrawBox(notch_x - 1, y - 2, notch_x + 1, y + bar_height + 2, GetColor(255, 255, 0), TRUE);
 
 	// HP数値
@@ -689,9 +697,9 @@ void Boss2::Shot(float delta_second)
 			attack_pattrn = 5;
 	#else
 			// HPが減ったら攻撃パターンを変更（オーバーフロー防止に合わせてリセット）
-			if (hp <= 3000 && attack_pattrn_num != std::vector<int>{12, 5})
+			if (hp <= 10000 && attack_pattrn_num != std::vector<int>{7, 5})
 			{
-				attack_pattrn_num = { 12, 5 };
+				attack_pattrn_num = { 7, 5 };
 				attack_count = 0; // 安全にリセット
 			}
 

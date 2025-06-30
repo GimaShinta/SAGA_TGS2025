@@ -78,9 +78,9 @@ void Stage1::Initialize()
     rm->GetImages("Resource/Image/Object/Enemy/Zako1/anime_enemy30_a.png", 4, 4, 1, 32, 32);
     rm->GetImages("Resource/Image/Object/Enemy/Zako1/anime_enemy30_b.png", 12, 12, 1, 24, 24);
 
-    // サウンド（死亡音・登場音）
-    rm->GetSounds("Resource/sound/se/se_effect/kill_4.mp3");
-    rm->GetSounds("Resource/sound/se/effect/buon.mp3");
+    //// サウンド（死亡音・登場音）
+    //rm->GetSounds("Resource/sound/se/se_effect/kill_4.mp3");
+    //rm->GetSounds("Resource/sound/se/effect/buon.mp3");
 
     preload_done = false;  // 初期化時にリセット
 
