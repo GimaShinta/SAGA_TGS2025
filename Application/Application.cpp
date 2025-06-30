@@ -32,9 +32,6 @@ void Application::WakeUp()
 	// ウィンドウモードで起動する
 	ChangeWindowMode(TRUE);
 
-	// フォントパスの定義（相対パスで OK）
-	AddFontResourceEx("DS-DIGI.TTF", FR_PRIVATE, NULL);
-	AddFontResourceEx("Orbitron-VariableFont_wght.ttf", FR_PRIVATE, NULL);
 
 	// ウィンドウサイズの設定
 	SetGraphMode(D_WIN_MAX_X, D_WIN_MAX_Y, D_COLOR_BIT);
@@ -57,6 +54,9 @@ void Application::WakeUp()
 	{
 		throw std::string("Dxライブラリの初期化に失敗しました！\n");
 	}
+
+	// フォントパスの定義（相対パスで OK）
+	AddFontResourceEx("Resource/font/Orbitron/Orbitron-VariableFont_wght.ttf", FR_PRIVATE, NULL);
 
 	//シーン情報を取得する
 	SceneManager* scene = Singleton<SceneManager>::GetInstance();
