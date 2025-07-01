@@ -84,15 +84,14 @@ void Boss3::Initialize()
 	}
 
 	// 例：攻撃パターンごとに左右の波紋位置を定義
-	ripple_positions[4] = { Vector2D(-140,  80), Vector2D(140,  80) };
-	ripple_positions[5] = { Vector2D(-160, 100), Vector2D(160, 100) };
-	ripple_positions[6] = { Vector2D(-100,  60), Vector2D(100,  60) };
-	ripple_positions[7] = { Vector2D(-120, 120), Vector2D(120, 120) };
-	ripple_positions[8] = { Vector2D(-120, 120), Vector2D(120, 120) };
-	ripple_positions[9] = { Vector2D(-120, 120), Vector2D(120, 120) };
-	ripple_positions[12] = { Vector2D(-100,  40), Vector2D(100,  40) };
-	ripple_positions[11] = { Vector2D(-100,  40), Vector2D(100,  40) };
-
+	ripple_positions[0] = { Vector2D( 0,  200), Vector2D( 0,  200) };
+	ripple_positions[11] = { Vector2D(-70,  200), Vector2D(70,  200) };
+	ripple_positions[4] = { Vector2D(-70,  200), Vector2D(70,  200) };
+	ripple_positions[6] = { Vector2D(-30,  -40), Vector2D(30,  -40) };
+	ripple_positions[5] = { Vector2D(-70,  200), Vector2D(-70,  200) };
+	ripple_positions[7] = { Vector2D(70,  200), Vector2D(70,  200) };
+	ripple_positions[8] = { Vector2D(-70,  200), Vector2D(70,  200) };
+	ripple_positions[9] = { Vector2D(0,  200), Vector2D(0,  200) };
 }
 
 /// <summary>
@@ -671,7 +670,7 @@ void Boss3::Shot(float delta_second)
 					ripples[i].timer = 0.0f;
 					ripples[i].pos = location + left_offset;
 					AnimationManager::GetInstance()->PlaySE(SE_NAME::Hamon);
-					AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::Hamon, 50);
+					AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::Hamon, 100);
 					break;
 				}
 			}

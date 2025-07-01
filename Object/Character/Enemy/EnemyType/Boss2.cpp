@@ -87,6 +87,25 @@ void Boss2::Initialize()
 		ripples[i].active = false;
 		ripples[i].timer = 0.0f;
 	}
+
+	// 例：攻撃パターンごとに左右の波紋位置を定義
+	ripple_positions[0] = { Vector2D(-160,  100), Vector2D(160,  100) };
+	ripple_positions[7] = { Vector2D(-100,  70), Vector2D(100,  70) };
+	ripple_positions[5] = { Vector2D(-100,  70), Vector2D(100,  70) };
+	ripple_positions[6] = { Vector2D(-100,  70), Vector2D(100,  70) };
+	ripple_positions[10] = { Vector2D(-100,  70), Vector2D(100,  70) };
+	ripple_positions[12] = { Vector2D(-160,  100), Vector2D(160,  100) };
+
+
+	//		if (attack_pattrn != 12)
+//		{
+//			ripples[i].pos = Vector2D(location.x - 160.0f, location.y + 100.0f); // 左砲口
+//		}
+//		else
+//		{
+//			ripples[i].pos = Vector2D(location.x - 100.0f, location.y + 40.0f); // 左砲口
+//		}
+
 }
 
 /// <summary>
@@ -232,6 +251,13 @@ void Boss2::Update(float delta_second)
 
 	// 攻撃パターンを設定して弾を打つ
 	Shot(delta_second);
+
+	if (is_drive == true)
+	{
+		ripple_positions[7] = { Vector2D(-160,  100), Vector2D(160,  100) };
+		ripple_positions[5] = { Vector2D(-160,  100), Vector2D(160,  100) };
+
+	}
 
 
 	damage_timer += delta_second;
@@ -649,46 +675,74 @@ void Boss2::Shot(float delta_second)
 	// 時間経過したら攻撃パターンを変更して弾を発射
 	if (generate2 == true && is_shot == false)
 	{
+		auto it = ripple_positions.find(attack_pattrn);
+		if (it != ripple_positions.end()) {
+			const Vector2D& left_offset = it->second.first;
+			const Vector2D& right_offset = it->second.second;
 
-		// 波紋を2つ（左右）発生させる
-		for (int i = 0; i < 5; ++i)
-		{
-			if (!ripples[i].active)
-			{
-				ripples[i].active = true;
-				ripples[i].timer = 0.0f;
+			for (int i = 0; i < 5; ++i) {
+				if (!ripples[i].active) {
+					ripples[i].active = true;
+					ripples[i].timer = 0.0f;
+					ripples[i].pos = location + left_offset;
+					AnimationManager::GetInstance()->PlaySE(SE_NAME::Hamon);
+					AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::Hamon, 100);
+					break;
+				}
+			}
 
-				// ここで波紋の音を再生する
-				AnimationManager::GetInstance()->PlaySE(SE_NAME::Hamon); // ←仮のSE名
-				AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::Hamon, 50);
-				if (attack_pattrn != 12)
-				{
-					ripples[i].pos = Vector2D(location.x - 160.0f, location.y + 100.0f); // 左砲口
+			for (int i = 0; i < 5; ++i) {
+				if (!ripples[i].active) {
+					ripples[i].active = true;
+					ripples[i].timer = 0.0f;
+					ripples[i].pos = location + right_offset;
+					break;
 				}
-				else
-				{
-					ripples[i].pos = Vector2D(location.x - 100.0f, location.y + 40.0f); // 左砲口
-				}
-				break;
 			}
 		}
-		for (int i = 0; i < 5; ++i)
-		{
-			if (!ripples[i].active)
-			{
-				ripples[i].active = true;
-				ripples[i].timer = 0.0f;
-				if (attack_pattrn != 12)
-				{
-					ripples[i].pos = Vector2D(location.x + 160.0f, location.y + 100.0f); // 左砲口
-				}
-				else
-				{
-					ripples[i].pos = Vector2D(location.x + 100.0f, location.y + 40.0f); // 左砲口
-				}
-				break;
-			}
-		}
+
+
+
+
+		//// 波紋を2つ（左右）発生させる
+		//for (int i = 0; i < 5; ++i)
+		//{
+		//	if (!ripples[i].active)
+		//	{
+		//		ripples[i].active = true;
+		//		ripples[i].timer = 0.0f;
+
+		//		// ここで波紋の音を再生する
+		//		AnimationManager::GetInstance()->PlaySE(SE_NAME::Hamon); // ←仮のSE名
+		//		AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::Hamon, 50);
+		//		if (attack_pattrn != 12)
+		//		{
+		//			ripples[i].pos = Vector2D(location.x - 160.0f, location.y + 100.0f); // 左砲口
+		//		}
+		//		else
+		//		{
+		//			ripples[i].pos = Vector2D(location.x - 100.0f, location.y + 40.0f); // 左砲口
+		//		}
+		//		break;
+		//	}
+		//}
+		//for (int i = 0; i < 5; ++i)
+		//{
+		//	if (!ripples[i].active)
+		//	{
+		//		ripples[i].active = true;
+		//		ripples[i].timer = 0.0f;
+		//		if (attack_pattrn != 12)
+		//		{
+		//			ripples[i].pos = Vector2D(location.x + 160.0f, location.y + 100.0f); // 左砲口
+		//		}
+		//		else
+		//		{
+		//			ripples[i].pos = Vector2D(location.x + 100.0f, location.y + 40.0f); // 左砲口
+		//		}
+		//		break;
+		//	}
+		//}
 
 		shot_timer += delta_second;
 		if (shot_timer >= shot_interval)
@@ -702,6 +756,7 @@ void Boss2::Shot(float delta_second)
 			// HPが減ったら攻撃パターンを変更（オーバーフロー防止に合わせてリセット）
 			if (hp <= 10000 && attack_pattrn_num != std::vector<int>{7, 5})
 			{
+				is_drive = true;
 				attack_pattrn_num = { 7, 5 };
 				attack_count = 0; // 安全にリセット
 			}
@@ -802,11 +857,26 @@ void Boss2::DrawBoss2(const Vector2D position) const
 			int alpha = static_cast<int>(255.0f - 55.0f * t);
 
 			SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
-			DrawCircle(static_cast<int>(ripples[i].pos.x),
-				static_cast<int>(ripples[i].pos.y),
-				static_cast<int>(radius),
-				GetColor(150, 255, 150),
-				FALSE);
+
+			if (is_drive == false)
+			{
+
+				DrawCircle(static_cast<int>(ripples[i].pos.x),
+					static_cast<int>(ripples[i].pos.y),
+					static_cast<int>(radius),
+					GetColor(150, 255, 150),
+					FALSE);
+			}
+			else
+			{
+				DrawCircle(static_cast<int>(ripples[i].pos.x),
+					static_cast<int>(ripples[i].pos.y),
+					static_cast<int>(radius),
+					GetColor(255, 0, 0),
+					FALSE);
+
+			}
+
 		}
 	}
 
