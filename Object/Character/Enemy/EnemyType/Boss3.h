@@ -70,7 +70,7 @@ private:
 	bool explosions_started = false;       // 爆発処理を開始したかどうか
 	Vector2D crash_velocity = Vector2D(100.0f, -100.0f); // 初速度（右へ + 上に少し浮いてから落下）
 	float gravity = 50.0f; // 重力加速度（Y方向）
-
+	float damage_timer = 0.0f;
 
 	struct Ripple {
 		Vector2D pos;
@@ -85,6 +85,8 @@ private:
 	bool ripple_start = false; // 波紋出現を開始するフラグ
 
 	int se[4];
+
+	std::map<int, std::pair<Vector2D, Vector2D>> ripple_positions;
 
 public:
 	Boss3();
@@ -178,7 +180,7 @@ private:
 	void Pattrn5_2(float spiral_interval, float spiral_duration_limit, float spiral_speed, const Vector2D& generate_location, float delta_second);
 	void Pattrn6(float fan_angle_range, float bullet_speed, float fan_interval, float fan_duration_limit, const Vector2D& generate_location, float delta_second);
 	void Pattrn6_2(float fan_angle_range, float bullet_speed, float fan_interval, float fan_duration_limit, const Vector2D& generate_location, float delta_second);
-	void Pattrn7(float fan_angle_range, float bullet_speed, float fan_interval, float fan_duration_limit, const Vector2D& generate_location, float delta_second);
+	void Pattrn7(int bullet_num, float fan_angle_range, float bullet_speed, float fan_interval, float fan_duration_limit, const Vector2D& generate_location, float delta_second, bool image_change);
 	void Pattrn7_2(float fan_angle_range, float bullet_speed, float fan_interval, float fan_duration_limit, const Vector2D& generate_location, float delta_second);
 	void Pattrn8(float wave_interval, float wave_duration_limit, const Vector2D& generate_location, float delta_second);
 	void Pattrn9(int shot_count, float radius, float angular_speed, float bullet_speed, const Vector2D& generate_location, float delta_second);

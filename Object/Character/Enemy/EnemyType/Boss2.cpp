@@ -658,6 +658,9 @@ void Boss2::Shot(float delta_second)
 				ripples[i].active = true;
 				ripples[i].timer = 0.0f;
 
+				// ここで波紋の音を再生する
+				AnimationManager::GetInstance()->PlaySE(SE_NAME::Hamon); // ←仮のSE名
+				AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::Hamon, 50);
 				if (attack_pattrn != 12)
 				{
 					ripples[i].pos = Vector2D(location.x - 160.0f, location.y + 100.0f); // 左砲口
@@ -988,7 +991,7 @@ void Boss2::Attack(float delta_second)
 			/// <param name="fan_duration_limit">攻撃時間</param>
 			/// <param name="generate_location">生成する位置</param>
 			/// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
-			Pattrn7_2(150.0f, 500.0f, 0.2f, 10.0f, Vector2D(location.x, location.y + 100.0f), delta_second);
+			Pattrn7_2(150.0f, 500.0f, 0.2f, 5.0f, Vector2D(location.x, location.y + 100.0f), delta_second);
 
 			break;
 		case 8:
@@ -1095,6 +1098,9 @@ void Boss2::Pattrn4(int bullet_num, float speed, float spiral_interval, float sp
 
 			EnemyShot4* e_shot4 = objm->CreateObject<EnemyShot4>(generate_location);
 			e_shot4->SetVelocity(velocity);
+			AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+			AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
+
 		}
 	}
 
@@ -1130,6 +1136,10 @@ void Boss2::Pattrn4_2(int bullet_num, float speed, float spiral_interval, float 
 
 			EnemyShot4* e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x - 170.0f, generate_location.y + 65.0f));
 			e_shot4->SetVelocity(velocity);
+			AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+			AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
+
+
 		}
 
 		for (int i = 0; i < bullet_num; i++)
@@ -1200,6 +1210,9 @@ void Boss2::Pattrn5(float spiral_interval, float spiral_duration_limit, float sp
 
 		EnemyShot4* shot = objm->CreateObject<EnemyShot4>(generate_location);
 		shot->SetVelocity(velocity);
+		AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+		AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
+
 #endif
 
 
@@ -1270,6 +1283,9 @@ void Boss2::Pattrn5_2(float spiral_interval, float spiral_duration_limit, float 
 
 			EnemyShot4* shot = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x + 170.0f, generate_location.y + 65.0f));
 			shot->SetVelocity(velocity);
+			AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+			AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
+
 		}
 
 		// 左側（反時計回り、上方向のみ）
@@ -1337,6 +1353,10 @@ void Boss2::Pattrn6(float fan_angle_range, float bullet_speed, float fan_interva
 
 		e_shot4 = objm->CreateObject<EnemyShot4>(generate_location);
 		e_shot4->SetVelocity(velocity);
+		AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+		AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
+
+
 		
 	}
 
@@ -1378,6 +1398,9 @@ void Boss2::Pattrn6_2(float fan_angle_range, float bullet_speed, float fan_inter
 		e_shot4->SetVelocity(velocity);
 		e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x - 170.0f, generate_location.y + 65.0f));
 		e_shot4->SetVelocity(velocity);
+		AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+		AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
+
 	}
 
 	// 時間制限を超えたら終了（発射しない）
@@ -1425,6 +1448,9 @@ void Boss2::Pattrn7(float fan_angle_range, float bullet_speed, float fan_interva
 
 			e_shot4 = objm->CreateObject<EnemyShot4>(generate_location);
 			e_shot4->SetVelocity(velocity);
+			AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+			AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
+
 		}
 	}
 
@@ -1464,6 +1490,9 @@ void Boss2::Pattrn7_2(float fan_angle_range, float bullet_speed, float fan_inter
 
 			e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x + 170.0f, generate_location.y - 10.0f));
 			e_shot4->SetVelocity(velocity);
+			AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+			AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
+
 		}
 
 		for (int i = 0; i < bullet_count; ++i)
@@ -1522,6 +1551,9 @@ void Boss2::Pattrn8(float wave_interval, float wave_duration_limit, const Vector
 		e_shot5->SetWaveReflected(true);
 		e_shot5->SetVelocity(Vector2D(0, 200));
 		e_shot5->SetWaveParameters(600.0f, 0.7f);
+		AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+		AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
+
 	}
 
 	// 一定時間経過したら終了
@@ -1584,11 +1616,14 @@ void Boss2::Pattrn9(int shot_count, float radius, float angular_speed, float bul
 
 			// ボスの周囲に弾を配置
 			e_shot4 = objm->CreateObject<EnemyShot4>(generate_location);
+			AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+			AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
 
 			if (e_shot4)
 			{
 				rotating_shots.push_back(e_shot4);  // 正しく生成されたら弾を保存
 				e_shot4->SetVelocity(Vector2D(0, 0)); // 回転だけなので弾速は0
+
 			}
 		}
 	}
@@ -1665,6 +1700,9 @@ void Boss2::Pattrn9_2(int shot_count, float radius, float angular_speed, float b
 			{
 				angles_left.push_back(angle);
 				e_shot4 = objm->CreateObject<EnemyShot4>(left_center);
+				AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+				AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
+
 				if (e_shot4)
 				{
 					shots_left.push_back(e_shot4);
@@ -1778,6 +1816,9 @@ void Boss2::Pattrn10(int shot_count, float radius, float angular_speed, float ce
 				angles.push_back(angle);
 
 				EnemyShot4* shot = objm->CreateObject<EnemyShot4>(center_pos);
+				AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+				AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
+
 				if (shot)
 				{
 					shot->SetVelocity(Vector2D(0, 0));
@@ -1851,6 +1892,9 @@ void Boss2::Pattrn10_2(int shot_count, float radius, float angular_speed, float 
 
 				// 左側の弾
 				EnemyShot4* shot_L = objm->CreateObject<EnemyShot4>(center_pos_L);
+				AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+				AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
+
 				if (shot_L)
 				{
 					shot_L->SetVelocity(Vector2D(0, 0));

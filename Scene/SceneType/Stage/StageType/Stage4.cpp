@@ -44,8 +44,8 @@ void Stage4::Finalize()
 	// I—¹ˆ—
 	GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
 	objm->Finalize();
-	AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
-	manager->RemoveAnimation(anim_id);
+	//AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+	//manager->RemoveAnimation(anim_id);
 
 }
 

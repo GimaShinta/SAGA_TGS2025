@@ -24,7 +24,9 @@ enum class SE_NAME
 	Bakuhatu_End,
 	Kill,
 	Destroy,
-	Hit
+	Hit,
+	EnemyShot,
+	Hamon
 	// •K—v‚É‰ž‚¶‚Ä’Ç‰Á
 };
 

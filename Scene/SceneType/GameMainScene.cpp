@@ -25,7 +25,7 @@ void GameMainScene::Initialize()
     AnimationManager* anim = Singleton<AnimationManager>::GetInstance();
     //anim->LoadAllEffects();
 
-    current_stage = new Stage1(player);
+    current_stage = new Stage4(player);
 
     current_stage->Initialize();
 

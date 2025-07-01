@@ -100,6 +100,8 @@ void Zako6::Update(float delta_second)
             rotation += delta_second * (1.5f * (1.0f - t));
 
             if (t >= 1.0f) {
+                AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot); // Å©âºÇÃSEñº
+
                 ShootToPlayer(0.003f); // Å© íeë¨ÇìKêÿÇ…ê›íË
                 float_timer = 0.0f;
                 state = ZakoState::Descending;
@@ -159,6 +161,8 @@ void Zako6::Update(float delta_second)
             scale = 5.0f - 4.2f * ease_t;
 
             if (t >= 1.0f) {
+                AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot); // Å©âºÇÃSEñº
+
                 ShootToPlayer(0.003f);
                 state = ZakoState::Floating;
                 base_location = location;
@@ -221,6 +225,8 @@ void Zako6::Update(float delta_second)
             scale = scale_min + (0.6 - scale_min) * ease_t;
 
             if (t >= 1.0f) {
+                AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot); // Å©âºÇÃSEñº
+
                 ShootToPlayer(0.003f);
                 float_timer = 0.0f;
                 state = ZakoState::Floating;
