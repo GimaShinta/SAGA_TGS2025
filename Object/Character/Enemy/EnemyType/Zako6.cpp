@@ -151,7 +151,7 @@ void Zako6::Update(float delta_second)
         {
         case ZakoState::Appearing: {
             appear_timer += delta_second;
-            float t = my_min(appear_timer / 1.5f, 1.0f);
+            float t = my_min(appear_timer / 1.2f, 1.0f);
             float ease_t = 1 - powf(1 - t, 3);
 
             location = start_pos + (target_pos - start_pos) * ease_t;

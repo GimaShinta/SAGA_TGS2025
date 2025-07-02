@@ -552,7 +552,7 @@ void Stage3::EnemyAppearance(float delta)
     // 1. ボスが出ていればZakoは出現しない
     if (boss2_spawned) return;
 
-    if (stage_timer < 5.0f)
+    if (stage_timer < 4.5f)
     {
         //SpawnBossAndItems();
 
@@ -596,14 +596,16 @@ void Stage3::EnemyAppearance(float delta)
             //is_zako7_group_spawned = true;
         }
 
-        HandleZako1_LR(delta);
+        HandleZako1_Left(delta);
+        //HandleZako1_LR(delta);
     }
-    else if (stage_timer < 10.0f)
+    else if (stage_timer < 6.8f)
     {
-        HandleZako1_Center(delta);
+        HandleZako1_Right(delta);
     }
     else if (stage_timer < 15.0f)
     {
+        HandleZako1_Center(delta);
         //HandleZako2_Upward(delta);
     }
     else if (stage_timer < 20.0f)
@@ -1212,43 +1214,157 @@ void Stage3::ScrollEffectUpdate(float delta)
 
 void Stage3::HandleZako1_LR(float delta)
 {
+    //GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+
+    //const int num = 6;
+    //const float spacing = 80.0f;
+    //const float appear_y = -100.0f;
+
+    //// 新しい出現開始条件（最初の1回）
+    //float spawn_interval = my_max(2.0f - stage_timer / 5.0f, 0.5f);
+    //if (!spawning_zako_lr && enemy_spawn_timer >= spawn_interval)
+    //{
+    //    // 出現開始
+    //    spawn_index_lr = 0;
+    //    spawn_delay_timer_lr = 0.0f;
+    //    spawning_zako_lr = true;
+    //    spawn_from_left = (enemy_group_index % 2 == 0);
+
+    //    enemy_group_index++;
+    //    enemy_spawn_timer = 0.0f;
+    //}
+
+    //// 出現処理中ではないならリターン
+    //if (!spawning_zako_lr) return;
+
+    //// 次の出現まで待つ
+    //spawn_delay_timer_lr -= delta;
+    //if (spawn_delay_timer_lr > 0.0f) return;
+
+    //// 敵出現処理
+    //float base_x = spawn_from_left ? 100.0f : (D_WIN_MAX_X - 100.0f);
+    //float dx = spawn_from_left ? spacing : -spacing;
+
+    //float end_base_x = spawn_from_left ? D_WIN_MAX_X / 2 - 180.0f : D_WIN_MAX_X / 2 + 120.0f;
+    //float end_dx = spawn_from_left ? spacing : -spacing;
+    //float target_y = spawn_from_left ? 200.0f : 300.0f;
+
+    //Vector2D appear_pos(base_x + dx * spawn_index_lr, appear_y);
+    //Vector2D end_pos(end_base_x + end_dx * spawn_index_lr, target_y);
+    //float delay = spawn_index_lr * 0.5f;
+
+    //auto zako = objm->CreateObject<Zako6>(appear_pos);
+    //zako->SetMode(ZakoMode::Zako3);
+    //zako->SetAppearParams(appear_pos, end_pos, 1.3f + delay, spawn_from_left);
+    //zako->SetPlayer(player);
+    //enemy_list.push_back(zako);
+
+    //// 次の出現の準備
+    //spawn_index_lr++;
+    //if (spawn_index_lr >= num)
+    //{
+    //    spawning_zako_lr = false; // 全員出現完了
+    //}
+    //else
+    //{
+    //    spawn_delay_timer_lr = 0.2f; // 次の出現までの待機時間
+    //}
+}
+void Stage3::HandleZako1_Left(float delta)
+{
     GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
 
-    float spawn_interval = my_max(2.0f - stage_timer / 5.0f, 0.5f);
-    if (enemy_spawn_timer < spawn_interval) return;
-
     const int num = 6;
-    const float spacing = 80.0f;
+    const float spacing = 100.0f;
     const float appear_y = -100.0f;
-    //const float target_y = 300.0f;
 
-    bool from_left = (enemy_group_index % 2 == 0);
-
-    float base_x = from_left ? 100.0f : (D_WIN_MAX_X - 100.0f);
-    float dx = from_left ? spacing : -spacing;
-
-    // 出現後の整列位置の基準点（中央を基準に左右に分かれる）
-    float end_base_x = from_left ? D_WIN_MAX_X / 2 - 120.0f : D_WIN_MAX_X / 2 + 120.0f;
-    float end_dx = from_left ? spacing : -spacing;
-
-    float target_y = from_left ? 200.0f : 300.0f;
-
-
-    for (int i = 0; i < num; ++i)
+    float spawn_interval = my_max(2.0f - stage_timer / 5.0f, 0.5f);
+    if (!spawning_zako_left && enemy_spawn_timer >= spawn_interval)
     {
-        Vector2D appear_pos(base_x + dx * i, appear_y);
-        Vector2D end_pos(end_base_x + end_dx * i, target_y);
-        float delay = i * 0.5f;
-
-        auto zako = objm->CreateObject<Zako6>(appear_pos);
-        zako->SetMode(ZakoMode::Zako3);
-        zako->SetAppearParams(appear_pos, end_pos, 1.3f + delay, from_left);
-        zako->SetPlayer(player);
-        enemy_list.push_back(zako);
+        spawn_index_left = 0;
+        spawn_delay_timer_left = 0.0f;
+        spawning_zako_left = true;
+        enemy_spawn_timer = 0.0f;
     }
 
-    enemy_group_index++;
-    enemy_spawn_timer = 0.0f;
+    if (!spawning_zako_left) return;
+
+    spawn_delay_timer_left -= delta;
+    if (spawn_delay_timer_left > 0.0f) return;
+
+    float base_x = 100.0f;
+    float dx = spacing;
+    float end_base_x = D_WIN_MAX_X / 2 - 180.0f;
+    float end_dx = spacing;
+    float target_y = 200.0f;
+
+    Vector2D appear_pos(base_x + dx * spawn_index_left, appear_y);
+    Vector2D end_pos(end_base_x + end_dx * spawn_index_left, target_y);
+    float delay = spawn_index_left * 0.5f;
+
+    auto zako = objm->CreateObject<Zako6>(appear_pos);
+    zako->SetMode(ZakoMode::Zako3);
+    zako->SetAppearParams(appear_pos, end_pos, 1.3f + delay, true); // 左から
+    zako->SetPlayer(player);
+    enemy_list.push_back(zako);
+
+    spawn_index_left++;
+    if (spawn_index_left >= num)
+    {
+        spawning_zako_left = false;
+    }
+    else
+    {
+        spawn_delay_timer_left = 0.2f;
+    }
+}
+void Stage3::HandleZako1_Right(float delta)
+{
+    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+
+    const int num = 6;
+    const float spacing = 100.0f;
+    const float appear_y = -100.0f;
+
+    float spawn_interval = my_max(2.0f - stage_timer / 5.0f, 0.5f);
+    if (!spawning_zako_right && enemy_spawn_timer >= spawn_interval)
+    {
+        spawn_index_right = 0;
+        spawn_delay_timer_right = 0.0f;
+        spawning_zako_right = true;
+        enemy_spawn_timer = 0.0f;
+    }
+
+    if (!spawning_zako_right) return;
+
+    spawn_delay_timer_right -= delta;
+    if (spawn_delay_timer_right > 0.0f) return;
+
+    float base_x = D_WIN_MAX_X - 100.0f;
+    float dx = -spacing;
+    float end_base_x = D_WIN_MAX_X / 2 + 120.0f;
+    float end_dx = -spacing;
+    float target_y = 300.0f;
+
+    Vector2D appear_pos(base_x + dx * spawn_index_right, appear_y);
+    Vector2D end_pos(end_base_x + end_dx * spawn_index_right, target_y);
+    float delay = spawn_index_right * 0.5f;
+
+    auto zako = objm->CreateObject<Zako6>(appear_pos);
+    zako->SetMode(ZakoMode::Zako3);
+    zako->SetAppearParams(appear_pos, end_pos, 1.3f + delay, false); // 右から
+    zako->SetPlayer(player);
+    enemy_list.push_back(zako);
+
+    spawn_index_right++;
+    if (spawn_index_right >= num)
+    {
+        spawning_zako_right = false;
+    }
+    else
+    {
+        spawn_delay_timer_right = 0.2f;
+    }
 }
 void Stage3::HandleZako1_Center(float delta)
 {

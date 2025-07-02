@@ -457,7 +457,7 @@ void Zako::SetPattern(ZakoPattern new_pattern)
 
         case ZakoPattern::RightMove:
         case ZakoPattern::LeftMove:
-            PlaySoundMem(se_start, DX_PLAYTYPE_BACK);
+            //PlaySoundMem(se_start, DX_PLAYTYPE_BACK);
             hp = 20;
             images = images_a;
             anim_indices = { 0, 1, 2, 3 };

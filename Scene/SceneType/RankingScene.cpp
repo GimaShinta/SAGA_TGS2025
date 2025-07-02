@@ -13,15 +13,19 @@ void RankingScene::Initialize()
     total_score = 0.0f;
     start_time = GetNowCount();
     confirm_reset = false;
+    cursor_index = 0;
 
-    auto scores = Singleton<ScoreData>::GetInstance()->GetScoreData();
+    auto* score_data = Singleton<ScoreData>::GetInstance();
+
+    // スコア合計
+    auto scores = score_data->GetScoreData();
     for (float s : scores)
         total_score += s;
 
     LoadRankingFromFile();
 
-    // スコアが0より大きければ追加・保存
-    if (total_score > 0.0f)
+    // ★一度だけ登録
+    if (total_score > 0.9f && !score_data->IsSubmitted())
     {
         entries.push_back({ total_score, GetTodayString() });
         std::sort(entries.begin(), entries.end(), [](auto& a, auto& b) {
@@ -30,6 +34,9 @@ void RankingScene::Initialize()
         if (entries.size() > 10)
             entries.resize(10);
         SaveRankingToFile();
+
+        // ★登録済みにマーク
+        score_data->MarkSubmitted();
     }
 }
 
@@ -104,39 +111,45 @@ eSceneType RankingScene::Update(float delta)
     wait_timer += static_cast<int>(delta * 60);
     InputManager* input = Singleton<InputManager>::GetInstance();
 
-        if (input->GetKeyDown(KEY_INPUT_DOWN) || input->GetButtonDown(XINPUT_BUTTON_DPAD_DOWN)) // 十字↓
-            cursor_index = (cursor_index + 1) % entries.size();
+    if (confirm_reset)
+    {
+        if (input->GetKeyDown(KEY_INPUT_X) || input->GetButtonDown(XINPUT_BUTTON_A))
+        {
+            if (!entries.empty())
+            {
+                entries.erase(entries.begin() + cursor_index);
 
-        if (input->GetKeyDown(KEY_INPUT_UP) || input->GetButtonDown(XINPUT_BUTTON_DPAD_UP))   // 十字↑
-            cursor_index = (cursor_index + entries.size() - 1) % entries.size();
+                // 安全に index を調整
+                if (cursor_index >= entries.size())
+                    cursor_index = Max(0, static_cast<int>(entries.size()) - 1);
+
+                SaveRankingToFile();
+            }
+
+            confirm_reset = false;
+        }
+        if (input->GetButtonDown(XINPUT_BUTTON_B))
+        {
+            confirm_reset = false;
+        }
+    }
+    else
+    {
+        if (!entries.empty())
+        {
+            if (input->GetKeyDown(KEY_INPUT_DOWN) || input->GetButtonDown(XINPUT_BUTTON_DPAD_DOWN))
+                cursor_index = (cursor_index + 1) % entries.size();
+
+            if (input->GetKeyDown(KEY_INPUT_UP) || input->GetButtonDown(XINPUT_BUTTON_DPAD_UP))
+                cursor_index = (cursor_index + entries.size() - 1) % entries.size();
+        }
 
         if (input->GetKeyDown(KEY_INPUT_Z) || input->GetKeyDown(KEY_INPUT_RETURN) || input->GetButtonDown(XINPUT_BUTTON_B))
             return eSceneType::eTitle;
 
-        if (input->GetKeyDown(KEY_INPUT_X) || input->GetButtonDown(1))
+        if (input->GetKeyDown(KEY_INPUT_X) || input->GetButtonDown(XINPUT_BUTTON_X))
             confirm_reset = true;
-    
-
-        if (input->GetKeyDown(KEY_INPUT_Z) || input->GetButtonDown(XINPUT_BUTTON_Y))
-        {
-            ResetRankingFile();
-            confirm_reset = false;
-        }
-        else if (input->GetKeyDown(KEY_INPUT_X) || input->GetButtonDown(1))
-        {
-            confirm_reset = false;
-        }
-
-
-    //if (wait_timer > 30)
-    //{
-    //    if (input->GetKeyDown(KEY_INPUT_Z) || input->GetKeyDown(KEY_INPUT_RETURN) || input->GetButtonDown(0))
-    //        return eSceneType::eTitle;
-
-    //    if (input->GetKeyDown(KEY_INPUT_X) || input->GetButtonDown(1))
-    //        confirm_reset = true;
-    //}
-
+    }
     return GetNowSceneType();
 }
 

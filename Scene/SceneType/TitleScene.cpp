@@ -65,9 +65,9 @@ void TitleScene::Initialize()
         m_particles.push_back(p);
     }
 
-    // スコアやログのリセット
-    ScoreData* score = Singleton<ScoreData>::GetInstance();
-    score->Reset();
+    //// スコアやログのリセット
+    //ScoreData* score = Singleton<ScoreData>::GetInstance();
+    //score->Reset();
 
 
 }
