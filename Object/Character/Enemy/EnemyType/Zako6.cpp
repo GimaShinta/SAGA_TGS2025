@@ -1,6 +1,8 @@
 #include "Zako6.h"
 #include "../../../../Utility/ProjectConfig.h"
 #include "../../../../Utility/AnimationManager.h"
+#include "../../../../Object/Character/Shot/EnemyShot/EnemyShot2.h"
+
 #include <cmath>
 
 Zako6::Zako6()
@@ -14,9 +16,9 @@ Zako6::~Zako6()
 void Zako6::Initialize()
 {
     enemy_type = ENE_ZAKO3;
-    z_layer = 2;
+    z_layer = 3;
     box_size = 12;
-    hp = 30;
+    hp = 10;
 
     //collision.is_blocking = true;
     //collision.object_type = eObjectType::eEnemy;
@@ -37,6 +39,8 @@ void Zako6::Initialize()
     enemy_jet = rm->GetImages("Resource/Image/Object/Player/Shot/anime_effect17.png", 6, 6, 1, 8, 88);
     jet = enemy_jet[4];
 
+    //sound_destroy = rm->GetSounds("Resource/sound/se/se_effect/kill_4.mp3");
+    //ChangeVolumeSoundMem(255 * 100 / 100, sound_destroy);
 
     // 共通パラメータ
     scale_min = 0.3f;
@@ -64,6 +68,18 @@ void Zako6::SetMode(ZakoMode new_mode)
     mode = new_mode;
 }
 
+void Zako6::ShootToPlayer(float speed)
+{
+    GameObjectManager* gm = Singleton<GameObjectManager>::GetInstance();
+    GameObjectBase* shot = gm->CreateObject<EnemyShot2>(location); // ←使用中の弾クラスに変更
+    if (shot && player)
+    {
+        Vector2D dir = player->GetLocation() - location;
+        dir.Normalize();
+        shot->SetVelocity(dir * speed);
+    }
+}
+
 void Zako6::Update(float delta_second)
 {
     float_timer += delta_second;
@@ -84,6 +100,9 @@ void Zako6::Update(float delta_second)
             rotation += delta_second * (1.5f * (1.0f - t));
 
             if (t >= 1.0f) {
+                AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot); // ←仮のSE名
+
+                ShootToPlayer(0.003f); // ← 弾速を適切に設定
                 float_timer = 0.0f;
                 state = ZakoState::Descending;
             }
@@ -112,7 +131,7 @@ void Zako6::Update(float delta_second)
             location.x = base_location.x + sinf(float_timer * 1.5f) * 10.0f;
             location.y = base_location.y + sinf(float_timer * 2.0f) * 5.0f;
 
-            if (float_timer >= 5.0f) {
+            if (float_timer >= 3.0f) {
                 state = ZakoState::Leaving;
                 float_timer = 0.0f;
             }
@@ -132,7 +151,7 @@ void Zako6::Update(float delta_second)
         {
         case ZakoState::Appearing: {
             appear_timer += delta_second;
-            float t = my_min(appear_timer / appear_duration, 1.0f);
+            float t = my_min(appear_timer / 1.2f, 1.0f);
             float ease_t = 1 - powf(1 - t, 3);
 
             location = start_pos + (target_pos - start_pos) * ease_t;
@@ -142,6 +161,9 @@ void Zako6::Update(float delta_second)
             scale = 5.0f - 4.2f * ease_t;
 
             if (t >= 1.0f) {
+                AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot); // ←仮のSE名
+
+                ShootToPlayer(0.003f);
                 state = ZakoState::Floating;
                 base_location = location;
                 float_timer = 0.0f;
@@ -155,7 +177,7 @@ void Zako6::Update(float delta_second)
             location.x = base_location.x + sinf(float_timer * 1.5f) * 10.0f;
             location.y = base_location.y + sinf(float_timer * 2.0f) * 5.0f;
 
-            if (float_timer >= 2.0f) {
+            if (float_timer >= 3.0f) {
                 state = ZakoState::Leaving;
                 float_timer = 0.0f;
             }
@@ -203,9 +225,12 @@ void Zako6::Update(float delta_second)
             scale = scale_min + (0.6 - scale_min) * ease_t;
 
             if (t >= 1.0f) {
+                AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot); // ←仮のSE名
+
+                ShootToPlayer(0.003f);
                 float_timer = 0.0f;
                 state = ZakoState::Floating;
-                base_location = location; // ← 浮遊の基準位置も更新
+                base_location = location;
             }
             break;
         }
@@ -214,7 +239,7 @@ void Zako6::Update(float delta_second)
             location.x = base_location.x + sinf(float_timer * 1.5f) * 10.0f;
             location.y = base_location.y + sinf(float_timer * 2.0f) * 5.0f;
 
-            if (float_timer >= 2.0f) {
+            if (float_timer >= 3.0f) {
                 state = ZakoState::Leaving;
                 float_timer = 0.0f;
             }
@@ -250,8 +275,8 @@ void Zako6::Update(float delta_second)
         is_destroy = true;
 
         DropItems();
-
         AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+        manager->PlaySE(SE_NAME::Destroy);
         anim_id = manager->PlayerAnimation(EffectName::eExprotion2, location, 0.035f, false);
         manager->SetScale(anim_id, 0.5f);
 

@@ -145,6 +145,7 @@
     <ClCompile Include="Object\Character\Enemy\EnemyType\Zako5.cpp" />
     <ClCompile Include="Object\Character\Enemy\EnemyType\Stage1BOSS.cpp" />
     <ClCompile Include="Object\Character\Shot\EnemyShot\FollowBeam.cpp" />
+    <ClCompile Include="Scene\SceneType\CreditScene.cpp" />
     <ClCompile Include="Scene\SceneType\ExitScene.cpp" />
     <ClCompile Include="Scene\SceneType\RankingScene.cpp" />
     <ClCompile Include="Scene\SceneType\Stage\StageType\Stage4.cpp" />
@@ -201,6 +202,7 @@
     <ClInclude Include="Object\Character\Enemy\EnemyType\Zako5.h" />
     <ClInclude Include="Object\Character\Enemy\EnemyType\Stage1BOSS.h" />
     <ClInclude Include="Object\Character\Shot\EnemyShot\FollowBeam.h" />
+    <ClInclude Include="Scene\SceneType\CreditScene.h" />
     <ClInclude Include="Scene\SceneType\ExitScene.h" />
     <ClInclude Include="Scene\SceneType\RankingScene.h" />
     <ClInclude Include="Scene\SceneType\Stage\StageType\Stage4.h" />

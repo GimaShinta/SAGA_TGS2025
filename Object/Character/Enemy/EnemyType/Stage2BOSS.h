@@ -70,6 +70,8 @@ private:
     std::vector<int> anim_indices;
     int image = -1;
 
+    int sound_destroy;
+
     float part_attack_timer = 0.0f;
     int active_group_id = 0;
 

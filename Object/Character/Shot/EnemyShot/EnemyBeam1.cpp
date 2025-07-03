@@ -18,7 +18,7 @@ EnemyBeam1::~EnemyBeam1()
 // ‰Šú‰»ˆ—
 void EnemyBeam1::Initialize()
 {
-    z_layer = 4;
+    z_layer = 2;
     box_size = Vector2D(8.0f, 800.0f);  // Å‰‚Í×‚­i—\’›ü—pj
 
     collision.is_blocking = false;  // Å‰‚Í“–‚½‚è”»’è‚È‚µ

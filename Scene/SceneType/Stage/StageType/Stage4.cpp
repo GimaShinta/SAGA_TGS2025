@@ -27,9 +27,9 @@ void Stage4::Initialize()
 	// 初期化処理
 // 【記述位置は仮】ステージの長さを代入
 	distance = STAGE3_DISTANCE;
-    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
-    objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) + 100.0f));
-    objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) + 50.0f));
+    //GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+    //objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) + 100.0f));
+    //objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) + 50.0f));
 
 	//フォント
 // font_digital = CreateFontToHandle("DS-Digital", 28, 6, DX_FONTTYPE_ANTIALIASING);
@@ -44,8 +44,8 @@ void Stage4::Finalize()
 	// 終了処理
 	GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
 	objm->Finalize();
-	AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
-	manager->RemoveAnimation(anim_id);
+	//AnimationManager* manager = Singleton<AnimationManager>::GetInstance();
+	//manager->RemoveAnimation(anim_id);
 
 }
 
@@ -150,7 +150,7 @@ void Stage4::Draw()
         DrawBox((D_WIN_MAX_X / 2) - 350, 0, (D_WIN_MAX_X / 2) + 350, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
 
         SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
-        DrawFormatStringToHandle((D_WIN_MAX_X / 2) - 100.0f, (D_WIN_MAX_Y / 2), GetColor(255, 255, 255), font_digital, "STAGE CLEAR");
+        DrawFormatStringToHandle((D_WIN_MAX_X / 2) - 100.0f, (D_WIN_MAX_Y / 2), GetColor(255, 255, 255), font_digital, "GAME CLEAR");
 
         //DrawString((D_WIN_MAX_X / 2) - 40, (D_WIN_MAX_Y / 2) - 100, "ゲームクリア", GetColor(0, 0, 0));
     }
@@ -273,7 +273,7 @@ void Stage4::PlayerShot()
                 shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 10, p_location.y - D_OBJECT_SIZE));
                 shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 30, p_location.y));
             }
-            else
+            else if (player->GetPowerd() == 3)
             {
                 shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 50, p_location.y + D_OBJECT_SIZE));
                 shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 30, p_location.y));
@@ -283,6 +283,18 @@ void Stage4::PlayerShot()
                 shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 50, p_location.y + D_OBJECT_SIZE));
 
             }
+            //else
+            //{
+            //    shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 70, p_location.y + (D_OBJECT_SIZE * 2)));
+            //    shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 50, p_location.y + D_OBJECT_SIZE));
+            //    shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 30, p_location.y));
+            //    shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 10, p_location.y - D_OBJECT_SIZE));
+            //    shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 10, p_location.y - D_OBJECT_SIZE));
+            //    shot = objm->CreateObject<Shot>(Vector2D(p_location.x - 30, p_location.y));
+            //    shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 50, p_location.y + D_OBJECT_SIZE));
+            //    shot = objm->CreateObject<Shot>(Vector2D(p_location.x + 70, p_location.y + (D_OBJECT_SIZE * 2)));
+
+            //}
             shot->SetShotFlip(false);
         }
         // 反転していたら上方向に生成

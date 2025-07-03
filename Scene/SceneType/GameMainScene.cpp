@@ -25,13 +25,13 @@ void GameMainScene::Initialize()
     AnimationManager* anim = Singleton<AnimationManager>::GetInstance();
     //anim->LoadAllEffects();
 
-    current_stage = new Stage2(player);
+    current_stage = new Stage4(player);
 
     current_stage->Initialize();
 
     // BGM読み込み（初回のみ）
     ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
-    stage_bgm1 = rm->GetSounds("Resource/sound/bgm/stage/BGM_2.mp3");
+    stage_bgm1 = rm->GetSounds("Resource/sound/bgm/stage/stage1_2.mp3");
     stage_bgm3 = rm->GetSounds("Resource/sound/bgm/stage/Cybernetic.mp3");
 
     stage_bgm4 = rm->GetSounds("Resource/sound/bgm/stage/Last_Boss.mp3"); // 任意のファイル
@@ -57,7 +57,7 @@ void GameMainScene::Initialize()
     current_bgm_handle = stage_bgm1;
 
     ChangeVolumeSoundMem(255 * 50 / 100, current_bgm_handle); 
-    ChangeVolumeSoundMem(255 * 50 / 100, stage_bgm1);
+    ChangeVolumeSoundMem(255 * 100 / 100, stage_bgm1);
 
     PlaySoundMem(current_bgm_handle, DX_PLAYTYPE_LOOP);
 
@@ -80,36 +80,36 @@ void GameMainScene::Initialize()
     //anim->PlayerAnimation(EffectName::eExprotion2, Vector2D(-999, -999), 0.01f, false);
 
 
-    // ● フォント描画（初回だけ隠れて描画してフォント展開を済ませる）
-    DrawStringToHandle(-999, -999, "PRELOAD", GetColor(0, 0, 0), font_digital);
-    DrawStringToHandle(-999, -999, "PRELOAD", GetColor(0, 0, 0), font_orbitron);
-    DrawStringToHandle(-999, -999, "PRELOAD", GetColor(0, 0, 0), m_menuFontHandle);
+    //// ● フォント描画（初回だけ隠れて描画してフォント展開を済ませる）
+    //DrawStringToHandle(-999, -999, "PRELOAD", GetColor(0, 0, 0), font_digital);
+    //DrawStringToHandle(-999, -999, "PRELOAD", GetColor(0, 0, 0), font_orbitron);
+    //DrawStringToHandle(-999, -999, "PRELOAD", GetColor(0, 0, 0), m_menuFontHandle);
 
-    // ● ショット音／ヒット音を読み込み＆ダミー再生でバッファ展開
-    int preload_se1 = rm->GetSounds("Resource/sound/se/shot/shot_02.mp3");
-    int preload_se2 = rm->GetSounds("Resource/sound/se/se_effect/reaction.mp3");
+    //// ● ショット音／ヒット音を読み込み＆ダミー再生でバッファ展開
+    //int preload_se1 = rm->GetSounds("Resource/sound/se/shot/shot_02.mp3");
+    //int preload_se2 = rm->GetSounds("Resource/sound/se/se_effect/reaction.mp3");
 
-    PlaySoundMem(preload_se1, DX_PLAYTYPE_BACK, TRUE);
-    StopSoundMem(preload_se1);
-    PlaySoundMem(preload_se2, DX_PLAYTYPE_BACK, TRUE);
-    StopSoundMem(preload_se2);
+    //PlaySoundMem(preload_se1, DX_PLAYTYPE_BACK, TRUE);
+    //StopSoundMem(preload_se1);
+    //PlaySoundMem(preload_se2, DX_PLAYTYPE_BACK, TRUE);
+    //StopSoundMem(preload_se2);
 
-    // ● チャージSEもバッファ化
-    PlaySoundMem(se_charge, DX_PLAYTYPE_BACK, TRUE);
-    StopSoundMem(se_charge);
+    //// ● チャージSEもバッファ化
+    //PlaySoundMem(se_charge, DX_PLAYTYPE_BACK, TRUE);
+    //StopSoundMem(se_charge);
 
-    // === 敵用画像（想定ファイル名）をプリロード ===
-    int preload_img1 = LoadGraph("Resource/Image/Enemy/enemy1.png");
-    int preload_img2 = LoadGraph("Resource/Image/Enemy/enemy2.png");
+    //// === 敵用画像（想定ファイル名）をプリロード ===
+    //int preload_img1 = LoadGraph("Resource/Image/Enemy/enemy1.png");
+    //int preload_img2 = LoadGraph("Resource/Image/Enemy/enemy2.png");
 
-    // 必要に応じて複数
-    DrawGraph(-999, -999, preload_img1, FALSE);
-    DrawGraph(-999, -999, preload_img2, FALSE);
+    //// 必要に応じて複数
+    //DrawGraph(-999, -999, preload_img1, FALSE);
+    //DrawGraph(-999, -999, preload_img2, FALSE);
 
-    // === 敵用効果音のバッファ確保 ===
-    int preload_hit = LoadSoundMem("Resource/sound/se/se_effect/reaction.mp3");
-    PlaySoundMem(preload_hit, DX_PLAYTYPE_BACK, TRUE);
-    StopSoundMem(preload_hit);
+    //// === 敵用効果音のバッファ確保 ===
+    //int preload_hit = LoadSoundMem("Resource/sound/se/se_effect/reaction.mp3");
+    //PlaySoundMem(preload_hit, DX_PLAYTYPE_BACK, TRUE);
+    //StopSoundMem(preload_hit);
 
     // === 敵が使うアニメーションも画面外でダミー生成 ===
     //anim->PlayerAnimation(EffectName::eExprotion, Vector2D(-999, -999), 0.01f, false);
@@ -149,13 +149,13 @@ eSceneType GameMainScene::Update(float delta_second)
             current_stage->Update(delta_second);
             if (current_stage && current_stage->GetStageID() == StageID::Stage3)
             {
-                Stage3* stage3 = dynamic_cast<Stage3*>(current_stage);
-                if (stage3 != nullptr)
+                //Stage3* stage3 = dynamic_cast<Stage3*>(current_stage);
+                if (current_stage->GetStageID() == StageID::Stage3)
                 {
-                    if (stage3->request_stop_bgm)
+                    if (current_stage->request_stop_bgm)
                     {
                         StopSoundMem(stage_bgm3);
-                        stage3->request_stop_bgm = false;
+                        current_stage->request_stop_bgm = false;
                     }
                      // BGM停止リクエスト（フェード後に止める）
                     //StopSoundMem(stage_bgm3);
@@ -291,7 +291,7 @@ eSceneType GameMainScene::Update(float delta_second)
                             current_stage->Initialize();
 
                             // ステージ3に到達した場合のみBGM切替
-                            if (dynamic_cast<Stage3*>(current_stage) != nullptr)
+                            if (current_stage->GetStageID() == StageID::Stage3)
                             {
                                 StopSoundMem(current_bgm_handle); // 現在のBGMを停止
                                 current_bgm_handle = stage_bgm3;  // ステージ3用BGMに切り替え
@@ -311,10 +311,25 @@ eSceneType GameMainScene::Update(float delta_second)
                 else if (current_stage->IsOver() == true)
                 {
                     current_stage->Finalize();
-                    delete current_stage;
-                    current_stage = nullptr;
+                    StageBase* retry_stage = nullptr;
+                    // オブジェクト管理クラスのインスタンスを取得
+                    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
+                    player = objm->CreateObject<Player>(Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) + 220.0f));
 
-                    return eSceneType::eTitle;
+                    switch (current_stage->GetStageID())
+                    {
+                    case StageID::Stage1: retry_stage = new Stage1(player); break;
+                    case StageID::Stage2: retry_stage = new Stage2(player); break;
+                    case StageID::Stage3: retry_stage = new Stage3(player); break;
+                    case StageID::Stage4: retry_stage = new Stage4(player); break;
+                    default: return eSceneType::eTitle;
+                    }
+
+                    delete current_stage;
+                    current_stage = retry_stage;
+                    current_stage->Initialize();
+
+                    return eSceneType::eGameMain;
                 }
             }
 

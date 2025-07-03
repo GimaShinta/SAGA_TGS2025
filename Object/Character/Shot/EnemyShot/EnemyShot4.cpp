@@ -72,6 +72,8 @@ void EnemyShot4::Initialize()
 	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime51.png", 4, 4, 1, 16, 16));
 	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime74.png", 4, 4, 1, 48, 48));
 	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange_p/Standard/anime74.png", 4, 4, 1, 48, 48));	
+	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime74.png", 4, 4, 1, 48, 48));	
+	bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Purple/standard/anime74.png", 4, 4, 1, 48, 48));	
 	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime75.png", 4, 4, 1, 32, 64));
 	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime76.png", 4, 4, 1, 48, 96));
 	//bullets.push_back(rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Orange/Standard/anime77.png", 4, 4, 1, 24, 24));
@@ -151,6 +153,7 @@ void EnemyShot4::Initialize()
 	//bullet[102] = rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime103.png", 4, 4, 1, 16, 32);
 	//bullet[103] = rm->GetImages("Resource/Image/Object/Enemy/Enemy_Bullet/Blue/standard/anime104.png", 4, 4, 1, 16, 32);
 
+	bullet = { bullets[6][0], bullets[7][0],  bullets[6][1],  bullets[7][1],  bullets[6][2],  bullets[7][2],  bullets[6][3],  bullets[7][3], };
 }
 
 /// <summary>
@@ -172,7 +175,6 @@ void EnemyShot4::Update(float delta_second)
 		is_destroy = true;
 	}
 
-	bullet = { bullets[6][0], bullets[7][0],  bullets[6][1],  bullets[7][1],  bullets[6][2],  bullets[7][2],  bullets[6][3],  bullets[7][3], };
 
 	std::vector<int> animation_num = { 0, 1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1 };
 	//フレームレートで時間を計測
@@ -245,16 +247,21 @@ void EnemyShot4::SetAttackPattrn(int pattrn)
 	attack_pattrn = pattrn;
 	if (pattrn <= 1)
 	{
-		bullet.push_back(bullets[0][0]);
-		bullet.push_back(bullets[1][0]);
+		bullet = { bullets[8][0], bullets[9][0],  bullets[8][1],  bullets[9][1],  bullets[8][2],  bullets[9][2],  bullets[8][3],  bullets[9][3], };
+
+		//bullet.push_back(bullets[0][0]);
+		//bullet.push_back(bullets[1][0]);
 	}
 	else if (pattrn == 2)
 	{
-		bullet.push_back(bullets[2][0]);
-		bullet.push_back(bullets[3][0]);
+		bullet = { bullets[6][0], bullets[7][0],  bullets[6][1],  bullets[7][1],  bullets[6][2],  bullets[7][2],  bullets[6][3],  bullets[7][3], };
+
+		//bullet.push_back(bullets[2][0]);
+		//bullet.push_back(bullets[3][0]);
 	}
 	else
 	{
+		bullet = { bullets[6][0], bullets[7][0],  bullets[6][1],  bullets[7][1],  bullets[6][2],  bullets[7][2],  bullets[6][3],  bullets[7][3], };
 
 	}
 

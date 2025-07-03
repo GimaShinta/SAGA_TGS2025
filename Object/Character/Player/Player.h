@@ -90,7 +90,7 @@ private:
 	int shield;
 
 	float last_explosion_time = -999.0f; // ÅŒã‚É”š”­‚ğÄ¶‚µ‚½ŠÔ
-
+	float invincible_time = 0.0f;
 
 public:
 	Player();

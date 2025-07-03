@@ -21,12 +21,12 @@ Boss2::~Boss2()
 void Boss2::Initialize()
 {
 	enemy_type = ENE_BOSS2;
-	z_layer = 1;
+	z_layer = 3;
 	box_size = 30;
 	hp = 30000;
 
 	// 攻撃パターンの設定
-	attack_pattrn_num = { 7, 4, 5, 4, 6, 4, 10, 4, 12 };
+	attack_pattrn_num = { 7, 12, 5, 12, 6, 12, 10, 12 };
 
 
 	// 当たり判定のオブジェクト設定
@@ -68,8 +68,14 @@ void Boss2::Initialize()
 	boss2_jet = rm->GetImages("Resource/Image/Effect/exhaust_03_spritesheet.png", 24, 8, 3, 128, 200);
 	jet = boss2_jet[0];
 
-	//se_beam = rm->GetSounds("Resource/sound/se/effect/audiostock_1090663.mp3");
-	//ChangeVolumeSoundMem(255 * 60 / 100, se_beam);
+
+	// ちょっと重くなる
+	//se[0] = rm->GetSounds("Resource/sound/se/battle/bakuhatu_b.mp3");
+	//se[1] = rm->GetSounds("Resource/sound/se/boss_se/boss_kill.mp3");
+	//se[2] = rm->GetSounds("Resource/sound/se/boss_se/bakuhatu_end.mp3");
+	//ChangeVolumeSoundMem(255 * 100 / 100, se[0]);
+	//ChangeVolumeSoundMem(255 * 100 / 100, se[1]);
+	//ChangeVolumeSoundMem(255 * 100 / 100, se[2]);
 
 	// 最初は本体の位置に固定
 	for (int i = 0; i < 6; ++i)
@@ -81,6 +87,25 @@ void Boss2::Initialize()
 		ripples[i].active = false;
 		ripples[i].timer = 0.0f;
 	}
+
+	// 例：攻撃パターンごとに左右の波紋位置を定義
+	ripple_positions[0] = { Vector2D(-160,  100), Vector2D(160,  100) };
+	ripple_positions[7] = { Vector2D(-100,  70), Vector2D(100,  70) };
+	ripple_positions[5] = { Vector2D(-100,  70), Vector2D(100,  70) };
+	ripple_positions[6] = { Vector2D(-100,  70), Vector2D(100,  70) };
+	ripple_positions[10] = { Vector2D(-100,  70), Vector2D(100,  70) };
+	ripple_positions[12] = { Vector2D(-160,  100), Vector2D(160,  100) };
+
+
+	//		if (attack_pattrn != 12)
+//		{
+//			ripples[i].pos = Vector2D(location.x - 160.0f, location.y + 100.0f); // 左砲口
+//		}
+//		else
+//		{
+//			ripples[i].pos = Vector2D(location.x - 100.0f, location.y + 40.0f); // 左砲口
+//		}
+
 }
 
 /// <summary>
@@ -148,7 +173,10 @@ void Boss2::Update(float delta_second)
 			explosions_started = true;
 			explosion_index = 0;
 			explosion_timer = 0.0f;
-
+			AnimationManager::GetInstance()->PlaySE(SE_NAME::Bakuhatu);
+			AnimationManager::GetInstance()->PlaySE(SE_NAME::Kill);
+			//PlaySoundMem(se[0], DX_PLAYTYPE_BACK);
+			//PlaySoundMem(se[1], DX_PLAYTYPE_BACK);
 			// 初回の爆発を即時生成
 			float offset_x = static_cast<float>(GetRand(200) - 100);
 			float offset_y = static_cast<float>(GetRand(200) - 100);
@@ -178,7 +206,8 @@ void Boss2::Update(float delta_second)
 				float offset_y = static_cast<float>(GetRand(200) - 100);
 				Vector2D random_pos = location + Vector2D(offset_x, offset_y);
 				float scale = 0.3f + (GetRand(200) / 200.0f); // 0.5 ～ 1.5
-
+				//PlaySoundMem(se[0], DX_PLAYTYPE_BACK);
+				AnimationManager::GetInstance()->PlaySE(SE_NAME::Bakuhatu);
 				int id = AnimationManager::GetInstance()->PlayerAnimation(
 					EffectName::eExprotion2,
 					random_pos,
@@ -192,6 +221,11 @@ void Boss2::Update(float delta_second)
 
 			// 全爆発完了後に大爆発＆削除
 			if (explosion_index >= max_explosions) {
+				//PlaySoundMem(se[1], DX_PLAYTYPE_BACK);
+				//PlaySoundMem(se[2], DX_PLAYTYPE_BACK);
+				AnimationManager::GetInstance()->PlaySE(SE_NAME::Kill);
+				AnimationManager::GetInstance()->PlaySE(SE_NAME::Bakuhatu_End);
+
 				int id = AnimationManager::GetInstance()->PlayerAnimation(
 					EffectName::eExprotion2,
 					location,
@@ -217,6 +251,13 @@ void Boss2::Update(float delta_second)
 
 	// 攻撃パターンを設定して弾を打つ
 	Shot(delta_second);
+
+	if (is_drive == true)
+	{
+		ripple_positions[7] = { Vector2D(-160,  100), Vector2D(160,  100) };
+		ripple_positions[5] = { Vector2D(-160,  100), Vector2D(160,  100) };
+
+	}
 
 
 	damage_timer += delta_second;
@@ -433,7 +474,7 @@ void Boss2::Draw(const Vector2D& screen_offset) const
 	DrawBox(x, y, x + current_bar_width, y + bar_height, GetColor(255, 255, 255), FALSE);
 
 	// くぼみ（第二形態位置）
-	float notch_x = x + current_bar_width / 2;
+	float notch_x = x + current_bar_width / 3;
 	DrawBox(notch_x - 1, y - 2, notch_x + 1, y + bar_height + 2, GetColor(255, 255, 0), TRUE);
 
 	// HP数値
@@ -634,43 +675,74 @@ void Boss2::Shot(float delta_second)
 	// 時間経過したら攻撃パターンを変更して弾を発射
 	if (generate2 == true && is_shot == false)
 	{
+		auto it = ripple_positions.find(attack_pattrn);
+		if (it != ripple_positions.end()) {
+			const Vector2D& left_offset = it->second.first;
+			const Vector2D& right_offset = it->second.second;
 
-		// 波紋を2つ（左右）発生させる
-		for (int i = 0; i < 5; ++i)
-		{
-			if (!ripples[i].active)
-			{
-				ripples[i].active = true;
-				ripples[i].timer = 0.0f;
+			for (int i = 0; i < 5; ++i) {
+				if (!ripples[i].active) {
+					ripples[i].active = true;
+					ripples[i].timer = 0.0f;
+					ripples[i].pos = location + left_offset;
+					AnimationManager::GetInstance()->PlaySE(SE_NAME::Hamon);
+					AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::Hamon, 100);
+					break;
+				}
+			}
 
-				if (attack_pattrn != 12)
-				{
-					ripples[i].pos = Vector2D(location.x - 160.0f, location.y + 100.0f); // 左砲口
+			for (int i = 0; i < 5; ++i) {
+				if (!ripples[i].active) {
+					ripples[i].active = true;
+					ripples[i].timer = 0.0f;
+					ripples[i].pos = location + right_offset;
+					break;
 				}
-				else
-				{
-					ripples[i].pos = Vector2D(location.x - 100.0f, location.y + 40.0f); // 左砲口
-				}
-				break;
 			}
 		}
-		for (int i = 0; i < 5; ++i)
-		{
-			if (!ripples[i].active)
-			{
-				ripples[i].active = true;
-				ripples[i].timer = 0.0f;
-				if (attack_pattrn != 12)
-				{
-					ripples[i].pos = Vector2D(location.x + 160.0f, location.y + 100.0f); // 左砲口
-				}
-				else
-				{
-					ripples[i].pos = Vector2D(location.x + 100.0f, location.y + 40.0f); // 左砲口
-				}
-				break;
-			}
-		}
+
+
+
+
+		//// 波紋を2つ（左右）発生させる
+		//for (int i = 0; i < 5; ++i)
+		//{
+		//	if (!ripples[i].active)
+		//	{
+		//		ripples[i].active = true;
+		//		ripples[i].timer = 0.0f;
+
+		//		// ここで波紋の音を再生する
+		//		AnimationManager::GetInstance()->PlaySE(SE_NAME::Hamon); // ←仮のSE名
+		//		AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::Hamon, 50);
+		//		if (attack_pattrn != 12)
+		//		{
+		//			ripples[i].pos = Vector2D(location.x - 160.0f, location.y + 100.0f); // 左砲口
+		//		}
+		//		else
+		//		{
+		//			ripples[i].pos = Vector2D(location.x - 100.0f, location.y + 40.0f); // 左砲口
+		//		}
+		//		break;
+		//	}
+		//}
+		//for (int i = 0; i < 5; ++i)
+		//{
+		//	if (!ripples[i].active)
+		//	{
+		//		ripples[i].active = true;
+		//		ripples[i].timer = 0.0f;
+		//		if (attack_pattrn != 12)
+		//		{
+		//			ripples[i].pos = Vector2D(location.x + 160.0f, location.y + 100.0f); // 左砲口
+		//		}
+		//		else
+		//		{
+		//			ripples[i].pos = Vector2D(location.x + 100.0f, location.y + 40.0f); // 左砲口
+		//		}
+		//		break;
+		//	}
+		//}
 
 		shot_timer += delta_second;
 		if (shot_timer >= shot_interval)
@@ -682,9 +754,10 @@ void Boss2::Shot(float delta_second)
 			attack_pattrn = 5;
 	#else
 			// HPが減ったら攻撃パターンを変更（オーバーフロー防止に合わせてリセット）
-			if (hp <= 3000 && attack_pattrn_num != std::vector<int>{12, 5})
+			if (hp <= 10000 && attack_pattrn_num != std::vector<int>{7, 5})
 			{
-				attack_pattrn_num = { 12, 5 };
+				is_drive = true;
+				attack_pattrn_num = { 7, 5 };
 				attack_count = 0; // 安全にリセット
 			}
 
@@ -784,11 +857,26 @@ void Boss2::DrawBoss2(const Vector2D position) const
 			int alpha = static_cast<int>(255.0f - 55.0f * t);
 
 			SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
-			DrawCircle(static_cast<int>(ripples[i].pos.x),
-				static_cast<int>(ripples[i].pos.y),
-				static_cast<int>(radius),
-				GetColor(150, 255, 150),
-				FALSE);
+
+			if (is_drive == false)
+			{
+
+				DrawCircle(static_cast<int>(ripples[i].pos.x),
+					static_cast<int>(ripples[i].pos.y),
+					static_cast<int>(radius),
+					GetColor(150, 255, 150),
+					FALSE);
+			}
+			else
+			{
+				DrawCircle(static_cast<int>(ripples[i].pos.x),
+					static_cast<int>(ripples[i].pos.y),
+					static_cast<int>(radius),
+					GetColor(255, 0, 0),
+					FALSE);
+
+			}
+
 		}
 	}
 
@@ -973,7 +1061,7 @@ void Boss2::Attack(float delta_second)
 			/// <param name="fan_duration_limit">攻撃時間</param>
 			/// <param name="generate_location">生成する位置</param>
 			/// <param name="delta_second">１フレームあたりの時間（基本的に変更なし）</param>
-			Pattrn7_2(150.0f, 500.0f, 0.2f, 10.0f, Vector2D(location.x, location.y + 100.0f), delta_second);
+			Pattrn7_2(150.0f, 500.0f, 0.2f, 5.0f, Vector2D(location.x, location.y + 100.0f), delta_second);
 
 			break;
 		case 8:
@@ -1080,6 +1168,9 @@ void Boss2::Pattrn4(int bullet_num, float speed, float spiral_interval, float sp
 
 			EnemyShot4* e_shot4 = objm->CreateObject<EnemyShot4>(generate_location);
 			e_shot4->SetVelocity(velocity);
+			AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+			AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
+
 		}
 	}
 
@@ -1115,6 +1206,10 @@ void Boss2::Pattrn4_2(int bullet_num, float speed, float spiral_interval, float 
 
 			EnemyShot4* e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x - 170.0f, generate_location.y + 65.0f));
 			e_shot4->SetVelocity(velocity);
+			AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+			AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
+
+
 		}
 
 		for (int i = 0; i < bullet_num; i++)
@@ -1185,6 +1280,9 @@ void Boss2::Pattrn5(float spiral_interval, float spiral_duration_limit, float sp
 
 		EnemyShot4* shot = objm->CreateObject<EnemyShot4>(generate_location);
 		shot->SetVelocity(velocity);
+		AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+		AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
+
 #endif
 
 
@@ -1255,6 +1353,9 @@ void Boss2::Pattrn5_2(float spiral_interval, float spiral_duration_limit, float 
 
 			EnemyShot4* shot = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x + 170.0f, generate_location.y + 65.0f));
 			shot->SetVelocity(velocity);
+			AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+			AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
+
 		}
 
 		// 左側（反時計回り、上方向のみ）
@@ -1322,6 +1423,10 @@ void Boss2::Pattrn6(float fan_angle_range, float bullet_speed, float fan_interva
 
 		e_shot4 = objm->CreateObject<EnemyShot4>(generate_location);
 		e_shot4->SetVelocity(velocity);
+		AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+		AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
+
+
 		
 	}
 
@@ -1363,6 +1468,9 @@ void Boss2::Pattrn6_2(float fan_angle_range, float bullet_speed, float fan_inter
 		e_shot4->SetVelocity(velocity);
 		e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x - 170.0f, generate_location.y + 65.0f));
 		e_shot4->SetVelocity(velocity);
+		AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+		AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
+
 	}
 
 	// 時間制限を超えたら終了（発射しない）
@@ -1410,6 +1518,9 @@ void Boss2::Pattrn7(float fan_angle_range, float bullet_speed, float fan_interva
 
 			e_shot4 = objm->CreateObject<EnemyShot4>(generate_location);
 			e_shot4->SetVelocity(velocity);
+			AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+			AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
+
 		}
 	}
 
@@ -1449,6 +1560,9 @@ void Boss2::Pattrn7_2(float fan_angle_range, float bullet_speed, float fan_inter
 
 			e_shot4 = objm->CreateObject<EnemyShot4>(Vector2D(generate_location.x + 170.0f, generate_location.y - 10.0f));
 			e_shot4->SetVelocity(velocity);
+			AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+			AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
+
 		}
 
 		for (int i = 0; i < bullet_count; ++i)
@@ -1507,6 +1621,9 @@ void Boss2::Pattrn8(float wave_interval, float wave_duration_limit, const Vector
 		e_shot5->SetWaveReflected(true);
 		e_shot5->SetVelocity(Vector2D(0, 200));
 		e_shot5->SetWaveParameters(600.0f, 0.7f);
+		AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+		AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
+
 	}
 
 	// 一定時間経過したら終了
@@ -1569,11 +1686,14 @@ void Boss2::Pattrn9(int shot_count, float radius, float angular_speed, float bul
 
 			// ボスの周囲に弾を配置
 			e_shot4 = objm->CreateObject<EnemyShot4>(generate_location);
+			AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+			AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
 
 			if (e_shot4)
 			{
 				rotating_shots.push_back(e_shot4);  // 正しく生成されたら弾を保存
 				e_shot4->SetVelocity(Vector2D(0, 0)); // 回転だけなので弾速は0
+
 			}
 		}
 	}
@@ -1650,6 +1770,9 @@ void Boss2::Pattrn9_2(int shot_count, float radius, float angular_speed, float b
 			{
 				angles_left.push_back(angle);
 				e_shot4 = objm->CreateObject<EnemyShot4>(left_center);
+				AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+				AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
+
 				if (e_shot4)
 				{
 					shots_left.push_back(e_shot4);
@@ -1763,6 +1886,9 @@ void Boss2::Pattrn10(int shot_count, float radius, float angular_speed, float ce
 				angles.push_back(angle);
 
 				EnemyShot4* shot = objm->CreateObject<EnemyShot4>(center_pos);
+				AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+				AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
+
 				if (shot)
 				{
 					shot->SetVelocity(Vector2D(0, 0));
@@ -1836,6 +1962,9 @@ void Boss2::Pattrn10_2(int shot_count, float radius, float angular_speed, float 
 
 				// 左側の弾
 				EnemyShot4* shot_L = objm->CreateObject<EnemyShot4>(center_pos_L);
+				AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyShot);
+				AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::EnemyShot, 50);
+
 				if (shot_L)
 				{
 					shot_L->SetVelocity(Vector2D(0, 0));

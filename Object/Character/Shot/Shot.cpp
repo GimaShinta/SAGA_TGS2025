@@ -6,12 +6,12 @@
 
 Shot::Shot()
 {
-	// Shot::Initialize の最後あたりに追加
-	PlaySoundMem(se, DX_PLAYTYPE_BACK, TRUE);  // TRUEで即時再生
-	StopSoundMem(se);  // すぐ停止しておく
+	//// Shot::Initialize の最後あたりに追加
+	//PlaySoundMem(se, DX_PLAYTYPE_BACK, TRUE);  // TRUEで即時再生
+	//StopSoundMem(se);  // すぐ停止しておく
 
-	PlaySoundMem(hit_se, DX_PLAYTYPE_BACK, TRUE);
-	StopSoundMem(hit_se);
+	//PlaySoundMem(hit_se, DX_PLAYTYPE_BACK, TRUE);
+	//StopSoundMem(hit_se);
 }
 
 Shot::~Shot()
@@ -47,8 +47,8 @@ void Shot::Initialize()
 	//// アニメーションの追加設定
 	//am->SetAlpha(anim_id, 122);       // 半透明
 	//am->SetScale(anim_id, 0.1f);      // 1.5倍拡大
-	hit_se = rm->GetSounds("Resource/sound/se/se_effect/hit_se.mp3");
-	ChangeVolumeSoundMem(255 * 50 / 100, hit_se);
+	//hit_se = rm->GetSounds("Resource/sound/se/se_effect/hit_se.mp3");
+	//ChangeVolumeSoundMem(255 * 50 / 100, hit_se);
 	//ChangeVolumeSoundMem(255 * 110 / 100, hit_se);
 	//ChangeVolumeSoundMem(255 * 60 / 100, se);
 	//PlaySoundMem(se, DX_PLAYTYPE_BACK);
@@ -114,7 +114,9 @@ void Shot::OnHitCollision(GameObjectBase* hit_object)
 		float random_x = static_cast<float>(GetRand(20));
 		if (GetRand(2) == 1)
 		{
-			PlaySoundMem(hit_se, DX_PLAYTYPE_BACK);
+			am->PlaySE(SE_NAME::Hit);
+			am->ChangeSEVolume(SE_NAME::Hit, 50);
+			//PlaySoundMem(hit_se, DX_PLAYTYPE_BACK);
 			random_x *= -1;
 		}
 		float random_y = static_cast<float>(GetRand(15));
@@ -133,7 +135,8 @@ void Shot::OnHitCollision(GameObjectBase* hit_object)
 	if (hit_object->GetCollision().object_type == eObjectType::eBoss2 ||
 		hit_object->GetCollision().object_type == eObjectType::eBoss3)
 	{
-		PlaySoundMem(hit_se, DX_PLAYTYPE_BACK);
+		am->PlaySE(SE_NAME::Hit);
+		am->ChangeSEVolume(SE_NAME::Hit, 50);
 		float random_x = static_cast<float>(GetRand(100));
 
 		anim_id = am->PlayerAnimation(EffectName::eExprotion2, Vector2D(location.x, location.y - random_x), 0.01f, false);
@@ -153,6 +156,7 @@ void Shot::OnHitCollision(GameObjectBase* hit_object)
 	}
 	if (hit_object->GetCollision().object_type == eObjectType::eBoss2)
 	{
+		// ダイナミック使ってる
 		Stage2Boss* boss = dynamic_cast<Stage2Boss*>(hit_object);
 		if (boss)
 		{

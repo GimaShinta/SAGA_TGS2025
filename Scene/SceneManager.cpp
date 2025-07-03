@@ -9,6 +9,7 @@
 #include "SceneType/ResultScene.h"
 #include "SceneType/RankingScene.h"
 #include "SceneType/ExitScene.h"
+#include "SceneType/CreditScene.h"
 
 // Singleton継承クラスのインクルード
 #include "../Utility/InputManager.h"
@@ -153,8 +154,8 @@ SceneBase* SceneManager::CreateScene(eSceneType type)
 		return dynamic_cast<SceneBase*>(new HelpScene());
 	case eSceneType::eGameMain:
 		return dynamic_cast<SceneBase*>(new GameMainScene());
-	case eSceneType::eResult:
-		return dynamic_cast<SceneBase*>(new GameMainScene());
+	case eSceneType::eCredit:
+		return dynamic_cast<SceneBase*>(new CreditScene());
 	case eSceneType::eRanking:
 		return dynamic_cast<SceneBase*>(new RankingScene());
 	case eSceneType::eXit:

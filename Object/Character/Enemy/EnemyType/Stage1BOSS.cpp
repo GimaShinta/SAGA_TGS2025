@@ -24,7 +24,7 @@ void Stage1Boss::Initialize()
     enemy_type = ENE_ZAKO1;
     z_layer = 2;
     box_size = 35;
-    hp = 1000;
+    hp = 3000;
 
     collision.is_blocking = true;
     collision.object_type = eObjectType::eEnemy;
@@ -41,6 +41,9 @@ void Stage1Boss::Initialize()
     images_b = rm->GetImages("Resource/Image/Object/Enemy/Boss/s1_Boss/anime_enemy75_b.png", 6, 6, 1, 40, 40);
     images = images_b;
     image = images[0];
+
+    sound_destroy = rm->GetSounds("Resource/sound/se/se_effect/kill_4.mp3");
+    ChangeVolumeSoundMem(255 * 100 / 100, sound_destroy);
 
     ChangePatternRandomly();
 
@@ -319,7 +322,7 @@ void Stage1Boss::Update(float delta_second)
     {
         is_alive = false;
         is_destroy = true;
-
+        PlaySoundMem(sound_destroy, DX_PLAYTYPE_BACK);
         // ====== 演出とスコア処理 ======
         auto* manager = Singleton<AnimationManager>::GetInstance();
         anim_id = manager->PlayerAnimation(EffectName::eExprotion, location, 0.05f, false);

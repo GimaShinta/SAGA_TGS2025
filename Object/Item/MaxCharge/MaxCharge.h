@@ -5,7 +5,7 @@ class MaxCharge :
 {
 private:
     std::vector<int> images;
-
+    int se;
 public:
     void Initialize() override;
     void Update(float delta) override;

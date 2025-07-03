@@ -15,7 +15,7 @@ Beam::~Beam()
 // 初期化処理
 void Beam::Initialize()
 {
-	z_layer = 5;
+	z_layer = 2;
 	box_size = Vector2D(60.0f, 800.0f);
 
 	// 当たり判定のオブジェクト設定

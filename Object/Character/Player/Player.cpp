@@ -3,7 +3,7 @@
 #include "../../../Utility/ProjectConfig.h"
 #include "../../../Utility/AnimationManager.h"
 
-Player::Player() : is_shot(false), count_space(1), life(3), on_hit(false), is_damage(false)
+Player::Player() : is_shot(false), count_space(1), life(6), on_hit(false), is_damage(false)
 {
 }
 
@@ -47,8 +47,8 @@ void Player::Initialize()
 	shields2 = rm->GetImages("Resource/Image/Object/Item/Shield/pipo-btleffect206_480.png", 20, 5, 4, 480, 480);
 	shields = rm->GetImages("Resource/Image/Object/Item/Shield/pipo-btleffect206h_480.png", 15, 5, 3, 480, 480);
 
-	se_shot = rm->GetSounds("Resource/sound/se/shot/shot_02.mp3");
-	ChangeVolumeSoundMem(255 * 60 / 100, se_shot);
+	//se_shot = rm->GetSounds("Resource/sound/se/shot/shot_02.mp3");
+	//ChangeVolumeSoundMem(255 * 60 / 100, se_shot);
 
 }
 
@@ -119,6 +119,40 @@ void Player::Update(float delta_second)
 
 		// 部品のアニメーション
 		BuhinAnim(delta_second);
+	}
+
+	//if (beam_on == true)
+	//{
+	//	// 自分のオブジェクトタイプ
+	//	collision.object_type = eObjectType::eNone;
+	//	// 当たる相手のオブジェクトタイプ
+	//	collision.hit_object_type.clear();
+	//}
+	//else
+	//{
+	//	// 自分のオブジェクトタイプ
+	//	collision.object_type = eObjectType::ePlayer;
+	//	// 当たる相手のオブジェクトタイプ
+	//	collision.hit_object_type = {eObjectType::eEnemy, eObjectType::eBoss2, eObjectType::eBoss3, eObjectType::eExp, eObjectType::ePowerUp };
+	//	//collision.hit_object_type.push_back(eObjectType::eEnemy);
+	//	//collision.hit_object_type.push_back(eObjectType::eBoss2);
+	//	//collision.hit_object_type.push_back(eObjectType::eBoss3);
+	//	//collision.hit_object_type.push_back(eObjectType::eExp);
+	//	//collision.hit_object_type.push_back(eObjectType::ePowerUp);
+	//}
+
+	if (invincible_time > 0.0f)
+	{
+		invincible_time -= delta_second;
+		collision.object_type = eObjectType::eNone;
+		collision.hit_object_type.clear();
+	}
+	else
+	{
+		// 自分のオブジェクトタイプ
+		collision.object_type = eObjectType::ePlayer;
+		// 当たる相手のオブジェクトタイプ
+		collision.hit_object_type = { eObjectType::eEnemy, eObjectType::eBoss2, eObjectType::eBoss3, eObjectType::eExp, eObjectType::ePowerUp };
 	}
 
 
@@ -364,6 +398,7 @@ void Player::Shot(float delta_second)
 {
 	// オブジェクト管理クラスのインスタンを取得
 	InputManager* input = Singleton<InputManager>::GetInstance();
+	AnimationManager* am = Singleton<AnimationManager>::GetInstance();
 
 	// 打つまでの時間を計測
 	shot_timer += delta_second;
@@ -387,7 +422,9 @@ void Player::Shot(float delta_second)
 	if (input->GetKeyDown(KEY_INPUT_SPACE) ||
 		input->GetButtonDown(XINPUT_BUTTON_A))
 	{
-		PlaySoundMem(se_shot, DX_PLAYTYPE_BACK);
+		am->PlaySE(SE_NAME::Shot);
+		am->ChangeSEVolume(SE_NAME::Shot, 60);
+		//PlaySoundMem(se_shot, DX_PLAYTYPE_BACK);
 		// 何も打ってなかったら打てるようにする
 		if (stop == false)
 		{
@@ -410,7 +447,8 @@ void Player::Shot(float delta_second)
 				is_shot_anim = true;
 				is_shot = true;
 				shot_timer = 0.0f;
-				PlaySoundMem(se_shot, DX_PLAYTYPE_BACK);
+				am->PlaySE(SE_NAME::Shot);
+				am->ChangeSEVolume(SE_NAME::Shot, 60);
 			}
 		}
 	}
@@ -430,6 +468,7 @@ void Player::Shot(float delta_second)
 			beam_on = true;
 			stop = true;
 			beam_timer = 0.0f;
+			invincible_time = 5.0f;
 			UseSpecial();  // ゲージ消費
 		}
 	}
@@ -450,6 +489,7 @@ void Player::Shot(float delta_second)
 	if (beam_timer >= 5.0f)
 	{
 		stop = false;
+		beam_on = false;
 	}
 }
 
@@ -695,4 +735,3 @@ void Player::ForceNeutralAnim(bool enable)
 {
 	force_neutral_anim = enable;
 }
-

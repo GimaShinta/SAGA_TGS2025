@@ -10,7 +10,7 @@ Zako4::~Zako4()
 void Zako4::Initialize()
 {
 	enemy_type = ENE_ZAKO4;
-	z_layer = 2;
+	z_layer = 3;
 	velocity.x = 60;
 	box_size = Vector2D(32, 32); // ƒTƒCƒY‚ð32x32‚ÉŠg‘å
 	hp = 500;

@@ -90,7 +90,9 @@ private:
 	bool ripple_start = false; // 波紋出現を開始するフラグ
 
 	int second_attack = 0;
-
+	int se[3];
+	std::map<int, std::pair<Vector2D, Vector2D>> ripple_positions;
+	bool is_drive = false;
 public:
 	Boss2();
 	~Boss2();

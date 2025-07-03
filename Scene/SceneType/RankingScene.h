@@ -20,6 +20,10 @@ private:
     int start_time = 0;
     bool confirm_reset = false;
     int cursor_index = 0;  // カーソル位置の追加
+    float Max(float a, float b)
+    {
+        return (a > b) ? a : b;
+    }
 
 
     bool LoadRankingFromFile();

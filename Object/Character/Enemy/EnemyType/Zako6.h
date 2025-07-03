@@ -34,7 +34,7 @@ public:
 
     /// Zako2 or Zako3 ‚Ì“®ìØ‚è‘Ö‚¦
     void SetMode(ZakoMode mode);
-
+    void ShootToPlayer(float speed);
 private:
     ZakoMode mode;
     ZakoState state;
@@ -43,6 +43,7 @@ private:
     float appear_timer;
     float appear_duration;
     float descend_duration;
+    int  sound_destroy;
 
     float scale_min;
     float scale_max;
