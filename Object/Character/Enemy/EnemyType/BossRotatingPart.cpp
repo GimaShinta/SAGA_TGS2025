@@ -5,7 +5,9 @@
 #include "../../../../Object/Character/Shot/EnemyShot/EnemyShot1.h"
 #include "../../../../Object/Character/Shot/EnemyBeam1.h"
 #include "../../../../Object/Character/Shot/EnemyShot/FollowBeam.h"
-#include "../../../../Object/Character/Player/Player.h" // ← Player 使用のため
+#include "../../../../Object/Character/Player/Player.h"
+#include "../../../../Object/Character/Shot/EnemyShot/WarningBeam.h"
+#include "../../../../Object/Character/Shot/EnemyShot/LinkedWarningBeam.h"
 #include <cmath>
 
 constexpr float PI = 3.1415926f;
@@ -30,16 +32,18 @@ void BossRotatingPart::Initialize()
 
     ResourceManager* rm = Singleton<ResourceManager>::GetInstance();
     images = rm->GetImages("Resource/Image/Object/Enemy/Boss/s1_Boss/anime_enemy74_a.png", 6, 6, 1, 48, 48);
+
+    appear_timer = 0.0f;
+    is_appearing = true;
+    scale = 0.0f;
+    alpha = 0;
 }
 
 void BossRotatingPart::Update(float delta_second)
 {
-
-    if (!boss || !boss->IsInAttackPhase()) return;  // ←★追加ガード
+    if (!boss || !boss->IsInAttackPhase()) return;
 
     float rotation_speed = 0.5f;
-
-    if (!boss) return;
 
     if (boss->IsHpBelowThreshold())
     {
@@ -61,70 +65,81 @@ void BossRotatingPart::Update(float delta_second)
     location.x = center.x + std::cos(theta) * radius;
     location.y = center.y + std::sin(theta) * radius;
 
-    __super::Update(delta_second);
-
-    if (group_id != boss->GetActiveGroupID() &&
-        attack_direction != AttackDirectionType::Omnidirectional)
+    if (is_appearing)
     {
-        image_index = 0;
-        return;
+        appear_timer += delta_second;
+        float t = appear_timer / 1.0f;
+        if (t > 1.0f) t = 1.0f;
+        scale = 0.3f + 0.7f * t;
+        alpha = static_cast<int>(255 * t);
+
+        if (t >= 1.0f)
+        {
+            is_appearing = false;
+            scale = 1.0f;
+            alpha = 255;
+        }
     }
 
+    __super::Update(delta_second);
+
+    anim_timer += delta_second;
+    if (anim_timer >= 0.1f)
+    {
+        image_index = (image_index + 1) % images.size();
+        anim_timer = 0.0f;
+    }
+
+    bool is_allowed = (group_id == boss->GetActiveGroupID() ||
+                       attack_direction == AttackDirectionType::Omnidirectional ||
+                       attack_direction == AttackDirectionType::Spiral ||
+                       attack_direction == AttackDirectionType::RainShot ||
+                       attack_direction == AttackDirectionType::HomingBurst);
+
+    if (!is_allowed) return;
+
+    float base_interval = 3.5f;
+    int hp = boss->GetHP();
+    if (hp < 6666 && hp >= 3333) base_interval = 2.5f;
+    else if (hp < 3333) base_interval = 2.0f;
+
     shot_timer += delta_second;
-    if (shot_timer >= 2.0f)
+    if (shot_timer >= base_interval)
     {
         shot_timer = 0.0f;
-
-        anim_timer += delta_second;
-        if (anim_timer >= 0.1f)
-        {
-            image_index = (image_index + 1) % images.size();
-            anim_timer = 0.0f;
-        }
 
         switch (attack_direction)
         {
             case AttackDirectionType::Inward:
             {
-                Vector2D core_pos = boss->GetLocation();
-                Vector2D dir = core_pos - location;
-                float len = dir.Length();
-                if (len > 0.01f) dir /= len;
-
-                auto beam = Singleton<GameObjectManager>::GetInstance()->CreateObject<FollowBeam>(location);
-                beam->SetBeamTarget(core_pos);
-                beam->SetFollowTarget(this, dir);
+                auto warn = Singleton<GameObjectManager>::GetInstance()->CreateObject<WarningBeam>(location);
+                warn->SetUp(Vector2D(0, 0), 1000.0f, 1.0f);
+                warn->SetFollowAndLookTarget(this, boss);
                 break;
             }
-
             case AttackDirectionType::Outward:
             {
                 float shoot_angle = angle_offset;
                 Vector2D dir = { std::cos(shoot_angle), std::sin(shoot_angle) };
-
-                auto beam = Singleton<GameObjectManager>::GetInstance()->CreateObject<FollowBeam>(location);
-                beam->SetBeamTarget(location + dir * 1000.0f);
-                beam->SetFollowTarget(this, dir);
+                auto warn = Singleton<GameObjectManager>::GetInstance()->CreateObject<WarningBeam>(location);
+                warn->SetUp(dir, 1000.0f, 1.0f);
+                warn->SetFollowAndLookTarget(this, nullptr);
                 break;
             }
-
             case AttackDirectionType::Spiral:
             {
                 static float spiral_angle = 0.0f;
                 spiral_angle += delta_second * 3.0f;
-
                 constexpr int shot_count = 6;
                 for (int i = 0; i < shot_count; ++i)
                 {
                     float angle_rad = spiral_angle + 2.0f * PI * i / shot_count;
                     Vector2D dir = { cos(angle_rad), sin(angle_rad) };
                     auto shot = Singleton<GameObjectManager>::GetInstance()->CreateObject<EnemyShot1>(location);
-                    shot->SetVelocity(dir * 200.0f);
+                    shot->SetVelocity(dir * 50.0f);
                 }
                 break;
             }
-
-
             case AttackDirectionType::RainShot:
             {
                 constexpr int rain_count = 10;
@@ -138,11 +153,9 @@ void BossRotatingPart::Update(float delta_second)
                 }
                 break;
             }
-
             case AttackDirectionType::HomingBurst:
             {
                 if (!player) break;
-
                 Vector2D dir = player->GetLocation() - location;
                 float len = dir.Length();
                 if (len > 0.01f) dir /= len;
@@ -158,7 +171,6 @@ void BossRotatingPart::Update(float delta_second)
                 }
                 break;
             }
-
             case AttackDirectionType::Omnidirectional:
             {
                 if (boss->IsHpBelowThreshold())
@@ -168,12 +180,30 @@ void BossRotatingPart::Update(float delta_second)
                     {
                         float angle_rad = 2.0f * PI * i / num_shots;
                         Vector2D dir = { std::cos(angle_rad), std::sin(angle_rad) };
-
                         auto shot = Singleton<GameObjectManager>::GetInstance()->CreateObject<EnemyShot1>(location);
-                        shot->SetVelocity(dir * 300.0f);
+                        shot->SetVelocity(dir * 200.0f);
                         shot->SetOmni(true);
                     }
                 }
+                break;
+            }
+            case AttackDirectionType::LinkedDown:
+            {
+                const auto& parts = boss->GetRotatingParts();
+
+                for (size_t i = 0; i + 1 < parts.size(); i += 2)
+                {
+                    GameObjectBase* partA = parts[i];
+                    GameObjectBase* partB = parts[i + 1];
+
+                    if (partA && partB)
+                    {
+                        auto warn = Singleton<GameObjectManager>::GetInstance()->CreateObject<LinkedWarningBeam>(partA->GetLocation());
+                        warn->SetEndpoints(partA, partB);
+                        warn->SetLifeTime(1.0f);
+                    }
+                }
+
                 break;
             }
 
@@ -181,17 +211,15 @@ void BossRotatingPart::Update(float delta_second)
                 break;
         }
     }
-    else
-    {
-        image_index = 0;
-    }
 }
 
 void BossRotatingPart::Draw(const Vector2D& screen_offset) const
 {
     if (!images.empty())
     {
-        DrawRotaGraph(location.x, location.y, 1.5f, angle, images[image_index], TRUE);
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+        DrawRotaGraph(location.x, location.y, scale, angle, images[image_index], TRUE);
+        SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
     }
     else
     {

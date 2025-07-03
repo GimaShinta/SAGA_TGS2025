@@ -135,6 +135,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Object\Character\Shot\EnemyShot\LinkedWarningBeam.cpp" />
+    <ClCompile Include="Object\Character\Shot\EnemyShot\LinkedBeam.cpp" />
     <ClCompile Include="Object\Item\MaxCharge\MaxCharge.cpp" />
     <ClCompile Include="Object\Character\Enemy\EnemyType\Boss3.cpp" />
     <ClCompile Include="Object\Character\Enemy\EnemyType\BossRotatingPart.cpp" />
@@ -186,8 +188,11 @@
     <ClCompile Include="Object\Character\Enemy\EnemyType\Zako3.cpp" />
     <ClCompile Include="Object\Character\Enemy\EnemyType\Zako4.cpp" />
     <ClCompile Include="Object\Character\Enemy\EnemyType\Zako6.cpp" />
+    <ClCompile Include="Object\Character\Shot\EnemyShot\WarningBeam.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Object\Character\Shot\EnemyShot\LinkedWarningBeam.h" />
+    <ClInclude Include="Object\Character\Shot\EnemyShot\LinkedBeam.h" />
     <ClInclude Include="Object\Item\MaxCharge\MaxCharge.h" />
     <ClInclude Include="Object\Character\Enemy\EnemyType\Boss3.h" />
     <ClInclude Include="Object\Character\Enemy\EnemyType\BossRotatingPart.h" />
@@ -242,6 +247,7 @@
     <ClInclude Include="Object\Character\Enemy\EnemyType\Zako3.h" />
     <ClInclude Include="Object\Character\Enemy\EnemyType\Zako4.h" />
     <ClInclude Include="Object\Character\Enemy\EnemyType\Zako6.h" />
+    <ClInclude Include="Object\Character\Shot\EnemyShot\WarningBeam.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

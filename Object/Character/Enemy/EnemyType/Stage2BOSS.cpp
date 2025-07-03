@@ -4,6 +4,7 @@
 #include "../../../../Object/GameObjectManager.h"
 #include "../../../../Utility/AnimationManager.h"
 #include "../../Shot/EnemyShot/EnemyShot2.h"
+#include "../../../../Object/Character/Shot/EnemyShot/LinkedWarningBeam.h"
 #include <cmath>
 
 Stage2Boss::Stage2Boss()
@@ -191,7 +192,7 @@ void Stage2Boss::Update(float delta_second)
                 auto* manager = Singleton<AnimationManager>::GetInstance();
                 anim_id = manager->PlayerAnimation(EffectName::eExprotion2, location, 0.035f, false);
                 manager->SetScale(anim_id, 1.0f);
-                Singleton<ScoreData>::GetInstance()->AddScore(GetRand(3000)+ 500);
+                Singleton<ScoreData>::GetInstance()->AddScore(GetRand(3000) + 500);
             }
 
             static float anim_timer = 0.0f;
@@ -212,12 +213,14 @@ void Stage2Boss::Update(float delta_second)
                 }
             }
 
+            // 攻撃パターン切り替えとビーム制御
             part_attack_timer += delta_second;
             if (part_attack_timer >= 4.0f)
             {
                 part_attack_timer = 0.0f;
                 active_group_id = 1 - active_group_id;
 
+                // 中心攻撃の切替
                 if (main_attack_type == BossRotatingPart::AttackDirectionType::Inward)
                     main_attack_type = BossRotatingPart::AttackDirectionType::Outward;
                 else
@@ -239,11 +242,13 @@ void Stage2Boss::Update(float delta_second)
                             part->SetAttackDirection(BossRotatingPart::AttackDirectionType::Spiral);
                         else
                             part->SetAttackDirection(BossRotatingPart::AttackDirectionType::Omnidirectional);
+
+                        // ★この行を追加（hpが2000以下になったらLinkedDown発動）
+                        if (hp < 8000)
+                            part->SetAttackDirection(BossRotatingPart::AttackDirectionType::LinkedDown);
                     }
                 }
             }
-
-            break;
         }
     }
 
