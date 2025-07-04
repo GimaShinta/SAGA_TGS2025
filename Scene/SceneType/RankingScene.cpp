@@ -241,7 +241,6 @@ void RankingScene::Draw()
             SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
     }
 
-    // --- ëÄçÏÉKÉCÉh ---
     const int msg_y = 640;
     if (confirm_reset)
     {
@@ -252,10 +251,9 @@ void RankingScene::Draw()
     else
     {
         DrawNeonText(cx - 260, msg_y,
-            "B : Title",
+            "B : Title    X : Reset",
             GetColor(100, 255, 255), GetColor(0, 150, 255), 150);
     }
-
 
 }
 

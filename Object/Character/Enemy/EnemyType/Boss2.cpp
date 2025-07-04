@@ -23,7 +23,7 @@ void Boss2::Initialize()
 	enemy_type = ENE_BOSS2;
 	z_layer = 3;
 	box_size = 30;
-	hp = 30000;
+	hp = 100000;
 
 	// 攻撃パターンの設定
 	attack_pattrn_num = { 7, 12, 5, 12, 6, 12, 10, 12 };
@@ -440,7 +440,7 @@ void Boss2::Draw(const Vector2D& screen_offset) const
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
 
 	// スケーリング付き描画
-	const float max_hp = 30000.0f;
+	const float max_hp = 100000.0f;
 	const float bar_width_full = 650.0f;
 	const float bar_height = 8.0f;
 	const float x_center = D_WIN_MAX_X / 2;
@@ -497,14 +497,39 @@ void Boss2::OnHitCollision(GameObjectBase* hit_object)
 		{
 			if (on_hit == false)
 			{
-				if (is_weakness == true)
+				// プレイヤーとの距離を取得
+				float distance = (GetLocation() - player->GetLocation()).Length();
+
+				int damage = 10;
+
+				// 距離に応じてダメージを変更（例: 4段階）
+				if (distance < 500.0f)
 				{
-					hp -= 50;
+					damage = 70;
+				}
+				else if (distance < 600.0f)
+				{
+					damage = 50;
+				}
+				else if (distance < 700.0f)
+				{
+					damage = 30;
 				}
 				else
 				{
-					hp -= 10;
+					damage = 30;
 				}
+
+				// 弱点ヒットなら倍率をかける
+				if (is_weakness == true)
+				{
+					hp -= damage;
+				}
+				else
+				{
+					hp -= damage / 2;
+				}
+
 				on_hit = true;
 
 				if (GetRand(70) == 1)
@@ -686,7 +711,7 @@ void Boss2::Shot(float delta_second)
 					ripples[i].timer = 0.0f;
 					ripples[i].pos = location + left_offset;
 					AnimationManager::GetInstance()->PlaySE(SE_NAME::Hamon);
-					AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::Hamon, 100);
+					AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::Hamon, 60);
 					break;
 				}
 			}
@@ -754,7 +779,7 @@ void Boss2::Shot(float delta_second)
 			attack_pattrn = 5;
 	#else
 			// HPが減ったら攻撃パターンを変更（オーバーフロー防止に合わせてリセット）
-			if (hp <= 10000 && attack_pattrn_num != std::vector<int>{7, 5})
+			if (hp <= 3333 && attack_pattrn_num != std::vector<int>{7, 5})
 			{
 				is_drive = true;
 				attack_pattrn_num = { 7, 5 };
@@ -2116,6 +2141,7 @@ void Boss2::Pattrn12()
 			beams.push_back(b);
 		}
 		beam_on = true;
+		AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyBeam);
 	}
 
 	for (size_t i = 0; i < beams.size(); ++i)

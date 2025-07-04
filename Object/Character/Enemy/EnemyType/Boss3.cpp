@@ -18,7 +18,7 @@ void Boss3::Initialize()
 	enemy_type = ENE_BOSS3;
 	z_layer = 3;
 	box_size = 30;
-	hp = 75000;
+	hp = 150000;
 
 	// 攻撃パターンの設定
 	attack_pattrn_num = { 11, 4, 6, 5, 7, 8, 9 };
@@ -398,7 +398,7 @@ void Boss3::Draw(const Vector2D& screen_offset) const
 	//	DrawBox(x, y, x + bar_width * hp_ratio, y + bar_height, GetColor(255, 255, 255), TRUE);
 	//}
 
-	const float max_hp = 70000.0f;
+	const float max_hp = 150000.0f;
 	const float bar_width = 650.0f;   // 中心から左右で350
 	const float bar_height = 8.0f;   // 細め
 	const float x = D_WIN_MAX_X / 2 - bar_width / 2;
@@ -425,7 +425,7 @@ void Boss3::Draw(const Vector2D& screen_offset) const
 
 
 	// ?? 追加：第二形態の目印（くぼみ）
-	const float notch_x = x + bar_width * 0.5f;  // 50%位置
+	const float notch_x = x + bar_width * 0.3f;  // 50%位置
 	const float notch_width = 2.0f;
 	const float notch_height = bar_height + 4.0f; // 少し上にはみ出す
 	DrawBox(
@@ -452,21 +452,45 @@ void Boss3::OnHitCollision(GameObjectBase* hit_object)
 		{
 			if (on_hit == false)
 			{
-				if (is_weakness == true)
+				// プレイヤーとの距離を取得
+				float distance = (GetLocation() - player->GetLocation()).Length();
+
+				int damage = 10;
+
+				// 距離に応じてダメージを変更（例: 4段階）
+				if (distance < 500.0f)
 				{
-					hp -= 50;
+					damage = 70;
+				}
+				else if (distance < 600.0f)
+				{
+					damage = 50;
+				}
+				else if (distance < 700.0f)
+				{
+					damage = 30;
 				}
 				else
 				{
-					hp -= 10;
+					damage = 30;
 				}
+
+				// 弱点ヒットなら倍率をかける
+				if (is_weakness == true)
+				{
+					hp -= damage;
+				}
+				else
+				{
+					hp -= damage / 2;
+				}
+
 				on_hit = true;
 
 				if (GetRand(70) == 1)
 				{
 					DropItems();
 				}
-
 			}
 			else
 			{
@@ -628,7 +652,7 @@ void Boss3::Shot(float delta_second)
 			attack_pattrn = 5;
 #else
 			// HPが減ったら攻撃パターンを変更（オーバーフロー防止に合わせてリセット）
-			if (hp <= 5000 && attack_pattrn_num != std::vector<int>{5, 7})
+			if (hp <= 50000 && attack_pattrn_num != std::vector<int>{5, 7})
 			{
 				attack_pattrn_num = { 5, 7 };
 				attack_count = 0;
@@ -670,7 +694,7 @@ void Boss3::Shot(float delta_second)
 					ripples[i].timer = 0.0f;
 					ripples[i].pos = location + left_offset;
 					AnimationManager::GetInstance()->PlaySE(SE_NAME::Hamon);
-					AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::Hamon, 100);
+					AnimationManager::GetInstance()->ChangeSEVolume(SE_NAME::Hamon, 60);
 					break;
 				}
 			}
@@ -1992,6 +2016,7 @@ void Boss3::Pattrn11(float offsets_x)
 			));
 		b->SetBoss3(this);
 		beam_on = true;
+		AnimationManager::GetInstance()->PlaySE(SE_NAME::EnemyBeam);
 	}
 
 	if (b != nullptr)

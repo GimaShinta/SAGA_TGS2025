@@ -37,6 +37,7 @@ void AnimationManager::LoadSE()
 	se_handles[SE_NAME::Bakuhatu_End] = rm->GetSounds("Resource/sound/se/boss_se/bakuhatu_end.mp3");
 	se_handles[SE_NAME::Hamon] = rm->GetSounds("Resource/sound/se/boss_se/hamon.mp3");
 	se_handles[SE_NAME::EnemyShot] = rm->GetSounds("Resource/sound/se/shot/shot_01.mp3");
+	se_handles[SE_NAME::EnemyBeam] = rm->GetSounds("Resource/sound/se/effect/audiostock_1553653.mp3");
 	//ChangeVolumeSoundMem(255 * 100 / 100, se_handles[SE_NAME::Bakuhatu]);
 	//ChangeVolumeSoundMem(255 * 100 / 100, se_handles[SE_NAME::Kill]);
 	//ChangeVolumeSoundMem(255 * 100 / 100, se_handles[SE_NAME::Bakuhatu_End]);
