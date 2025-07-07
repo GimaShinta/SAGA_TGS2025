@@ -26,7 +26,7 @@ Stage2::~Stage2()
 void Stage2::Initialize()
 {
     std::srand(static_cast<unsigned int>(std::time(nullptr)));  // ランダムシード設定
-    stage_timer = 70.0f;
+    stage_timer = 0.0f;
     enemy_spawn_timer = 0.0f;
     zako5_spawned = false;
 
@@ -381,12 +381,12 @@ void Stage2::EnemyAppearance(float delta)
             zako_top->SetPlayer(player);
             enemy_list.push_back(zako_top);
 
-            Zako* zako_left = objm->CreateObject<Zako>(Vector2D(base_x - offset_x, base_y + offset_y));
+            Zako* zako_left = objm->CreateObject<Zako>(Vector2D(base_x - offset_x, base_y + offset_y-70));
             zako_left->SetPattern(ZakoPattern::MoveStraight);
             zako_left->SetPlayer(player);
             enemy_list.push_back(zako_left);
 
-            Zako* zako_right = objm->CreateObject<Zako>(Vector2D(base_x + offset_x, base_y + offset_y));
+            Zako* zako_right = objm->CreateObject<Zako>(Vector2D(base_x + offset_x, base_y + offset_y-70));
             zako_right->SetPattern(ZakoPattern::MoveStraight);
             zako_right->SetPlayer(player);
             enemy_list.push_back(zako_right);
