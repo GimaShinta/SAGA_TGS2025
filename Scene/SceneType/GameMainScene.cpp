@@ -249,6 +249,8 @@ eSceneType GameMainScene::Update(float delta_second)
                         black_fade_timer += delta_second;
                         if (alpha >= 255)
                         {
+                            StopSoundMem(stage_bgm3); // ← ステージ3のBGMを明示的に停止
+
                             StageBase* next_stage = current_stage->GetNextStage(player);
 
                             current_stage->Finalize();
@@ -257,18 +259,13 @@ eSceneType GameMainScene::Update(float delta_second)
 
                             if (next_stage != nullptr)
                             {
-                                // === ステージの切替とBGM処理 ===
                                 current_stage = next_stage;
                                 current_stage->Initialize();
 
-                                // ステージ3に到達した場合のみBGM切替
-                                if (dynamic_cast<Stage3*>(current_stage) != nullptr)
-                                {
-                                    StopSoundMem(current_bgm_handle); // 現在のBGMを停止
-                                    current_bgm_handle = stage_bgm3;  // ステージ3用BGMに切り替え
-                                    ChangeVolumeSoundMem(255 * 90 / 100, current_bgm_handle);
-                                    PlaySoundMem(current_bgm_handle, DX_PLAYTYPE_LOOP);
-                                }
+                                // ステージ4用のBGMを再生（必要なら stage_bgm4 を定義）
+                                current_bgm_handle = stage_bgm4;  // または stage_bgm4
+                                ChangeVolumeSoundMem(255 * 90 / 100, current_bgm_handle);
+                                //  PlaySoundMem(current_bgm_handle, DX_PLAYTYPE_LOOP);
                             }
                             else
                             {
@@ -292,7 +289,7 @@ eSceneType GameMainScene::Update(float delta_second)
                             current_stage->Initialize();
 
                             // ステージ3に到達した場合のみBGM切替
-                            if (dynamic_cast<Stage3*>(current_stage) != nullptr)
+                            if (current_stage->GetStageID() == StageID::Stage3)
                             {
                                 StopSoundMem(current_bgm_handle); // 現在のBGMを停止
                                 current_bgm_handle = stage_bgm3;  // ステージ3用BGMに切り替え

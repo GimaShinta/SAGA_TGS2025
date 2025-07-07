@@ -60,8 +60,6 @@ void Player::Update(float delta_second)
 {
 	// 移動処理
 	Movement(delta_second);
-	// 弾を打つ
-	Shot(delta_second);
 	// ダメージを受けたら
 	Damage(delta_second);
 
@@ -92,6 +90,8 @@ void Player::Update(float delta_second)
 	}
 	else
 	{
+		// 弾を打つ
+		Shot(delta_second);
 		// ライフが０になったらゲームオーバー
 		if (life < 0)
 		{
