@@ -145,8 +145,8 @@ eSceneType TitleScene::Update(float delta_second)
 
         m_transitionTimer += delta_second;
 
-        if (m_transitionTimer >= 2.0f) // 2秒で次のシーンへ
             ScoreData::GetInstance()->Reset();
+        if (m_transitionTimer >= 2.0f) // 2秒で次のシーンへ
             return eSceneType::eGameMain;
     }
 
