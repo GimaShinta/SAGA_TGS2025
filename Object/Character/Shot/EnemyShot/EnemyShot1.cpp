@@ -41,12 +41,10 @@ void EnemyShot1::Update(float delta_second)
 
 void EnemyShot1::Draw(const Vector2D& screen_offset) const
 {
-	if (is_omni)
-	{
+	
 		// 全方向弾：白い球体
 		DrawCircle(static_cast<int>(location.x), static_cast<int>(location.y), 6, GetColor(255, 255, 255), TRUE);
 		return;
-	}
 
 	Vector2D dir = velocity.Normalize();
 	Vector2D end = location + dir * 600.0f;  // ★ ビームの長さ（調整可）

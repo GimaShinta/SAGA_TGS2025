@@ -8,6 +8,8 @@
 #include <ctime>
 #include <cmath>
 #include <vector>
+constexpr float PI = 3.1415926f;
+
 
 Stage1Boss::Stage1Boss()
 {
