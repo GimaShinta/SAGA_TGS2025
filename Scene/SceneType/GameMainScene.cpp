@@ -25,7 +25,7 @@ void GameMainScene::Initialize()
     AnimationManager* anim = Singleton<AnimationManager>::GetInstance();
     //anim->LoadAllEffects();
 
-    current_stage = new Stage3(player);
+    current_stage = new Stage1(player);
 
     current_stage->Initialize();
 
@@ -242,40 +242,41 @@ eSceneType GameMainScene::Update(float delta_second)
             if (current_stage->IsFinished())
             {
                 if (current_stage->IsClear() == true)
-                {        
+                {
+
                     if (current_stage->GetStageID() == StageID::Stage3)
                     {
-                          black_fade_timer += delta_second;
-                                if (alpha >= 255)
+                        black_fade_timer += delta_second;
+                        if (alpha >= 255)
+                        {
+                            StageBase* next_stage = current_stage->GetNextStage(player);
+
+                            current_stage->Finalize();
+                            delete current_stage;
+                            current_stage = nullptr;
+
+                            if (next_stage != nullptr)
+                            {
+                                // === ステージの切替とBGM処理 ===
+                                current_stage = next_stage;
+                                current_stage->Initialize();
+
+                                // ステージ3に到達した場合のみBGM切替
+                                if (dynamic_cast<Stage3*>(current_stage) != nullptr)
                                 {
-                                    StopSoundMem(stage_bgm3); // ← ステージ3のBGMを明示的に停止
-
-                                    StageBase* next_stage = current_stage->GetNextStage(player);
-
-                                    current_stage->Finalize();
-                                    delete current_stage;
-                                    current_stage = nullptr;
-
-                                    if (next_stage != nullptr)
-                                    {
-                                        current_stage = next_stage;
-                                        current_stage->Initialize();
-
-                                        // ステージ4用のBGMを再生（必要なら stage_bgm4 を定義）
-                                        current_bgm_handle = stage_bgm4;  // または stage_bgm4
-                                        ChangeVolumeSoundMem(255 * 90 / 100, current_bgm_handle);
-                                      //  PlaySoundMem(current_bgm_handle, DX_PLAYTYPE_LOOP);
-                                    }
-                                    else
-                                    {
-                                        return eSceneType::eTitle;
-                                    }
+                                    StopSoundMem(current_bgm_handle); // 現在のBGMを停止
+                                    current_bgm_handle = stage_bgm3;  // ステージ3用BGMに切り替え
+                                    ChangeVolumeSoundMem(255 * 90 / 100, current_bgm_handle);
+                                    PlaySoundMem(current_bgm_handle, DX_PLAYTYPE_LOOP);
                                 }
+                            }
+                            else
+                            {
+                                return eSceneType::eTitle;
+                            }
 
-                     }
-                        
-                    
-
+                        }
+                    }
                     else
                     {
                         StageBase* next_stage = current_stage->GetNextStage(player);
@@ -291,7 +292,7 @@ eSceneType GameMainScene::Update(float delta_second)
                             current_stage->Initialize();
 
                             // ステージ3に到達した場合のみBGM切替
-                            if (current_stage->GetStageID() == StageID::Stage3)
+                            if (dynamic_cast<Stage3*>(current_stage) != nullptr)
                             {
                                 StopSoundMem(current_bgm_handle); // 現在のBGMを停止
                                 current_bgm_handle = stage_bgm3;  // ステージ3用BGMに切り替え
@@ -311,25 +312,10 @@ eSceneType GameMainScene::Update(float delta_second)
                 else if (current_stage->IsOver() == true)
                 {
                     current_stage->Finalize();
-                    StageBase* retry_stage = nullptr;
-                    // オブジェクト管理クラスのインスタンスを取得
-                    GameObjectManager* objm = Singleton<GameObjectManager>::GetInstance();
-                    player = objm->CreateObject<Player>(Vector2D(D_WIN_MAX_X / 2, (D_WIN_MAX_Y / 2) + 220.0f));
-
-                    switch (current_stage->GetStageID())
-                    {
-                    case StageID::Stage1: retry_stage = new Stage1(player); break;
-                    case StageID::Stage2: retry_stage = new Stage2(player); break;
-                    case StageID::Stage3: retry_stage = new Stage3(player); break;
-                    case StageID::Stage4: retry_stage = new Stage4(player); break;
-                    default: return eSceneType::eTitle;
-                    }
-
                     delete current_stage;
-                    current_stage = retry_stage;
-                    current_stage->Initialize();
+                    current_stage = nullptr;
 
-                    return eSceneType::eGameMain;
+                    return eSceneType::eTitle;
                 }
             }
 

@@ -3,7 +3,7 @@
 #include "../../../Utility/ProjectConfig.h"
 #include "../../../Utility/AnimationManager.h"
 
-Player::Player() : is_shot(false), count_space(1), life(6), on_hit(false), is_damage(false)
+Player::Player() : is_shot(false), count_space(1), life(8), on_hit(false), is_damage(false)
 {
 }
 
