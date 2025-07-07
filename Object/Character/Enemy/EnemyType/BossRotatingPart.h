@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../../../Object/GameObjectBase.h"
-#include"../../../../Object/Character/Player/Player.h"
+#include "../../../../Object/Character/Player/Player.h"
 
 class Stage2Boss;
 
@@ -15,14 +15,12 @@ public:
         player = p;
     }
 
-
     void Initialize() override;
     void Update(float delta_second) override;
     void Draw(const Vector2D& screen_offset) const override;
     void OnHitCollision(GameObjectBase* hit_object) override;
 
     void SetUp(Stage2Boss* boss, float radius, float angle_offset);
-
     void SetGroupID(int id)
     {
         group_id = id;
@@ -37,13 +35,13 @@ public:
         Inward,
         Outward,
         Omnidirectional,
-        Triangle,
-        Pentagon,
-        Spiral,        // Å© NEW
-        RainShot,      // Å© NEW
-        HomingBurst    // Å© NEW
+        Triangle,       // Åö éOäpå`ÉrÅ[ÉÄ
+        LinkedDown,     // Åö ÉRÉAÇÇ¬Ç»Ç¨â∫Ç…åÇÇ¬
+        HomingCenter,   // Åö íÜâõí«è]
+        Spiral,
+        RainShot,
+        HomingBurst
     };
-
 
     void SetAttackDirection(AttackDirectionType type)
     {
@@ -66,7 +64,6 @@ public:
         rotation_direction = dir;
     }
 
-
 private:
     Stage2Boss* boss = nullptr;
     float radius = 80.0f;
@@ -80,10 +77,13 @@ private:
 
     float shot_timer = 0.0f;
     bool use_beam = false;
-    float rotation_direction = 1.0f; // +1Ç≈ê≥âÒì]ÅA-1Ç≈ãtâÒì]
+    float rotation_direction = 1.0f;
+    float appear_timer = 0.0f;
+    bool is_appearing = true;
+    float scale = 1.0f;
+    int alpha = 255;
 
     int group_id = 0;
     AttackDirectionType attack_direction = AttackDirectionType::Inward;
-
     PartType type = PartType::Red;
 };
