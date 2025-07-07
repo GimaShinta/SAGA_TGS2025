@@ -177,52 +177,48 @@ void RankingScene::Draw()
     DrawExtendStringToHandle(cx - 180 * scale, 50, scale, scale, "HIGH SCORE RANKING", GetColor(0, 255, 255), font);
     SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
-    // 整列描画
-    int panel_w = 640;
+    // 修正済み描画位置
+    int panel_w = 680;
     int bx = cx - panel_w / 2;
     int rank_x = bx + 30;
-    int score_x = bx + 130;
-    int date_x = bx + 400;
+    int score_x = bx + 110;
+    int date_x = bx + 340;
 
     for (int i = 0; i < static_cast<int>(entries.size()); ++i)
     {
         const auto& e = entries[i];
         int y = 140 + i * 48;
 
-        // 背景
         SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
         DrawBox(bx, y - 4, bx + panel_w, y + 40, GetColor(0, 0, 0), TRUE);
         SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
         DrawBox(bx, y - 4, bx + panel_w, y + 40, GetColor(0, 255, 255), FALSE);
 
-        // 色
         int textColor = (i == 0) ? GetColor(255, 215, 0) : GetColor(255, 255, 255);
         if (i == 0 && GetNowCount() % 100 > 50)
             SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 
-        // 整列テキスト
         DrawFormatStringToHandle(rank_x, y, textColor, font, "%2d:", i + 1);
-        DrawFormatStringToHandle(score_x, y, textColor, font, "%7.0f", e.score);
+        DrawFormatStringToHandle(score_x, y, textColor, font, "%6.0f", e.score);
         DrawStringToHandle(date_x, y, e.date.c_str(), textColor, font);
 
         if (i == 0)
             SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
     }
 
+    // カーソルと再描画枠
     for (int i = 0; i < static_cast<int>(entries.size()); ++i)
     {
         const auto& e = entries[i];
         int y = 140 + i * 48;
 
-        // 背景枠
         SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
         DrawBox(bx, y - 4, bx + panel_w, y + 40, GetColor(0, 0, 0), TRUE);
 
-        // 選択行なら色変更 or 枠追加
         if (i == cursor_index)
         {
             DrawBox(bx - 4, y - 8, bx + panel_w + 4, y + 44, GetColor(255, 255, 0), FALSE);
-            DrawStringToHandle(bx - 30, y, "", GetColor(255, 255, 0), font);  // カーソルアイコン
+            DrawStringToHandle(bx - 30, y, "", GetColor(255, 255, 0), font);
         }
         else
         {
@@ -234,7 +230,7 @@ void RankingScene::Draw()
             SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
 
         DrawFormatStringToHandle(rank_x, y, textColor, font, "%2d:", i + 1);
-        DrawFormatStringToHandle(score_x, y, textColor, font, "%7.0f", e.score);
+        DrawFormatStringToHandle(score_x, y, textColor, font, "%6.0f", e.score);
         DrawStringToHandle(date_x, y, e.date.c_str(), textColor, font);
 
         if (i == 0)
@@ -254,8 +250,8 @@ void RankingScene::Draw()
             "B : Title    X : Reset",
             GetColor(100, 255, 255), GetColor(0, 150, 255), 150);
     }
-
 }
+
 
 void RankingScene::Finalize()
 {
