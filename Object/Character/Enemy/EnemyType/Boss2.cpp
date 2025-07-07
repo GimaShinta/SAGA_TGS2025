@@ -124,6 +124,8 @@ void Boss2::Update(float delta_second)
 	if (hp <= 0 && !is_crashing) {
 		is_crashing = true;
 		velocity = Vector2D(0, 0); // —‰º‚Íè“®ˆ—
+		Singleton<ScoreData>::GetInstance()->AddScore(15000);
+
 		return; // ‚±‚ÌƒtƒŒ[ƒ€‚ÅˆÈ~‚Ìˆ—‚Ís‚í‚È‚¢
 	}
 

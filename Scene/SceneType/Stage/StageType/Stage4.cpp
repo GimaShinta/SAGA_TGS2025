@@ -98,6 +98,20 @@ void Stage4::Update(float delta)
 
     // クリア判定
     UpdateGameStatus(delta);
+
+    if (is_clear)
+    {
+        if (result_started)
+        {
+            ResultDraw(delta);
+        }
+    }
+
+    if (glitch_done)
+    {
+        finished = true;
+    }
+
 }
 
 void Stage4::Draw()
@@ -150,7 +164,18 @@ void Stage4::Draw()
         DrawBox((D_WIN_MAX_X / 2) - 350, 0, (D_WIN_MAX_X / 2) + 350, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
 
         SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
-        DrawFormatStringToHandle((D_WIN_MAX_X / 2) - 100.0f, (D_WIN_MAX_Y / 2), GetColor(255, 255, 255), font_digital, "GAME CLEAR");
+        DrawFormatStringToHandle((D_WIN_MAX_X / 2) - 100.0f, 200, GetColor(255, 255, 255), font_digital, "GAME CLEAR");
+
+        if (result_started)
+        {
+            int fade_alpha = (result_timer * 12.0f < 60.0f) ? static_cast<int>(result_timer * 12.0f) : 60;
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, fade_alpha);
+            DrawBox((D_WIN_MAX_X / 2) - 350, 0, (D_WIN_MAX_X / 2) + 350, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
+            SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+            ResultDraw(delta_draw);
+        }
+
+
 
         //DrawString((D_WIN_MAX_X / 2) - 40, (D_WIN_MAX_Y / 2) - 100, "ゲームクリア", GetColor(0, 0, 0));
     }
@@ -338,8 +363,8 @@ void Stage4::EnemyAppearance()
     }
     else 
     {
-        objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2 - 60, 120))->SetPlayer(player);
-        objm->CreateObject<Shield>(Vector2D(D_WIN_MAX_X / 2 + 60, 120))->SetPlayer(player);
+        //objm->CreateObject<PowerUp>(Vector2D(D_WIN_MAX_X / 2 - 60, 120))->SetPlayer(player);
+        objm->CreateObject<Shield>(Vector2D(D_WIN_MAX_X / 2, 120))->SetPlayer(player);
 
         boss3 = objm->CreateObject<Boss3>(Vector2D(D_WIN_MAX_X / 2, -100));
         boss3->SetPlayer(player);
@@ -393,7 +418,7 @@ void Stage4::UpdateGameStatus(float delta)
             gameover_timer = 0.0f;
         }
 
-        if (scene_timer >= 4.0f)
+        if (scene_timer >= 10.0f)
         {
             finished = true;
         }
@@ -404,6 +429,210 @@ void Stage4::UpdateGameStatus(float delta)
     {
         finished = true;
     }
+    if (is_clear == true && result_started == false)
+    {
+        clear_wait_timer += delta;
+        if (clear_wait_timer >= 5.0f)
+        {
+            result_started = true;
+            result_timer = 0.0f; // スコア演出タイマーリセット
+        }
+    }
+
+}
+
+void Stage4::ResultDraw(float delta)
+{
+    if (!result_started) return;
+
+    // タイマー進行
+    if (!result_fadeout_started)
+        result_timer += delta * 60.0f;
+    else
+        result_fadeout_timer += delta * 60.0f;
+
+    const int cx = D_WIN_MAX_X / 2;
+    const int cy = D_WIN_MAX_Y / 2 - 20;
+
+    // 背景フェード（固定）
+    int fade_alpha = (result_timer * 12.0f < 60.0f) ? static_cast<int>(result_timer * 12.0f) : 60;
+    SetDrawBlendMode(DX_BLENDMODE_ALPHA, fade_alpha);
+    DrawBox(cx - 350, 0, cx + 350, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
+    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+    // フェード／スライド定数
+    const int fade_duration = 60;
+    const int slide_distance = 60;
+
+    // 表示補助関数
+    auto GetAlpha = [&](int delay, bool is_fadeout = false) -> int {
+        int t = static_cast<int>(result_fadeout_started ? result_fadeout_timer : result_timer) - delay;
+        if (t < 0) return is_fadeout ? 255 : 0;
+        if (t >= fade_duration) return is_fadeout ? 0 : 255;
+        return is_fadeout ? 255 - (255 * t) / fade_duration : (255 * t) / fade_duration;
+        };
+
+    auto GetSlideY = [&](int base_y, int delay, bool is_fadeout = false) -> int {
+        int t = static_cast<int>(result_fadeout_started ? result_fadeout_timer : result_timer) - delay;
+        if (t < 0) return base_y + (is_fadeout ? 0 : slide_distance);
+        if (t >= fade_duration) return base_y + (is_fadeout ? slide_distance : 0);
+        int offset = (slide_distance * t) / fade_duration;
+        return is_fadeout ? base_y + offset : base_y + slide_distance - offset;
+        };
+
+    // スコア集計
+    ScoreData* score = Singleton<ScoreData>::GetInstance();
+    const auto& scores = score->GetScoreData();
+    float base_score = 0.0f;
+    for (float s : scores) base_score += s;
+    int life_bonus = player->life * 1000;
+    total_score = base_score;
+    
+    if (scored == false)
+    {
+        score->SetScoreData(life_bonus);
+        scored = true;
+    }
+
+    // 表示ライン設定
+    struct ResultLine {
+        int delay;
+        int y_offset;
+        std::string label;
+        std::string format;
+    };
+
+    std::vector<ResultLine> lines = {
+        {  30, -80, "RESULT", "" },
+        {  70, -20, "BASE SCORE", "BASE SCORE : %.0f" },
+        { 110,  20, "LIFE BONUS", "LIFE BONUS : %d" },
+        { 160,  60, "TOTAL SCORE", "TOTAL SCORE : %.0f" },
+    };
+
+    bool fading_out = result_fadeout_started;
+
+    for (size_t i = 0; i < lines.size(); ++i)
+    {
+        const auto& line = lines[i];
+
+        // フェードアウト中は delay を逆順にする
+        int delay = line.delay;
+        if (result_fadeout_started)
+        {
+            delay = lines.back().delay - line.delay;
+        }
+
+        int alpha = GetAlpha(delay, result_fadeout_started);
+        int y = GetSlideY(cy + line.y_offset, delay, result_fadeout_started);
+        int color = GetColor(255, 255, 255);
+
+        SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+
+        char buf[128];
+        if (line.format.empty()) {
+            sprintf_s(buf, "%s", line.label.c_str());
+        }
+        else if (line.label == "BASE SCORE") {
+            sprintf_s(buf, line.format.c_str(), base_score - life_bonus);
+        }
+        else if (line.label == "LIFE BONUS") {
+            sprintf_s(buf, line.format.c_str(), life_bonus);
+        }
+        else if (line.label == "TOTAL SCORE") {
+            sprintf_s(buf, line.format.c_str(), total_score);
+        }
+
+        int width = GetDrawStringWidthToHandle(buf, strlen(buf), font_digital);
+        DrawStringToHandle(cx - width / 2, y, buf, color, font_digital);
+
+        if (line.label == "TOTAL SCORE" && alpha == 255 && !result_fadeout_started) {
+            result_displayed = true;
+        }
+    }
+
+    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+    // 表示後のグリッチ待機
+    if (result_displayed && !glitch_started && !glitch_done) {
+        post_result_wait_timer += delta;
+        if (post_result_wait_timer >= 8.0f) {
+            glitch_started = true;
+            glitch_timer = 0.0f;
+        }
+    }
+
+    // グリッチ演出
+    if (glitch_started && !glitch_done) {
+        //for (int i = 0; i < 50; ++i) {
+        //    int x = (rand() % 700) + (D_WIN_MAX_X / 2 - 350);
+        //    int y = rand() % D_WIN_MAX_Y;
+        //    int w = 80 + rand() % 150;
+        //    int h = 8 + rand() % 40;
+        //    int r = 150 + rand() % 106;
+        //    int g = 150 + rand() % 106;
+        //    int b = 255;
+        //    SetDrawBlendMode(DX_BLENDMODE_ALPHA, 220);
+        //    DrawBox(x, y, x + w, y + h, GetColor(r, g, b), TRUE);
+        //}
+
+        glitch_timer += delta;
+        if (glitch_timer > 2.0f) {
+            glitch_done = true;
+        }
+    }
+
+    // フェードアウト開始
+    if (glitch_done && !result_fadeout_started) {
+        result_fadeout_started = true;
+        result_fadeout_timer = 0.0f;
+    }
+
+    // フェードアウト完了で終了
+    if (result_fadeout_started && !result_ended) {
+        int last_delay = lines.back().delay;
+        if (result_fadeout_timer >= fade_duration + last_delay) {
+            result_ended = true;
+            finished = true;
+            // 必要であれば次のシーンへ切り替えなど
+        }
+    }
+
+    //// フェードアウト完了で暗転フェードイン開始
+    //if (result_ended && !black_fade_started) {
+    //    black_fade_started = true;
+    //    black_fade_timer = 0.0f;
+    //}
+
+    //// 黒い暗転フェード
+    //if (black_fade_started)
+    //{
+    //    black_fade_timer += delta;
+
+    //    static int alpha = 0;
+    //    if (black_fade_timer >= 0.01f)
+    //    {
+    //        black_fade_timer = 0.0f;
+    //        alpha++;
+    //    }
+    //    //int alpha = static_cast<int>((black_fade_timer / black_fade_duration) * 255.0f);
+    //    if (alpha > 255) alpha = 255;
+
+    //    SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+    //    DrawBox(0, 0, D_WIN_MAX_X, D_WIN_MAX_Y, GetColor(0, 0, 0), TRUE);
+    //    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+    //    if (alpha >= 255)
+    //    {
+    //        finished = true;
+
+    //        // 暗転完了 → 次のシーンへ切り替えなど
+    //        // SceneManager::ChangeScene(...);
+    //    }
+    //}
+
+
+    SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
 
 }
 

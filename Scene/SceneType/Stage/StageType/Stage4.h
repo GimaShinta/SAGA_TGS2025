@@ -77,7 +77,18 @@ private:
 	void EnemyAppearance();
 	void EnemyShot(float delta_second);
 	void UpdateGameStatus(float delta);
-
+	void ResultDraw(float delta);  // ← 関数プロトタイプ追加
+	bool result_fadeout_started = false;
+	float result_fadeout_timer = 0.0f;
+	bool result_ended = false;
+	bool result_started = false;
+	float result_timer = 0.0f;
+	float total_score = 0.0f;
+	bool result_displayed = false;
+	float post_result_wait_timer = 0.0f;  // ←これを追加
+	float delta_draw = 0.0f;
+	float clear_wait_timer = 0.0f;
+	bool scored = false;
 private:
 	bool finished = false;
 
