@@ -146,6 +146,7 @@ eSceneType TitleScene::Update(float delta_second)
         m_transitionTimer += delta_second;
 
         if (m_transitionTimer >= 2.0f) // 2•b‚ÅŽŸ‚ÌƒV[ƒ“‚Ö
+            ScoreData::GetInstance()->Reset();
             return eSceneType::eGameMain;
     }
 
