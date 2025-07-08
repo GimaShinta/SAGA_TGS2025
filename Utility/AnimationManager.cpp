@@ -67,9 +67,9 @@ void AnimationManager::WarmUpSE()
 		StopSoundMem(handle);
 	}
 
-#ifndef NDEBUG
-	printfDx("SEウォームアップ完了（%d種）\n", (int)se_handles.size());
-#endif
+//#ifndef NDEBUG
+//	printfDx("SEウォームアップ完了（%d種）\n", (int)se_handles.size());
+//#endif
 
 }
 
